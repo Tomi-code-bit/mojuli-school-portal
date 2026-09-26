@@ -1585,6 +1585,149 @@ footer.footer .bottom {
   flex-wrap: wrap;
   gap: 12px;
 }
+
+/* =========================================================================
+   WHATSAPP FLOATING WIDGET & DIRECT CONTACT STYLES
+   ========================================================================= */
+.whatsapp-float-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.whatsapp-floating-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #25D366;
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  animation: waPulse 2.8s infinite;
+}
+.whatsapp-floating-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 28px rgba(37, 211, 102, 0.6);
+}
+@keyframes waPulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6); }
+  70% { box-shadow: 0 0 0 16px rgba(37, 211, 102, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+.whatsapp-floating-btn svg { width: 32px; height: 32px; fill: #FFFFFF; }
+.wa-badge-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #EF4444;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+}
+.whatsapp-popup {
+  display: none;
+  width: 320px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid #E2E8F0;
+  animation: waSlideUp 0.3s ease;
+}
+[data-theme="dark"] .whatsapp-popup {
+  background: #0B192E;
+  border-color: #1E3456;
+}
+.whatsapp-popup.open { display: block; }
+@keyframes waSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.wa-popup-header {
+  background: linear-gradient(135deg, #075E54 0%, #128C7E 100%);
+  color: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+.wa-popup-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #FFFFFF;
+  padding: 2px;
+  object-fit: contain;
+}
+.wa-popup-title { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+.wa-popup-sub { font-size: 0.74rem; color: #DCF8C6; margin-top: 2px; }
+.wa-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.wa-popup-close:hover { opacity: 1; }
+.wa-popup-body {
+  padding: 18px;
+}
+.wa-popup-body p {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #475569;
+  margin-bottom: 14px;
+}
+[data-theme="dark"] .wa-popup-body p { color: #94A3B8; }
+.wa-chat-options { display: flex; flex-direction: column; gap: 10px; }
+.wa-chat-link {
+  display: block;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+[data-theme="dark"] .wa-chat-link {
+  background: #102340;
+  border-color: #2A4773;
+}
+.wa-chat-link:hover {
+  background: #E2E8F0;
+  border-color: #25D366;
+  transform: translateY(-1px);
+}
+.wa-link-num {
+  display: block;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #075E54;
+}
+[data-theme="dark"] .wa-link-num { color: #25D366; }
+.wa-link-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748B;
+  margin-top: 2px;
+}
+
 </style>
 </head>
 <body>
@@ -1593,12 +1736,8 @@ footer.footer .bottom {
 <header class="site">
   <div class="nav-row">
     <div class="brand" onclick="go('home')">
-      <div class="crest-box" id="headerLogoSlot">
-        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M24 3 L43 11 V22 C43 34 35.5 42 24 45 C12.5 42 5 34 5 22 V11 Z" fill="#0B2A5B" stroke="#F59E0B" stroke-width="2.2"/>
-          <path d="M24 12 V33 M16 18 H32" stroke="#F59E0B" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M15 27 C15 24 19 24 19 27 C19 24 23 24 23 27 V31 H15 Z" fill="#F59E0B"/>
-        </svg>
+      <div class="crest-box" id="headerLogoSlot" style="background:#fff;border-radius:10px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,0.2)">
+        <img src="assets/school_logo.png" alt="Mojuli Christ Glorious Nursery & Primary School Logo" style="width:100%;height:100%;object-fit:contain">
       </div>
       <div>
         <div class="name">Mojuli Christ Glorious School</div>
@@ -1618,9 +1757,10 @@ footer.footer .bottom {
     </nav>
     
     <div class="nav-actions">
-      <button class="btn btn-outline btn-sm" onclick="downloadHtmlFile()" title="Download complete single-file HTML code">
-        <span>📥</span> Download HTML
-      </button>
+      <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="background:#25D366;color:#ffffff;border-color:#25D366;font-weight:700;display:inline-flex;align-items:center;gap:6px" title="Chat on WhatsApp">
+        <svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor"><path d="M16 2a14 14 0 0 0-12 21.2L2 30l7-1.9A14 14 0 1 0 16 2zm0 25.5a11.5 11.5 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.5 11.5 0 1 1 16 27.5zm6.3-8.6c-.3-.2-2-.9-2.3-1s-.5-.2-.8.2-.9 1.1-1.1 1.3-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.3 0-.5.2-.7s.3-.4.5-.6.2-.3.3-.5.1-.3 0-.5c0-.1-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 .5 4.3 4.3 0 0 0-1.4 3.2 7.5 7.5 0 0 0 1.6 4 17.2 17.2 0 0 0 6.6 5.8c.8.3 1.4.5 1.9.7a4.6 4.6 0 0 0 2.1.1 3.5 3.5 0 0 0 2.3-1.6 2.8 2.8 0 0 0 .2-1.6c-.2-.2-.5-.3-.8-.5z"/></svg>
+        WhatsApp
+      </a>
       <button class="icon-btn" onclick="toggleSound()" id="soundToggleBtn" title="Toggle UI Sound Effects" aria-label="Toggle Sound">
         <span id="soundIcon">🔇</span>
       </button>
@@ -1643,7 +1783,8 @@ footer.footer .bottom {
       <button data-go="parent-login">Parent Portal</button>
       <button data-go="forum">Parents Forum</button>
       <button data-go="contact">Contact</button>
-      <button onclick="downloadHtmlFile()" style="color:var(--gold-400)">📥 Download HTML Code</button>
+      <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (07042664309)</a>
+      <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (0803779632)</a>
     </div>
   </div>
 </header>
@@ -1659,7 +1800,7 @@ footer.footer .bottom {
   <button class="dock-btn" onclick="quickLogin('parent')">👨‍👩‍👧 Parent Portal</button>
   <button class="dock-btn" onclick="quickLogin('teacher')">👩‍🏫 Teacher</button>
   <button class="dock-btn" onclick="quickLogin('admin')">🛡️ Admin</button>
-  <button class="dock-btn" onclick="downloadHtmlFile()" style="background:var(--gold-gradient);color:var(--navy-950)">📥 Download HTML</button>
+  <button class="dock-btn" onclick="toggleWaPopup()" style="background:#25D366;color:#ffffff;font-weight:700">💬 WhatsApp Us</button>
 </aside>
 
 <!-- ================= FOOTER ================= -->
@@ -1690,7 +1831,13 @@ footer.footer .bottom {
     <div>
       <h5>Campus &amp; Office</h5>
       <span style="font-size:0.86rem;display:block;padding:4px 0">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</span>
-      <span style="font-size:0.86rem;display:block;padding:4px 0;color:#fff;font-weight:600">+234 801 234 5678</span>
+      <div style="margin:6px 0">
+        <a href="tel:07042664309" style="font-size:0.9rem;display:block;color:#fff;font-weight:700">📞 07042664309</a>
+        <a href="tel:0803779632" style="font-size:0.9rem;display:block;color:#fff;font-weight:700;margin-top:2px">📞 0803779632</a>
+      </div>
+      <div style="margin-top:8px">
+        <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;display:inline-flex;align-items:center;gap:6px"><span>💬</span> WhatsApp Direct Message</a>
+      </div>
       <span style="font-size:0.86rem;display:block;padding:4px 0">info@mojulichristglorious.edu.ng</span>
       <div style="margin-top:12px">
         <span class="badge live"><span class="dot"></span> 2026/27 Session Open</span>
@@ -1825,21 +1972,39 @@ const SECONDARY_CLASSES = ["JSS 1","JSS 2","JSS 3","SS 1","SS 2","SS 3"];
 
 const DEFAULT_PHOTOS = [
   {
+    id: "photo_front_gate",
+    src: "assets/school_front_gate.jpg",
+    caption: "Mojuli Christ Glorious Nursery & Primary School — Main Front Gate & Welcome Mural",
+    category: "Campus"
+  },
+  {
+    id: "photo_graduation_group",
+    src: "assets/gallery_graduation_group.jpg",
+    caption: "Graduation Ceremony & Academic Valedictory Celebration with Educator",
+    category: "Events"
+  },
+  {
+    id: "photo_choir",
+    src: "assets/gallery_choir.jpg",
+    caption: "Mojuli School Choral Presentation & Vocal Ministry in Gowns",
+    category: "Events"
+  },
+  {
+    id: "photo_performance",
+    src: "assets/gallery_performance.jpg",
+    caption: "Pupils Stage Performance & Cultural Day Celebration",
+    category: "Events"
+  },
+  {
     id: "photo_classroom",
     src: "assets/school_students_classroom_1790377093224.jpg",
     caption: "Engaged Pupils in Active Primary Classroom Learning",
     category: "Classrooms"
   },
   {
-    id: "photo_campus",
-    src: "assets/school_campus_exterior_1790377121449.jpg",
-    caption: "Mojuli Christ Glorious School Campus Exterior",
-    category: "Campus"
-  },
-  {
     id: "photo_lab",
     src: "assets/school_science_lab_1790377166265.jpg",
-    caption: "Secondary School Practical Science Laboratory",
+    caption: "Secondary Practical Science Laboratory Experience",
     category: "Science"
   }
 ];
@@ -2071,26 +2236,34 @@ let threads = DB.get('threads', null) || SAMPLE_THREADS_SEED;
 let settings = DB.get('settings', null) || { secondaryActive: true, logoDataUrl: null };
 let gallery = DB.get('gallery', null) || DEFAULT_PHOTOS;
 
+// Sync latest official photos
+if(gallery && gallery.length < 6) {
+  gallery = DEFAULT_PHOTOS;
+  saveGallery();
+}
+
+
 function saveApplications(){ DB.set('applications', applications); }
 function saveAnnouncements(){ DB.set('announcements', announcements); }
 function saveThreads(){ DB.set('threads', threads); }
 function saveSettings(){ DB.set('settings', settings); }
 function saveGallery(){ DB.set('gallery', gallery); }
 
+
+function toggleWaPopup() {
+  const pop = document.getElementById('whatsappPopup');
+  if(pop) {
+    pop.classList.toggle('open');
+    if(pop.classList.contains('open')) Sound.playSuccess();
+    else Sound.playClick();
+  }
+}
+
 function applyHeaderLogo(){
   const slot = document.getElementById('headerLogoSlot');
   if(!slot) return;
-  const logo = settings.logoDataUrl;
-  if(logo){
-    slot.innerHTML = `<img src="${logo}" alt="School logo" style="width:100%;height:100%;object-fit:cover">`;
-  } else {
-    slot.innerHTML = `
-      <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M24 3 L43 11 V22 C43 34 35.5 42 24 45 C12.5 42 5 34 5 22 V11 Z" fill="#0B2A5B" stroke="#F59E0B" stroke-width="2.2"/>
-        <path d="M24 12 V33 M16 18 H32" stroke="#F59E0B" stroke-width="2.6" stroke-linecap="round"/>
-        <path d="M15 27 C15 24 19 24 19 27 C19 24 23 24 23 27 V31 H15 Z" fill="#F59E0B"/>
-      </svg>`;
-  }
+  const logo = settings.logoDataUrl || 'assets/school_logo.png';
+  slot.innerHTML = `<img src="${logo}" alt="Mojuli Christ Glorious Nursery & Primary School Logo" style="width:100%;height:100%;object-fit:contain">`;
 }
 
 function readFileAsDataUrl(file){
@@ -2224,7 +2397,7 @@ function quickLogin(role) {
    4. REPORT CARD BUILDER & PRINT
    --------------------------------------------------------------------- */
 function buildReportCardHTML(student, kind){
-  const logo = settings.logoDataUrl || DEFAULT_PHOTOS[1].src;
+  const logo = settings.logoDataUrl || 'assets/school_logo.png';
   const results = getComputedResults(kind);
   const affective = affectiveStore[kind];
   const comments = commentsStore[kind];
@@ -2256,7 +2429,7 @@ function buildReportCardHTML(student, kind){
         <div class="rc-schoolinfo">
           <h1>MOJULI CHRIST GLORIOUS SCHOOL</h1>
           <div class="rc-motto">"JESUS IS OUR GREAT TEACHER"</div>
-          <div class="rc-addr">Lane 3, Marina Street, Ilupeju Avenue, Ado-Ekiti, Ekiti State<br>+234 801 234 5678 &nbsp;·&nbsp; info@mojulichristglorious.edu.ng</div>
+          <div class="rc-addr">Lane 3, Marina Street, Ilupeju Avenue, Ado-Ekiti, Ekiti State<br>Hotlines: 07042664309 &nbsp;·&nbsp; 0803779632 &nbsp;·&nbsp; info@mojulichristglorious.edu.ng</div>
           <div class="rc-report-title">Term Performance Evaluation Report — ${student.session}</div>
           <div>Student ID: <span class="rc-sid">${student.id}</span></div>
         </div>
@@ -2546,8 +2719,8 @@ registerView('home', ()=>{
       <div class="hero-showcase">
         <div class="showcase-card">
           <div class="showcase-img-wrap">
-            <img src="${classroomImg}" alt="Classroom atmosphere at Mojuli Christ Glorious School">
-            <span class="showcase-tag">Excellence in Action</span>
+            <img src="assets/school_front_gate.jpg" alt="Mojuli Christ Glorious Nursery & Primary School Campus Entrance">
+            <span class="showcase-tag">Welcome to Mojuli</span>
           </div>
           <div class="showcase-stats">
             <div class="showcase-stat-box">
@@ -2606,6 +2779,57 @@ registerView('home', ()=>{
             <li>Science, Arts &amp; Commercial Specializations</li>
             <li>JSCE, WASSCE &amp; Career Guidance</li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dedicated WhatsApp & Instant Reach Out Section -->
+  <section class="pad" style="background:linear-gradient(135deg, #075E54 0%, #128C7E 100%);color:#FFFFFF;position:relative;overflow:hidden">
+    <div style="position:absolute;top:-40px;right:-40px;width:240px;height:240px;background:rgba(255,255,255,0.06);border-radius:50%;pointer-events:none"></div>
+    <div class="wrap">
+      <div class="grid-2" style="align-items:center;gap:36px">
+        <div>
+          <span class="badge" style="background:rgba(255,255,255,0.2);color:#FFFFFF;border-color:rgba(255,255,255,0.4)">Direct WhatsApp Message</span>
+          <h2 style="color:#FFFFFF;margin-top:16px;font-size:2.2rem;line-height:1.2">Direct Enquiries via WhatsApp</h2>
+          <div style="color:var(--gold-300);font-weight:700;font-size:0.9rem;margin-top:6px">"JESUS IS OUR GREAT TEACHER"</div>
+          <p style="color:rgba(255,255,255,0.92);font-size:1.05rem;line-height:1.7;margin-top:14px">
+            Have questions about pupil enrollment, school fees, academic terms, or visiting the school campus? Tap to connect directly with our administrative desk on WhatsApp.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:24px">
+            <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-gold btn-lg" style="box-shadow:0 6px 20px rgba(0,0,0,0.25);font-weight:800;color:var(--navy-950)">
+              <span>💬</span> Message 07042664309
+            </a>
+            <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-outline btn-lg" style="border-color:#FFFFFF;color:#FFFFFF;background:rgba(255,255,255,0.12);font-weight:800">
+              <span>💬</span> Message 0803779632
+            </a>
+          </div>
+        </div>
+        
+        <div style="background:rgba(255,255,255,0.12);padding:28px;border-radius:var(--radius-lg);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.25);box-shadow:0 12px 30px rgba(0,0,0,0.15)">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+            <img src="assets/school_logo.png" alt="School Emblem" style="width:58px;height:58px;object-fit:contain;background:#FFFFFF;border-radius:10px;padding:3px;box-shadow:0 4px 12px rgba(0,0,0,0.2)">
+            <div>
+              <h4 style="color:#FFFFFF;font-size:1.15rem;margin:0">Official School Hotlines</h4>
+              <span style="color:var(--gold-300);font-size:0.8rem;font-weight:700">Immediate Phone &amp; WhatsApp Access</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <a href="tel:07042664309" style="display:flex;align-items:center;gap:14px;color:#FFFFFF;padding:14px;background:rgba(0,0,0,0.2);border-radius:var(--radius-md);transition:transform 0.2s">
+              <span style="font-size:1.6rem">📱</span>
+              <div>
+                <b style="font-size:1.1rem;display:block">07042664309</b>
+                <span style="font-size:0.8rem;opacity:0.85">Hotline 1 &bull; Tap to Call or Chat</span>
+              </div>
+            </a>
+            <a href="tel:0803779632" style="display:flex;align-items:center;gap:14px;color:#FFFFFF;padding:14px;background:rgba(0,0,0,0.2);border-radius:var(--radius-md);transition:transform 0.2s">
+              <span style="font-size:1.6rem">📞</span>
+              <div>
+                <b style="font-size:1.1rem;display:block">0803779632</b>
+                <span style="font-size:0.8rem;opacity:0.85">Hotline 2 &bull; Tap to Call or Chat</span>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -4221,7 +4445,8 @@ registerView('gallery', ()=>`
       
       <div class="tabs-inline" style="justify-content:center;margin-bottom:28px">
         <button class="gallery-cat-btn active" onclick="setGalleryCategory('All', this)">All Collections</button>
-        <button class="gallery-cat-btn" onclick="setGalleryCategory('Campus', this)">Campus &amp; Architecture</button>
+        <button class="gallery-cat-btn" onclick="setGalleryCategory('Campus', this)">Campus &amp; Entrance</button>
+        <button class="gallery-cat-btn" onclick="setGalleryCategory('Events', this)">Ceremonies &amp; Choir</button>
         <button class="gallery-cat-btn" onclick="setGalleryCategory('Classrooms', this)">Classrooms &amp; Learning</button>
         <button class="gallery-cat-btn" onclick="setGalleryCategory('Science', this)">Science Laboratories</button>
       </div>
@@ -4257,9 +4482,17 @@ registerView('contact', ()=>`
             <h4 style="font-size:1.05rem;margin-bottom:8px">📍 Campus Address</h4>
             <p style="font-size:0.92rem;line-height:1.7">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</p>
           </div>
-          <div class="card" style="margin-bottom:18px">
-            <h4 style="font-size:1.05rem;margin-bottom:8px">📞 Phone &amp; Enquiries</h4>
-            <p style="font-size:0.92rem;line-height:1.7">General Enquiries: +234 801 234 5678<br>Admissions Hotline: +234 802 345 6789<br>Email: info@mojulichristglorious.edu.ng</p>
+          <div class="card" style="margin-bottom:18px;border-left:4px solid #25D366">
+            <h4 style="font-size:1.05rem;margin-bottom:8px">💬 WhatsApp &amp; Reach Out Hotlines</h4>
+            <p style="font-size:0.92rem;line-height:1.8;margin-bottom:12px">
+              Direct Phone 1: <a href="tel:07042664309" style="font-weight:700;color:var(--navy-700)">07042664309</a><br>
+              Direct Phone 2: <a href="tel:0803779632" style="font-weight:700;color:var(--navy-700)">0803779632</a><br>
+              Email: <span style="font-weight:600">info@mojulichristglorious.edu.ng</span>
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 07042664309</a>
+              <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 0803779632</a>
+            </div>
           </div>
           <div class="card">
             <h4 style="font-size:1.05rem;margin-bottom:8px">⏰ Office Hours</h4>
@@ -4407,5 +4640,37 @@ function escapeHtml(s){
 // Launch application
 go('home');
 </script>
+
+<!-- Floating WhatsApp Direct Chat Widget -->
+<div class="whatsapp-float-widget" id="whatsappFloatWidget">
+  <div class="whatsapp-popup" id="whatsappPopup">
+    <div class="wa-popup-header">
+      <img src="assets/school_logo.png" alt="School Logo" class="wa-popup-logo">
+      <div>
+        <div class="wa-popup-title">Mojuli Christ Glorious School</div>
+        <div class="wa-popup-sub">🟢 Active &amp; Ready to Chat</div>
+      </div>
+      <button class="wa-popup-close" onclick="toggleWaPopup()" aria-label="Close Chat Popup">✕</button>
+    </div>
+    <div class="wa-popup-body">
+      <p>Hello! 👋 Welcome to Mojuli Christ Glorious School. How can we assist you today?</p>
+      <div class="wa-chat-options">
+        <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20inquire%20about%20admissions." target="_blank" rel="noopener" class="wa-chat-link">
+          <span class="wa-link-num">📱 Line 1: 07042664309</span>
+          <span class="wa-link-desc">Admissions &amp; General Enquiries →</span>
+        </a>
+        <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20inquire%20about%20admissions." target="_blank" rel="noopener" class="wa-chat-link">
+          <span class="wa-link-num">📞 Line 2: 0803779632</span>
+          <span class="wa-link-desc">Administration &amp; Principal Desk →</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <button class="whatsapp-floating-btn" onclick="toggleWaPopup()" title="Chat with school on WhatsApp" aria-label="WhatsApp Chat">
+    <svg viewBox="0 0 32 32" width="30" height="30" fill="#fff"><path d="M16 2a14 14 0 0 0-12 21.2L2 30l7-1.9A14 14 0 1 0 16 2zm0 25.5a11.5 11.5 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.5 11.5 0 1 1 16 27.5zm6.3-8.6c-.3-.2-2-.9-2.3-1s-.5-.2-.8.2-.9 1.1-1.1 1.3-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.3 0-.5.2-.7s.3-.4.5-.6.2-.3.3-.5.1-.3 0-.5c0-.1-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 .5 4.3 4.3 0 0 0-1.4 3.2 7.5 7.5 0 0 0 1.6 4 17.2 17.2 0 0 0 6.6 5.8c.8.3 1.4.5 1.9.7a4.6 4.6 0 0 0 2.1.1 3.5 3.5 0 0 0 2.3-1.6 2.8 2.8 0 0 0 .2-1.6c-.2-.2-.5-.3-.8-.5z"/></svg>
+    <span class="wa-badge-dot"></span>
+  </button>
+</div>
+
 </body>
 </html>
