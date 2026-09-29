@@ -4718,14 +4718,7 @@ function loginFormView(kind, title, idLabel, afterGo){
             </div>
 
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Sign In to Dashboard →</button>
-            ${githubAuthButtonHTML()}
           </form>
-
-          ${samplePupil ? `
-          <!-- Enrolled Student Account Helper Chip -->
-          <div class="auth-demo-hint" onclick="fillDemoAuth('${afterGo}', '${defaultDemoId}', '${defaultDemoPass}')" title="Click to auto-fill enrolled student credentials">
-            <span>💡 <b>Enrolled Account:</b> <code>${defaultDemoId}</code> &bull; Password: <code>${defaultDemoPass}</code> (${defaultDemoName})</span>
-          </div>` : ''}
 
           ${isParent ? `
           <p class="small-muted" style="text-align:center;margin-top:18px">
@@ -4832,18 +4825,7 @@ registerView('staff-login', ()=>`
               </select>
             </div>
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console →</button>
-            ${githubAuthButtonHTML()}
           </form>
-
-          <!-- Quick Test Account Chips -->
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
-            <div class="auth-demo-hint" onclick="fillDemoAuth('staff', 'admin@mojulichristglorious.edu.ng', 'admin2026'); document.getElementById('staffRoleSelect').value='admin';">
-              <span>🛡️ <b>Admin Account:</b> <code>admin@mojulichristglorious.edu.ng</code> &bull; Password: <code>admin2026</code></span>
-            </div>
-            <div class="auth-demo-hint" onclick="fillDemoAuth('staff', 'teacher@mojulichristglorious.edu.ng', 'teacher2026'); document.getElementById('staffRoleSelect').value='teacher';">
-              <span>💡 <b>Teacher Account:</b> <code>teacher@mojulichristglorious.edu.ng</code> &bull; Password: <code>teacher2026</code></span>
-            </div>
-          </div>
 
           <p class="small-muted" style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
             Prospective Educator? <a href="#" data-go="staff-signup" style="color:var(--navy-800);font-weight:700">Apply to Teach &amp; Take Assessment →</a>
