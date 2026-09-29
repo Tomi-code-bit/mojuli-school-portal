@@ -2136,11 +2136,11 @@ const SAMPLE_EVENTS = [
 ];
 
 const SAMPLE_RESULTS = [
-  {subject:"Mathematics", ca1:18, ca2:17, ca3:19, exam:36, lastTermBF:88, position:"2nd", remark:"Excellent grasp of concepts; consistent accuracy."},
-  {subject:"English Language", ca1:15, ca2:16, ca3:14, exam:33, lastTermBF:75, position:"5th", remark:"Very good comprehension; refine creative composition."},
-  {subject:"Basic Science", ca1:16, ca2:18, ca3:17, exam:35, lastTermBF:80, position:"3rd", remark:"Outstanding scientific reasoning and curiosity."},
-  {subject:"Christian Religious Studies", ca1:19, ca2:19, ca3:18, exam:37, lastTermBF:90, position:"1st", remark:"Exemplary understanding and godly application."},
-  {subject:"Social Studies", ca1:14, ca2:13, ca3:15, exam:30, lastTermBF:70, position:"6th", remark:"Good effort; revise civic duties regularly."},
+  {subject:"Mathematics", ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:"-", remark:"Pending assessment"},
+  {subject:"English Language", ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:"-", remark:"Pending assessment"},
+  {subject:"Basic Science", ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:"-", remark:"Pending assessment"},
+  {subject:"Christian Religious Studies", ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:"-", remark:"Pending assessment"},
+  {subject:"Social Studies", ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:"-", remark:"Pending assessment"},
 ];
 
 function gradeFor(total){
@@ -2148,7 +2148,8 @@ function gradeFor(total){
   if(total>=60) return 'B';
   if(total>=50) return 'C';
   if(total>=40) return 'D';
-  return 'F';
+  if(total>0) return 'F';
+  return '-';
 }
 
 function computeResultRow(r){
@@ -2158,7 +2159,7 @@ function computeResultRow(r){
   // If Prev B/F exists, cumulative is Prev B/F + Current Total. Otherwise cumulative is just current Total.
   const cumulative = bf > 0 ? (bf + total) : total;
   const classAverage = bf > 0 ? (Math.round((cumulative / 2) * 10) / 10) : total;
-  return { ...r, caTotal, total, lastTermBF: bf, cumulative, classAverage, grade: r.grade || gradeFor(total) };
+  return { ...r, caTotal, total, lastTermBF: bf, cumulative, classAverage, grade: r.grade || (total > 0 ? gradeFor(total) : '-') };
 }
 
 const SAMPLE_AFFECTIVE = [
@@ -2173,8 +2174,8 @@ const SAMPLE_AFFECTIVE = [
 ];
 
 const DEFAULT_COMMENTS = {
-  classTeacher: "{firstName} has displayed commendable intellectual rigor and moral responsibility this term. A pleasure to teach!",
-  principal: "Outstanding academic results. Continue honoring God through diligence and humble service.",
+  classTeacher: "{firstName} is enrolled for this academic term. Continuous assessment underway.",
+  principal: "Welcome to Mojuli Christ Glorious School. Honor God through diligence and discipline.",
   nextTerm: "Second Term commences Monday, 11 January 2027. Boarders resume Sunday 10 January."
 };
 
@@ -2195,43 +2196,16 @@ function saveResultsStore(){ DB.set('resultsStore', resultsStore); }
 function saveAffectiveStore(){ DB.set('affectiveStore', affectiveStore); }
 function saveCommentsStore(){ DB.set('commentsStore', commentsStore); }
 
-const DEFAULT_CLASS_ROSTER = [
-  {id:"MJL/26/0001", name:"Faith Adebayo", cls:"Primary 4", gender:"Female", parent:"Mrs. Adebayo", phone:"08012345678", dob:"2016-04-12", address:"Lane 3, Marina Street, Ado-Ekiti", status:"Enrolled", admissionType:"Online Application", photoUrl:""},
-  {id:"MJL/26/0002", name:"Daniel Umeh", cls:"Primary 4", gender:"Male", parent:"Mrs. Umeh", phone:"08023456789", dob:"2016-08-20", address:"Ilupeju Avenue, Ado-Ekiti", status:"Enrolled", admissionType:"Online Application", photoUrl:""},
-  {id:"MJL/26/0003", name:"Chioma Nnamdi", cls:"Primary 4", gender:"Female", parent:"Mr. Nnamdi", phone:"08034567890", dob:"2016-02-14", address:"GRA Phase 2, Ado-Ekiti", status:"Enrolled", admissionType:"Walk-in Admission", photoUrl:""},
-  {id:"MJL/26/0004", name:"Samuel Bassey", cls:"Primary 4", gender:"Male", parent:"Mrs. Bassey", phone:"08045678901", dob:"2016-09-30", address:"Marina Extension, Ado-Ekiti", status:"Enrolled", admissionType:"Online Application", photoUrl:""},
-  {id:"MJL/26/0005", name:"Blessing Eze", cls:"Primary 4", gender:"Female", parent:"Mr. Eze", phone:"08056789012", dob:"2016-11-05", address:"Housing Estate, Ado-Ekiti", status:"Enrolled", admissionType:"Walk-in Admission", photoUrl:""},
-  {id:"MJL/26/0006", name:"Ibrahim Musa", cls:"Primary 4", gender:"Male", parent:"Alhaji Musa", phone:"08067890123", dob:"2016-05-18", address:"Okesa Street, Ado-Ekiti", status:"Enrolled", admissionType:"Online Application", photoUrl:""},
-  {id:"MJL/26/0007", name:"Kelechi Okoye", cls:"Primary 4", gender:"Male", parent:"Mr. Okoye", phone:"08078901234", dob:"2016-01-25", address:"Ajilosun Area, Ado-Ekiti", status:"Enrolled", admissionType:"Walk-in Admission", photoUrl:""},
-  {id:"MJL/26/0008", name:"Toluwalase Balogun", cls:"Primary 4", gender:"Female", parent:"Pastor Balogun", phone:"08089012345", dob:"2016-07-09", address:"Basiri Road, Ado-Ekiti", status:"Enrolled", admissionType:"Online Application", photoUrl:""}
-];
+const DEFAULT_CLASS_ROSTER = [];
 let classRoster = DB.get('classRoster', null) || DEFAULT_CLASS_ROSTER;
-
-// Map legacy IDs to new MJL/26/0001 sequence
-const ID_MAPPING = {
-  "MJL/PRY/2026/014": "MJL/26/0001",
-  "MJL/PRY/2026/015": "MJL/26/0002",
-  "MJL/PRY/2026/016": "MJL/26/0003",
-  "MJL/PRY/2026/017": "MJL/26/0004",
-  "MJL/PRY/2026/018": "MJL/26/0005",
-  "MJL/PRY/2026/019": "MJL/26/0006",
-  "MJL/PRY/2026/020": "MJL/26/0007",
-  "MJL/PRY/2026/021": "MJL/26/0008",
-  "MJL/SEC/2026/031": "MJL/26/0009"
-};
 
 // Sanitize and normalize roster
 classRoster.forEach((p, idx) => {
-  if (ID_MAPPING[p.id]) {
-    p.id = ID_MAPPING[p.id];
-  }
   if (!p.id || !p.id.startsWith('MJL/')) {
     p.id = `MJL/26/${String(idx + 1).padStart(4, '0')}`;
   }
-  if (!p.gender || p.gender === 'Pupil') {
-    p.gender = /sunday|samuel|daniel|ibrahim|kelechi|emmanuel|david|john|peter|musa/i.test(p.name) ? 'Male' : 'Female';
-  }
-  if (!p.cls) p.cls = 'Primary 4';
+  if (!p.gender) p.gender = 'Pupil';
+  if (!p.cls) p.cls = 'Primary 1';
   if (!p.status) p.status = 'Enrolled';
   if (!p.admissionType) p.admissionType = 'Direct / Walk-In Admission';
   if (p.photoUrl === undefined) p.photoUrl = '';
@@ -2257,7 +2231,7 @@ function generateNextStudentId() {
   return `MJL/${yr}/${String(nextNum).padStart(4, '0')}`;
 }
 
-let activePupilId = (classRoster[0] && classRoster[0].id) || "MJL/26/0001";
+let activePupilId = (classRoster[0] && classRoster[0].id) || "";
 let activeTeacherView = 'pupil'; // 'pupil' or 'broadsheet'
 
 let pupilScoresStore = DB.get('pupilScoresStore', null) || {};
@@ -2279,17 +2253,15 @@ function getPupilResults(pupilId, customTerm, customSession) {
   const isThirdTerm = currentTerm.toLowerCase().includes('third');
 
   if (!pupilScoresStore[pupilId]) {
-    pupilScoresStore[pupilId] = SAMPLE_RESULTS.map((r) => {
-      const delta = (pupilId.charCodeAt(pupilId.length - 1) % 5) - 2;
-      return {
-        ...r,
-        ca1: Math.min(20, Math.max(10, r.ca1 + delta)),
-        ca2: Math.min(20, Math.max(10, r.ca2 + delta)),
-        ca3: Math.min(20, Math.max(10, r.ca3 + delta)),
-        exam: Math.min(40, Math.max(20, r.exam + delta * 2)),
-        lastTermBF: 0
-      };
-    });
+    pupilScoresStore[pupilId] = SAMPLE_RESULTS.map((r) => ({
+      ...r,
+      ca1: 0,
+      ca2: 0,
+      ca3: 0,
+      exam: 0,
+      lastTermBF: 0,
+      remark: "Pending assessment"
+    }));
     savePupilScoresStore();
   }
 
@@ -2344,7 +2316,7 @@ function archiveCurrentTermResults(termName, sessionName) {
 }
 
 // Pre-seed first term history for enrolled pupils so Second Term can automatically fetch First Term scores
-if (Object.keys(termResultsHistory).length === 0) {
+if (Object.keys(termResultsHistory).length === 0 && classRoster.length > 0) {
   classRoster.forEach(p => {
     if (!termResultsHistory[p.id]) termResultsHistory[p.id] = {};
     if (!termResultsHistory[p.id]["2026/2027"]) termResultsHistory[p.id]["2026/2027"] = {};
@@ -2367,17 +2339,13 @@ function overallRemarkFor(pct){
   if(pct>=75) return 'DISTINCTION (EXEMPLARY)';
   if(pct>=60) return 'VERY GOOD';
   if(pct>=50) return 'CREDIT PASS';
-  return 'NEEDS TARGETED SUPPORT';
+  if(pct>0) return 'NEEDS TARGETED SUPPORT';
+  return 'PENDING';
 }
 
-const SAMPLE_ATTENDANCE = {present:78, absent:3, late:4, total:85};
+const SAMPLE_ATTENDANCE = {present:0, absent:0, late:0, total:0};
 
-const DEFAULT_ASSIGNMENTS = [
-  {id:"asg_1", cls:"Primary 4", subject:"Mathematics", title:"Long Division & Problem Solving Worksheet Qs 1–15", instructions:"Complete exercises in your 2A Mathematics notebook showing complete step-by-step working.", given:"15 Sep", due:"22 Sep"},
-  {id:"asg_2", cls:"Primary 4", subject:"English Language", title:"Narrative Essay: 'A Memorable Experience in My Neighborhood'", instructions:"Write a neat 3-paragraph essay focusing on descriptive adjectives, punctuation, and handwriting.", given:"16 Sep", due:"21 Sep"},
-  {id:"asg_3", cls:"Primary 4", subject:"Basic Science", title:"Labelled Diagram of the Plant Cell and Chloroplast Structure", instructions:"Use 2B pencils and label the cell wall, cell membrane, vacuole, and chloroplast.", given:"17 Sep", due:"24 Sep"},
-  {id:"asg_4", cls:"Primary 4", subject:"CRS", title:"Memory Verse: Proverbs 3:5-6 and Summary of King Solomon's Wisdom", instructions:"Recite during Friday chapel assembly and write a 4-sentence reflection on godly wisdom.", given:"18 Sep", due:"23 Sep"},
-];
+const DEFAULT_ASSIGNMENTS = [];
 let assignmentsStore = DB.get('assignmentsStore', null) || DEFAULT_ASSIGNMENTS;
 function saveAssignmentsStore(){ DB.set('assignmentsStore', assignmentsStore); }
 const SAMPLE_HOMEWORK = assignmentsStore;
@@ -2396,52 +2364,6 @@ const SAMPLE_TIMETABLE = [
    --------------------------------------------------------------------- */
 const DEFAULT_USER_ACCOUNTS = [
   {
-    id: "acc_pry_001",
-    identifier: "MJL/26/0001",
-    email: "faith.adebayo@student.mojuli.edu.ng",
-    phone: "08012345678",
-    name: "Faith Adebayo",
-    role: "student-primary",
-    cls: "Primary 4",
-    gender: "Female",
-    password: "MJL/26/0001",
-    registeredAt: "10 Sep 2026"
-  },
-  {
-    id: "acc_sec_009",
-    identifier: "MJL/26/0009",
-    email: "emmanuel.okafor@student.mojuli.edu.ng",
-    phone: "08023456789",
-    name: "Emmanuel Okafor",
-    role: "student-secondary",
-    cls: "JSS 2",
-    gender: "Male",
-    password: "MJL/26/0009",
-    registeredAt: "11 Sep 2026"
-  },
-  {
-    id: "acc_parent_01",
-    identifier: "08012345678",
-    email: "adebayo.parent@example.com",
-    phone: "08012345678",
-    name: "Mrs. Adebayo",
-    role: "parent",
-    childId: "MJL/26/0001",
-    password: "parent123",
-    registeredAt: "12 Sep 2026"
-  },
-  {
-    id: "acc_staff_01",
-    identifier: "oduya.g@mojulichristglorious.edu.ng",
-    email: "oduya.g@mojulichristglorious.edu.ng",
-    phone: "08033344455",
-    name: "Mrs. Grace Oduya",
-    role: "teacher",
-    cls: "Primary 4",
-    password: "staffpass",
-    registeredAt: "01 Sep 2026"
-  },
-  {
     id: "acc_admin_01",
     identifier: "admin@mojulichristglorious.edu.ng",
     email: "admin@mojulichristglorious.edu.ng",
@@ -2450,16 +2372,21 @@ const DEFAULT_USER_ACCOUNTS = [
     role: "admin",
     password: "admin2026",
     registeredAt: "01 Jan 2026"
+  },
+  {
+    id: "acc_staff_01",
+    identifier: "teacher@mojulichristglorious.edu.ng",
+    email: "teacher@mojulichristglorious.edu.ng",
+    phone: "07042664309",
+    name: "Class Teacher",
+    role: "teacher",
+    cls: "Primary 4",
+    password: "teacher2026",
+    registeredAt: "01 Jan 2026"
   }
 ];
 
 let userAccounts = DB.get('userAccounts', null) || DEFAULT_USER_ACCOUNTS;
-// Migrate any old userAccounts
-userAccounts.forEach(u => {
-  if (u.identifier === 'MJL/PRY/2026/014') { u.identifier = 'MJL/26/0001'; u.password = 'MJL/26/0001'; }
-  if (u.identifier === 'MJL/SEC/2026/031') { u.identifier = 'MJL/26/0009'; u.password = 'MJL/26/0009'; }
-  if (u.childId === 'MJL/PRY/2026/014') { u.childId = 'MJL/26/0001'; }
-});
 function saveUserAccounts(){ DB.set('userAccounts', userAccounts); }
 
 function findUserAccount(identifier) {
@@ -2626,26 +2553,18 @@ function togglePassVisibility(inputId, btn) {
 }
 
 const SAMPLE_STUDENTS = {
-  primary: {name:"Faith Adebayo", id:"MJL/26/0001", cls:"Primary 4", session:"2026/2027", term:"First Term"},
-  secondary: {name:"Emmanuel Okafor", id:"MJL/26/0009", cls:"JSS 2", session:"2026/2027", term:"First Term"},
+  primary: {name:"Enrolled Pupil", id:"MJL/26/0001", cls:"Primary 1", session:"2026/2027", term:"First Term"},
+  secondary: {name:"Enrolled Student", id:"MJL/26/0001", cls:"JSS 1", session:"2026/2027", term:"First Term"},
 };
 
-const SAMPLE_TEACHER = {name:"Mrs. Grace Oduya", role:"Class Teacher — Primary 4", classes:["Primary 4"]};
-const SAMPLE_TEACHER_STUDENTS = [
-  "Faith Adebayo", "Daniel Umeh", "Chioma Nnamdi", "Samuel Bassey", 
-  "Blessing Eze", "Ibrahim Musa", "Kelechi Okoye", "Toluwalase Balogun"
-];
+const SAMPLE_TEACHER = {name:"Class Teacher", role:"Class Teacher", classes:["Primary 1"]};
+const SAMPLE_TEACHER_STUDENTS = [];
 
 const SAMPLE_FEES = [
-  {term:"First Term 2026/2027", due:"₦85,000", paid:"₦85,000", balance:"₦0", status:"Paid"},
-  {term:"Second Term 2026/2027", due:"₦85,000", paid:"₦0", balance:"₦85,000", status:"Not yet due"},
+  {term:"First Term 2026/2027", due:"₦85,000", paid:"₦0", balance:"₦85,000", status:"Current Term"},
 ];
 
-const SAMPLE_APPLICATIONS_SEED = [
-  {id:"MJL-APP-83921", name:"Peace Oluwaseun Johnson", dob:"2019-03-12", gender:"Female", prevSchool:"Little Angels Nursery", cls:"KG 2", parent:"Mrs. Johnson", phone:"08012345678", email:"johnson@example.com", address:"5 Grace Street, Ado-Ekiti", emergency:"08098765432", date:"14 Sep 2026", status:"Accepted"},
-  {id:"MJL-APP-54219", name:"David Chinedu Nwachukwu", dob:"2014-07-02", gender:"Male", prevSchool:"Bright Kids Primary", cls:"Primary 6", parent:"Mr. Nwachukwu", phone:"08023456789", email:"nwachukwu@example.com", address:"18 Hope Close, Ado-Ekiti", emergency:"08087654321", date:"16 Sep 2026", status:"Under Review"},
-  {id:"MJL-APP-19284", name:"Victoria Ayomide Adeleke", dob:"2017-11-20", gender:"Female", prevSchool:"Glory Fountain Academy", cls:"Primary 3", parent:"Chief Adeleke", phone:"08034567890", email:"adeleke@example.com", address:"12 Hilltop View, Ado-Ekiti", emergency:"08076543210", date:"18 Sep 2026", status:"Pending"}
-];
+const SAMPLE_APPLICATIONS_SEED = [];
 
 const STAFF_QUIZ_BANK = {
   general: [
@@ -2724,10 +2643,7 @@ function quizForClass(cls){
   return [...STAFF_QUIZ_BANK.general, ...STAFF_QUIZ_BANK[bandForClass(cls)]];
 }
 
-const SAMPLE_STAFF_APPLICATIONS_SEED = [
-  {id:genId(), name:"Mrs. Bukola Fashola", email:"bukola.f@example.com", phone:"08055512345", cls:"Primary 3", score:100, correct:6, total:6, date:"10 Sep 2026", status:"Shortlisted"},
-  {id:genId(), name:"Mr. Chukwudi Ani", email:"ani.c@example.com", phone:"08066678901", cls:"JSS 1", score:83, correct:5, total:6, date:"15 Sep 2026", status:"Pending Review"},
-];
+const SAMPLE_STAFF_APPLICATIONS_SEED = [];
 
 let staffApplications = DB.get('staffApplications', null) || SAMPLE_STAFF_APPLICATIONS_SEED;
 function saveStaffApplications(){ DB.set('staffApplications', staffApplications); }
@@ -2735,12 +2651,7 @@ let pendingStaffSignup = null;
 
 const FORUM_CATEGORIES = ["All","General Discussion","School Announcements","Academic Matters","PTA Matters","Events","Suggestions & Ideas","Questions"];
 const SAMPLE_THREADS_SEED = [
-  {id:genId(), cat:"PTA Matters", title:"Suggestions for the upcoming Term 1 PTA agenda", author:"Mrs. Adeyemi (Parent)", date:"12 Sep 2026", pinned:true, body:"What topics would parents like the PTA executive to present this term? I'd love to propose an expansion of the after-school music and chess clubs.", comments:[
-    {author:"Mr. Balogun (Parent)", date:"12 Sep 2026", body:"Fully support! Also let's discuss extended library reading hours on Fridays."},
-    {author:"Mrs. Oduya (Staff)", date:"13 Sep 2026", body:"The school administration is happy to review club expansion. We will include this in the agenda!"}
-  ]},
   {id:genId(), cat:"School Announcements", title:"Welcome to the 2026/2027 Academic Session!", author:"Admin (Management)", date:"01 Sep 2026", pinned:true, body:"Grace and peace! We are thrilled to welcome our pupils, parents, and teachers to an inspiring year of faith, discovery, and stellar achievement.", comments:[]},
-  {id:genId(), cat:"Academic Matters", title:"Recommended reading list & phonics tools for Primary 4?", author:"Mr. Okoye (Parent)", date:"09 Sep 2026", pinned:false, body:"Does the school provide a supplementary book list for home reading? My child completed the library reader already and is eager for more books.", comments:[]},
 ];
 
 let applications = DB.get('applications', null) || SAMPLE_APPLICATIONS_SEED;
@@ -2773,6 +2684,116 @@ let gallery = DB.get('gallery', null) || DEFAULT_PHOTOS;
 if(gallery && gallery.length < 6) {
   gallery = DEFAULT_PHOTOS;
   saveGallery();
+}
+
+// Clean Slate Automatic Migration: Remove old demo pupils & fake records from localStorage
+(function cleanupOldDemoData() {
+  const DEMO_NAMES = [
+    "Faith Adebayo", "Daniel Umeh", "Chioma Nnamdi", "Samuel Bassey", 
+    "Blessing Eze", "Ibrahim Musa", "Kelechi Okoye", "Toluwalase Balogun",
+    "Emmanuel Okafor"
+  ];
+  const DEMO_APP_IDS = ['MJL-APP-83921', 'MJL-APP-54219', 'MJL-APP-19284'];
+  const DEMO_ASG_IDS = ['asg_1', 'asg_2', 'asg_3', 'asg_4'];
+  const DEMO_STAFF_NAMES = ['Mrs. Bukola Fashola', 'Mr. Chukwudi Ani'];
+
+  if (!localStorage.getItem('mjl_clean_production_slate_v2')) {
+    // 1. Purge demo pupils
+    classRoster = (classRoster || []).filter(p => !DEMO_NAMES.includes(p.name));
+    saveClassRoster();
+    activePupilId = (classRoster[0] && classRoster[0].id) || "";
+
+    // 2. Purge demo user accounts, keep admin & staff
+    userAccounts = (userAccounts || []).filter(u => 
+      u.role === 'admin' || 
+      (u.role === 'teacher' && u.identifier === 'teacher@mojulichristglorious.edu.ng') ||
+      (!DEMO_NAMES.some(n => u.name && u.name.includes(n)) && !['acc_pry_001', 'acc_sec_009', 'acc_parent_01'].includes(u.id))
+    );
+    if (!userAccounts.some(u => u.role === 'admin')) {
+      userAccounts.push(DEFAULT_USER_ACCOUNTS[0]);
+    }
+    if (!userAccounts.some(u => u.role === 'teacher')) {
+      userAccounts.push(DEFAULT_USER_ACCOUNTS[1]);
+    }
+    saveUserAccounts();
+
+    // 3. Purge demo assignments
+    assignmentsStore = (assignmentsStore || []).filter(a => !DEMO_ASG_IDS.includes(a.id));
+    saveAssignmentsStore();
+
+    // 4. Purge demo student applications
+    applications = (applications || []).filter(a => !DEMO_APP_IDS.includes(a.id));
+    saveApplications();
+
+    // 5. Purge demo staff applications
+    staffApplications = (staffApplications || []).filter(s => !DEMO_STAFF_NAMES.includes(s.name));
+    saveStaffApplications();
+
+    // 6. Purge fake scores for demo pupils
+    DEMO_NAMES.forEach((name, i) => {
+      const fakeId = `MJL/26/${String(i+1).padStart(4, '0')}`;
+      delete pupilScoresStore[fakeId];
+      delete pupilAffectiveStore[fakeId];
+      delete pupilCommentsStore[fakeId];
+      delete termResultsHistory[fakeId];
+    });
+    savePupilScoresStore();
+    savePupilAffectiveStore();
+    savePupilCommentsStore();
+    saveTermResultsHistory();
+
+    localStorage.setItem('mjl_clean_production_slate_v2', 'true');
+  }
+})();
+
+function resetToCleanProductionSlate() {
+  showModal({
+    title: "🧹 Reset to Clean Production Slate?",
+    message: "This will remove all demo/dummy pupils, fake scores, test assignments, and sample applications, leaving the portal completely clean so you can enter 100% real school information. Your admin settings and passcodes will be kept. Proceed?",
+    confirmText: "Yes, Clean Everything",
+    cancelText: "Cancel",
+    onConfirm: () => {
+      classRoster = [];
+      saveClassRoster();
+      
+      assignmentsStore = [];
+      saveAssignmentsStore();
+      
+      applications = [];
+      saveApplications();
+      
+      staffApplications = [];
+      saveStaffApplications();
+      
+      pupilScoresStore = {};
+      savePupilScoresStore();
+      
+      pupilAffectiveStore = {};
+      savePupilAffectiveStore();
+      
+      pupilCommentsStore = {};
+      savePupilCommentsStore();
+      
+      termResultsHistory = {};
+      saveTermResultsHistory();
+      
+      userAccounts = userAccounts.filter(u => u.role === 'admin' || u.role === 'teacher');
+      saveUserAccounts();
+      
+      activePupilId = "";
+      
+      Sound.playSuccess();
+      toast('✅ Portal reset to clean production state! All fake info removed.');
+      
+      // Refresh active admin views if open
+      if (typeof renderAdminStudentRegistry === 'function') renderAdminStudentRegistry();
+      if (typeof renderAdminResultsTable === 'function') renderAdminResultsTable();
+      if (typeof renderAdminAdmissions === 'function') renderAdminAdmissions();
+      if (typeof renderAdminStaffApplications === 'function') renderAdminStaffApplications();
+      if (typeof renderAssignedClassPanel === 'function') renderAssignedClassPanel();
+      if (typeof renderTeacherAssignmentsPanel === 'function') renderTeacherAssignmentsPanel();
+    }
+  });
 }
 
 function saveApplications(){ DB.set('applications', applications); }
@@ -2922,28 +2943,47 @@ function toast(msg){
   window._toastT = setTimeout(()=>el.classList.remove('show'), 2800);
 }
 
-/* Quick One-Click Demo Role Switcher */
+/* Quick One-Click Role Switcher */
 function quickLogin(role) {
   Sound.playSuccess();
   if(role === 'home') {
     go('home');
     toast('Viewing Public School Website');
   } else if(role === 'student-primary') {
-    session = { role: 'student-primary', student: SAMPLE_STUDENTS.primary };
-    go('primary-dashboard');
-    toast('Logged in as Faith Adebayo (Primary 4)');
+    const firstPry = classRoster.find(p => !p.cls || /^Primary|^KG|^Nursery/i.test(p.cls));
+    if (firstPry) {
+      session = { role: 'student-primary', student: firstPry };
+      go('primary-dashboard');
+      toast(`Logged in as ${firstPry.name} (${firstPry.cls})`);
+    } else {
+      toast('No primary pupils enrolled yet. Please register a pupil first.');
+      go('student-login-primary');
+    }
   } else if(role === 'student-secondary') {
-    session = { role: 'student-secondary', student: SAMPLE_STUDENTS.secondary };
-    go('secondary-dashboard');
-    toast('Logged in as Emmanuel Okafor (JSS 2)');
+    const firstSec = classRoster.find(p => p.cls && /^(JSS|SS)/i.test(p.cls));
+    if (firstSec) {
+      session = { role: 'student-secondary', student: firstSec };
+      go('secondary-dashboard');
+      toast(`Logged in as ${firstSec.name} (${firstSec.cls})`);
+    } else {
+      toast('No secondary students enrolled yet. Please register a student first.');
+      go('student-login-secondary');
+    }
   } else if(role === 'parent') {
-    session = { role: 'parent' };
-    go('parent-portal');
-    toast('Logged in as Mrs. Adebayo (Parent Portal)');
+    const firstP = classRoster[0];
+    if (firstP) {
+      session = { role: 'parent', childId: firstP.id, childName: firstP.name, parentName: firstP.parent || 'Parent' };
+      go('parent-portal');
+      toast(`Logged into Parent Portal (${firstP.name}'s Guardian)`);
+    } else {
+      session = { role: 'parent' };
+      go('parent-portal');
+      toast('Logged into Parent Portal');
+    }
   } else if(role === 'teacher') {
     session = { role: 'staff-teacher' };
     go('teacher-dashboard');
-    toast('Logged in as Mrs. Grace Oduya (Class Teacher)');
+    toast('Logged in to Teacher Dashboard');
   } else if(role === 'admin') {
     if (settings.productionMode) {
       showModal({
@@ -3081,7 +3121,12 @@ function buildReportCardHTML(student, kind, pupilId){
 function printReportCard(kind){
   Sound.playSuccess();
   if(kind === 'parent'){
-    const child = SAMPLE_CHILDREN[activeChild];
+    const children = typeof getParentChildren === 'function' ? getParentChildren() : [];
+    const child = children[activeChild] || children[0];
+    if (!child) {
+      toast('No enrolled child found to print report card');
+      return;
+    }
     const student = {
       name: child.name, id: child.id, cls: child.cls,
       session: settings.session || "2026/2027", term: settings.term || "First Term"
@@ -3121,11 +3166,21 @@ function masterClassBroadsheetHTML(kind) {
     return { ...p, resultsCount: cnt, totalScore: tot, average: avg };
   }).sort((a,b) => b.average - a.average);
 
+  if (ranked.length === 0) {
+    return `
+      <div class="card" style="margin-bottom:20px;text-align:center;padding:40px 20px">
+        <div style="font-size:2.5rem;margin-bottom:8px">📊</div>
+        <h3>No Enrolled Pupils in Broadsheet</h3>
+        <p class="small-muted">Enroll pupils into this class level to view the master broadsheet performance analysis.</p>
+      </div>
+    `;
+  }
+
   return `
     <div class="card" style="margin-bottom:20px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <div>
-          <h3 style="margin-bottom:2px">Primary 4 Master Class Broadsheet</h3>
+          <h3 style="margin-bottom:2px">Master Class Broadsheet</h3>
           <p class="small-muted">Full academic performance summary &amp; standings across all ${ranked.length} enrolled pupils.</p>
         </div>
         <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print Class Broadsheet</button>
@@ -3173,6 +3228,25 @@ function masterClassBroadsheetHTML(kind) {
 function teacherResultsPanelHTML(kind){
   const clsLabel = kind==='primary' ? SAMPLE_TEACHER.classes[0] : (SECONDARY_CLASSES[1] || 'JSS 2');
   const pupil = classRoster.find(p=>p.id === activePupilId) || classRoster[0];
+  if (!pupil) {
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="margin-bottom:4px">Enter Results &amp; Continuous Assessment — ${clsLabel}</h2>
+          <p class="small-muted">Continuous Assessment (CA 1, 2, 3) + Examination scores with live calculations.</p>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('${kind}')">➕ Add New Pupil to Class</button>
+      </div>
+      <div class="card" style="text-align:center;padding:48px 20px;border:1px solid var(--border)">
+        <div style="font-size:3rem;margin-bottom:12px">🧑‍🎓</div>
+        <h3 style="margin-bottom:8px">No Pupils Enrolled in Roster</h3>
+        <p class="small-muted" style="max-width:500px;margin:0 auto 20px">
+          The class roster is currently empty. Click the button below or register pupils in the Admin Console to begin recording continuous assessment and exam grades.
+        </p>
+        <button class="btn btn-navy" onclick="showPupilEnrollmentModal('${kind}')">➕ Enroll First Pupil</button>
+      </div>
+    `;
+  }
   const results = getPupilResults(pupil.id);
   const affective = pupilAffectiveStore[pupil.id] || affectiveStore[kind] || DEFAULT_AFFECTIVE;
   const comments = pupilCommentsStore[pupil.id] || commentsStore[kind] || DEFAULT_COMMENTS;
@@ -3709,7 +3783,15 @@ function renderAssignedClassPanel() {
             </tr>
           </thead>
           <tbody>
-            ${classRoster.map((p, idx) => `
+            ${classRoster.length === 0 ? `
+              <tr>
+                <td colspan="9" style="text-align:center;padding:36px;color:var(--text-muted)">
+                  <div style="font-size:2.2rem;margin-bottom:8px">📋</div>
+                  <b>No pupils enrolled in the class register yet.</b><br>
+                  <span class="small-muted">Use the manual enrollment form below to register your first pupil.</span>
+                </td>
+              </tr>
+            ` : classRoster.map((p, idx) => `
               <tr>
                 <td>${idx + 1}.</td>
                 <td>
@@ -4566,9 +4648,15 @@ function loginFormView(kind, title, idLabel, afterGo){
   const isSecondary = afterGo === 'secondary-dashboard';
   const isParent = kind === 'parent';
   
-  const defaultDemoId = isPrimary ? "MJL/26/0001" : isSecondary ? "MJL/26/0009" : "08012345678";
-  const defaultDemoPass = isPrimary ? "MJL/26/0001" : isSecondary ? "MJL/26/0009" : "parent123";
-  const defaultDemoName = isPrimary ? "Faith Adebayo (Primary 4)" : isSecondary ? "Emmanuel Okafor (JSS 2)" : "Mrs. Adebayo (Parent)";
+  const samplePupil = isPrimary 
+    ? classRoster.find(p => !p.cls || /^Primary|^KG|^Nursery/i.test(p.cls))
+    : isSecondary
+    ? classRoster.find(p => p.cls && /^(JSS|SS)/i.test(p.cls))
+    : classRoster[0];
+
+  const defaultDemoId = samplePupil ? samplePupil.id : (isSecondary ? "MJL/26/0001" : "MJL/26/0001");
+  const defaultDemoPass = samplePupil ? samplePupil.id : (isParent ? "" : "MJL/26/0001");
+  const defaultDemoName = samplePupil ? `${samplePupil.name} (${samplePupil.cls})` : "";
   const levelCategory = isPrimary ? "Early Years & Primary" : isSecondary ? "Secondary (JSS 1 - SS 3)" : "Parent / Guardian";
 
   return `
@@ -4596,7 +4684,7 @@ function loginFormView(kind, title, idLabel, afterGo){
         <div class="note-box" style="margin-bottom:16px;background:rgba(27,54,93,0.06);border-left:4px solid var(--navy-800);padding:10px 14px;border-radius:6px">
           <span style="font-size:1.1rem">ℹ️</span>
           <div style="font-size:0.84rem;color:var(--text-main);line-height:1.5">
-            <b>Student Access Notice:</b> Students cannot self-register online. Accounts are provisioned exclusively by school administration and class teachers. Your initial password is identical to your <b>Student ID</b> (e.g. <code>${defaultDemoId}</code>).
+            <b>Student Access Notice:</b> Students cannot self-register online. Accounts are provisioned exclusively by school administration and class teachers. Your initial password is identical to your <b>Student ID</b> (e.g. <code>MJL/26/0001</code>).
           </div>
         </div>
         `}
@@ -4606,13 +4694,13 @@ function loginFormView(kind, title, idLabel, afterGo){
           <form id="loginForm-${afterGo}">
             <div class="field">
               <label>${idLabel} *</label>
-              <input required id="loginId-${afterGo}" placeholder="e.g. ${defaultDemoId}" value="${defaultDemoId}">
+              <input required id="loginId-${afterGo}" placeholder="e.g. ${defaultDemoId}" value="${samplePupil ? samplePupil.id : ''}">
             </div>
             
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••" value="${defaultDemoPass}">
+                <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••" value="${samplePupil ? samplePupil.id : ''}">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('loginPass-${afterGo}', this)">Show</button>
               </div>
               <p class="hint">${!isParent ? 'Default student password is your Student ID' : 'Your secret account password'}</p>
@@ -4629,10 +4717,11 @@ function loginFormView(kind, title, idLabel, afterGo){
             ${githubAuthButtonHTML()}
           </form>
 
-          <!-- Quick Fill Demo Helper Chip -->
-          <div class="auth-demo-hint" onclick="fillDemoAuth('${afterGo}', '${defaultDemoId}', '${defaultDemoPass}')" title="Click to auto-fill sample test credentials">
-            <span>💡 <b>Quick Test Account:</b> <code>${defaultDemoId}</code> &bull; Password: <code>${defaultDemoPass}</code> (${defaultDemoName})</span>
-          </div>
+          ${samplePupil ? `
+          <!-- Enrolled Student Account Helper Chip -->
+          <div class="auth-demo-hint" onclick="fillDemoAuth('${afterGo}', '${defaultDemoId}', '${defaultDemoPass}')" title="Click to auto-fill enrolled student credentials">
+            <span>💡 <b>Enrolled Account:</b> <code>${defaultDemoId}</code> &bull; Password: <code>${defaultDemoPass}</code> (${defaultDemoName})</span>
+          </div>` : ''}
 
           ${isParent ? `
           <p class="small-muted" style="text-align:center;margin-top:18px">
@@ -4722,20 +4811,20 @@ registerView('staff-login', ()=>`
           <form id="loginForm-staff">
             <div class="field">
               <label>Staff Identifier / Official Email *</label>
-              <input required id="staffEmailInput" placeholder="staff@mojulichristglorious.edu.ng" value="oduya.g@mojulichristglorious.edu.ng">
+              <input required id="staffEmailInput" placeholder="admin@mojulichristglorious.edu.ng" value="admin@mojulichristglorious.edu.ng">
             </div>
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="staffPassInput" placeholder="••••••••" value="staffpass">
+                <input required type="password" id="staffPassInput" placeholder="••••••••" value="admin2026">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('staffPassInput', this)">Show</button>
               </div>
             </div>
             <div class="field">
               <label>Designated Console Role *</label>
               <select id="staffRoleSelect" required>
-                <option value="teacher">Classroom Teacher (Primary 4)</option>
                 <option value="admin">Principal &amp; Administrator</option>
+                <option value="teacher">Classroom Teacher</option>
               </select>
             </div>
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console →</button>
@@ -4744,11 +4833,11 @@ registerView('staff-login', ()=>`
 
           <!-- Quick Test Account Chips -->
           <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
-            <div class="auth-demo-hint" onclick="fillDemoAuth('staff', 'oduya.g@mojulichristglorious.edu.ng', 'staffpass'); document.getElementById('staffRoleSelect').value='teacher';">
-              <span>💡 <b>Teacher Account:</b> <code>oduya.g@mojulichristglorious.edu.ng</code> &bull; Password: <code>staffpass</code></span>
-            </div>
             <div class="auth-demo-hint" onclick="fillDemoAuth('staff', 'admin@mojulichristglorious.edu.ng', 'admin2026'); document.getElementById('staffRoleSelect').value='admin';">
               <span>🛡️ <b>Admin Account:</b> <code>admin@mojulichristglorious.edu.ng</code> &bull; Password: <code>admin2026</code></span>
+            </div>
+            <div class="auth-demo-hint" onclick="fillDemoAuth('staff', 'teacher@mojulichristglorious.edu.ng', 'teacher2026'); document.getElementById('staffRoleSelect').value='teacher';">
+              <span>💡 <b>Teacher Account:</b> <code>teacher@mojulichristglorious.edu.ng</code> &bull; Password: <code>teacher2026</code></span>
             </div>
           </div>
 
@@ -5553,7 +5642,8 @@ registerView('admin-dashboard', ()=>`
 
           </div>
 
-          <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:20px">
+          <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+            <button type="button" class="btn btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="resetToCleanProductionSlate()" title="Remove demo data and reset to completely clean school portal">🧹 Reset to Clean Slate</button>
             <button type="button" class="btn btn-ghost" onclick="resetVisualSettingsToDefault()">Reset to Default Values</button>
             <button type="submit" class="btn btn-gold" style="font-weight:700">💾 Save &amp; Apply All School Settings</button>
           </div>
@@ -5590,7 +5680,13 @@ function renderAdminStudentRegistry() {
   });
 
   if (!list.length) {
-    wrap.innerHTML = `<div class="empty">No pupils found matching "${escapeHtml(search)}".</div>`;
+    wrap.innerHTML = search ? 
+      `<div class="empty">No pupils found matching "${escapeHtml(search)}".</div>` :
+      `<div class="empty" style="padding:40px 20px">
+        <div style="font-size:2.6rem;margin-bottom:8px">🧑‍🎓</div>
+        <p><b>No pupils enrolled in the school registry yet.</b></p>
+        <p class="small-muted" style="margin-top:6px">New pupils registered online or enrolled manually via the teacher / admin portal will appear here automatically.</p>
+      </div>`;
     return;
   }
 
@@ -5875,7 +5971,16 @@ function renderAdminAdmissions(){
     return matchesSearch && matchesStatus;
   });
 
-  if(!list.length){ el.innerHTML = `<div class="empty">No applications matching criteria.</div>`; return; }
+  if(!list.length){
+    el.innerHTML = search ? 
+      `<div class="empty">No applications matching criteria.</div>` :
+      `<div class="empty" style="padding:40px 20px">
+        <div style="font-size:2.6rem;margin-bottom:8px">📝</div>
+        <p><b>No online student admission applications submitted yet.</b></p>
+        <p class="small-muted" style="margin-top:6px">When parents submit the online admission form on the website, their applications will appear here for review and acceptance.</p>
+      </div>`;
+    return;
+  }
   el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Ref ID</th><th>Applicant</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Update Status</th></tr></thead>
     <tbody>${list.map(a=>`
       <tr>
@@ -5914,7 +6019,16 @@ function renderAdminStaffApplications(){
   const search = (document.getElementById('adminStaffSearch')?.value || '').toLowerCase();
   let list = staffApplications.filter(a => a.name.toLowerCase().includes(search) || a.cls.toLowerCase().includes(search));
   
-  if(!list.length){ el.innerHTML = `<div class="empty">No teaching applications matching search.</div>`; return; }
+  if(!list.length){
+    el.innerHTML = search ? 
+      `<div class="empty">No teaching applications matching search.</div>` :
+      `<div class="empty" style="padding:40px 20px">
+        <div style="font-size:2.6rem;margin-bottom:8px">💼</div>
+        <p><b>No staff recruitment applications received yet.</b></p>
+        <p class="small-muted" style="margin-top:6px">When educator candidates take the online competency assessment and apply for teaching roles, their test scores and submissions will appear here.</p>
+      </div>`;
+    return;
+  }
   const pillClass = s => s==='Pending Review' ? 'pending' : s==='Shortlisted' ? 'review' : s==='Hired' ? 'accepted' : 'rejected';
   
   el.innerHTML = `<div class="table-wrap"><table><thead><tr><th>Teacher Applicant</th><th>Class Targeted</th><th>Competency Score</th><th>Date</th><th>Status</th><th>Review Action</th></tr></thead>
@@ -6110,35 +6224,35 @@ function initAdminSettings(){
 /* ---------------------------------------------------------------------
    13. PARENT PORTAL & TUITION PAYMENT SIMULATOR
    --------------------------------------------------------------------- */
-const SAMPLE_CHILDREN = [
-  {name:"Faith Adebayo", cls:"Primary 4", id:"MJL/26/0001"},
-  {name:"Precious Adebayo", cls:"JSS 2", id:"MJL/26/0009"},
-];
-let activeChild = 0;
-
-function initParentPortal(){
+function getParentChildren() {
   if (session && session.user && session.user.childId) {
     const cId = session.user.childId;
     const pupil = classRoster.find(p => p.id === cId);
-    if (!SAMPLE_CHILDREN.some(c => c.id === cId)) {
-      SAMPLE_CHILDREN.unshift({
-        name: (pupil && pupil.name) || (session.user.name + "'s Ward"),
-        cls: (pupil && pupil.cls) || "Primary 4",
-        id: cId
-      });
-      activeChild = 0;
-    }
+    if (pupil) return [{ name: pupil.name, cls: pupil.cls, id: pupil.id, photoUrl: pupil.photoUrl }];
+    return [{ name: (session.user.name || "Student") + "'s Ward", cls: "Primary 1", id: cId }];
   }
+  if (classRoster.length > 0) {
+    return classRoster.slice(0, 3).map(p => ({ name: p.name, cls: p.cls, id: p.id, photoUrl: p.photoUrl }));
+  }
+  return [];
+}
+let activeChild = 0;
+
+function initParentPortal(){
+  const children = getParentChildren();
+  if (!children.length) return;
 
   document.querySelectorAll('.child-pill').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       activeChild = Number(btn.dataset.child);
       document.querySelectorAll('.child-pill').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      const currentChild = SAMPLE_CHILDREN[activeChild];
+      const currentChild = children[activeChild] || children[0];
       if (!currentChild) return;
-      document.getElementById('parentChildName').textContent = currentChild.name;
-      document.getElementById('parentChildMeta').textContent = `${currentChild.cls} • ${currentChild.id}`;
+      const nameEl = document.getElementById('parentChildName');
+      const metaEl = document.getElementById('parentChildMeta');
+      if (nameEl) nameEl.textContent = currentChild.name;
+      if (metaEl) metaEl.textContent = `${currentChild.cls} • ${currentChild.id}`;
       const body = document.getElementById('parentResultsBody');
       if(body){
         const results = (currentChild.id && (pupilScoresStore[currentChild.id] || classRoster.some(p => p.id === currentChild.id)))
@@ -6150,7 +6264,7 @@ function initParentPortal(){
             <td style="font-weight:800">${r.total}</td>
             <td>${r.cumulative}</td>
             <td>${r.classAverage}</td>
-            <td><span class="badge ${r.grade==='A'?'live':'gold'}">${r.grade}</span></td>
+            <td><span class="badge ${r.grade==='A'?'live':r.grade==='F'?'demo':'gold'}">${r.grade}</span></td>
             <td><b>${r.position}</b></td>
           </tr>
         `).join('');
@@ -6168,7 +6282,7 @@ function openFeePaymentModal(term, amountStr) {
     onConfirm: () => {
       toast('Processing secure transaction...');
       setTimeout(() => {
-        const fee = SAMPLE_FEES.find(f => f.term.includes('Second Term'));
+        const fee = SAMPLE_FEES.find(f => f.term.includes('First Term'));
         if(fee) {
           fee.paid = fee.due;
           fee.balance = "₦0";
@@ -6184,7 +6298,8 @@ function openFeePaymentModal(term, amountStr) {
 }
 
 function showReceiptModal(term, amountStr) {
-  const child = SAMPLE_CHILDREN[activeChild];
+  const children = getParentChildren();
+  const child = children[activeChild] || { name: 'Student', cls: 'Class' };
   const refCode = `REC-MCGS-${Math.floor(100000 + Math.random() * 900000)}`;
   const dateStr = new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
   
@@ -6199,7 +6314,40 @@ function showReceiptModal(term, amountStr) {
   });
 }
 
-registerView('parent-portal', ()=>`
+registerView('parent-portal', ()=>{
+  const children = getParentChildren();
+  if (children.length === 0) {
+    return `
+      <section class="pad">
+        <div class="wrap" style="max-width:680px">
+          <div class="dash-topbar" style="margin-bottom:24px">
+            <div>
+              <h2>Parent Portal</h2>
+              <p class="small-muted">Real-time academic performance, tuition &amp; teacher feedback for your children.</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" data-go="home">Sign Out</button>
+          </div>
+          <div class="card" style="text-align:center;padding:50px 20px;border:1px solid var(--border)">
+            <div style="font-size:3rem;margin-bottom:12px">👨‍👩‍👧</div>
+            <h3 style="margin-bottom:8px">No Enrolled Child Linked Yet</h3>
+            <p class="small-muted" style="max-width:480px;margin:0 auto 20px">
+              Your parent profile is active, but no student has been registered in the school system yet. When your child is enrolled by the school or linked with their Student ID, their live continuous assessment scores, homework, and tuition balance will appear here.
+            </p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-navy" data-go="home">Return to Homepage</button>
+              <button class="btn btn-gold" data-go="parent-login">Link Child's Student ID</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+  const curr = children[activeChild] || children[0];
+  const currResults = (curr.id && (pupilScoresStore[curr.id] || classRoster.some(p => p.id === curr.id)))
+    ? getPupilResults(curr.id)
+    : getComputedResults(kindForClass(curr.cls));
+
+  return `
   <section class="pad">
     <div class="wrap">
       <div class="dash-topbar">
@@ -6213,32 +6361,33 @@ registerView('parent-portal', ()=>`
         </div>
       </div>
       
+      ${children.length > 1 ? `
       <div class="child-switch">
-        ${SAMPLE_CHILDREN.map((c,i)=>`<button class="child-pill ${i===0?'active':''}" data-child="${i}">Child: ${c.name.split(' ')[0]} (${c.cls})</button>`).join('')}
-      </div>
+        ${children.map((c,i)=>`<button class="child-pill ${i===activeChild?'active':''}" data-child="${i}">Child: ${c.name.split(' ')[0]} (${c.cls})</button>`).join('')}
+      </div>` : ''}
       
       <div class="card" style="margin-bottom:28px">
-        <span id="parentChildName" style="font-family:var(--font-heading);font-weight:700;font-size:1.25rem">${SAMPLE_CHILDREN[0].name}</span>
-        <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${SAMPLE_CHILDREN[0].cls} &bull; ${SAMPLE_CHILDREN[0].id}</p>
+        <span id="parentChildName" style="font-family:var(--font-heading);font-weight:700;font-size:1.25rem">${curr.name}</span>
+        <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${curr.cls} &bull; ${curr.id}</p>
       </div>
 
       <div class="grid-2">
         <div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <h3 style="margin-bottom:0">First Term Score Sheet</h3>
-            <span class="badge live"><span class="dot"></span> Published</span>
+            <h3 style="margin-bottom:0">Term Academic Performance</h3>
+            <span class="badge live"><span class="dot"></span> Live Record</span>
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Subject</th><th>Total /100</th><th>Cumulative</th><th>Class Avg</th><th>Grade</th><th>Position</th></tr></thead>
               <tbody id="parentResultsBody">
-                ${getComputedResults(kindForClass(SAMPLE_CHILDREN[0].cls)).slice(0,5).map(r=>`
+                ${currResults.slice(0,5).map(r=>`
                   <tr>
                     <td style="font-weight:700">${r.subject}</td>
                     <td style="font-weight:800">${r.total}</td>
                     <td>${r.cumulative}</td>
                     <td>${r.classAverage}</td>
-                    <td><span class="badge ${r.grade==='A'?'live':'gold'}">${r.grade}</span></td>
+                    <td><span class="badge ${r.grade==='A'?'live':r.grade==='F'?'demo':'gold'}">${r.grade}</span></td>
                     <td><b>${r.position}</b></td>
                   </tr>
                 `).join('')}
@@ -6257,7 +6406,7 @@ registerView('parent-portal', ()=>`
           
           <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 14px">
             <h3 style="margin:0">Tuition &amp; Fees Statement</h3>
-            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('Second Term 2026/2027', '₦85,000')">💳 Pay Tuition Now</button>
+            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('First Term 2026/2027', '₦85,000')">💳 Pay Tuition Now</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -6279,7 +6428,8 @@ registerView('parent-portal', ()=>`
       </div>
     </div>
   </section>
-`);
+  `;
+});
 
 /* ---------------------------------------------------------------------
    14. PARENTS FORUM WITH LIVE SEARCH & MODERATION
