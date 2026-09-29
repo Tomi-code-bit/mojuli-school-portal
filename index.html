@@ -4384,8 +4384,7 @@ registerView('admission', ()=>`
             <p class="small-muted">Enter your application reference code or applicant name to check admission progress.</p>
           </div>
           <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost btn-sm" onclick="trackSampleApp('MJL-APP-83921')">Demo: Peace Johnson (Accepted)</button>
-            <button class="btn btn-ghost btn-sm" onclick="trackSampleApp('MJL-APP-54219')">Demo: David Nwachukwu (Under Review)</button>
+            <!-- Demo buttons removed for production -->
           </div>
         </div>
         
@@ -4465,15 +4464,20 @@ registerView('admission', ()=>`
                 <input name="prevSchool" placeholder="e.g. Grace Seedlings Nursery">
               </div>
               <div class="field">
+                <label>Passport Photo (Optional but recommended)</label>
+                <input type="file" name="passport" accept="image/*">
+              </div>
+              <div class="field">
                 <label>Class Applying For *</label>
                 <select required name="cls">
                   <option value="">Select Level &amp; Class</option>
                   <optgroup label="Early Years &amp; Primary">
                     ${PRIMARY_CLASSES.map(c=>`<option>${c}</option>`).join('')}
                   </optgroup>
+                  ${settings.secondaryActive ? `
                   <optgroup label="Secondary School">
                     ${SECONDARY_CLASSES.map(c=>`<option>${c}</option>`).join('')}
-                  </optgroup>
+                  </optgroup>` : ''}
                 </select>
               </div>
             </fieldset>
@@ -5391,6 +5395,7 @@ registerView('admin-dashboard', ()=>`
       <button class="tab active" data-tab-ad="admissions">📋 Admissions Pipeline</button>
       <button class="tab" data-tab-ad="staff">👨‍🏫 Staff &amp; Recruitment</button>
       <button class="tab" data-tab-ad="students">👥 Student Registry</button>
+      <button class="tab" data-tab-ad="fees">💰 Fees Management</button>
       <button class="tab" data-tab-ad="results">📑 Academic Results</button>
       <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
       <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
@@ -5454,6 +5459,20 @@ registerView('admin-dashboard', ()=>`
           </div>
         </div>
         <div id="adminStudentTableWrap"></div>
+      </div>
+
+      <div data-panel-ad="fees" class="panel">
+        <div class="table-filter-bar">
+          <div>
+            <h3 style="margin-bottom:4px">Student Fees & Billing</h3>
+            <p class="small-muted">Search for a pupil and set their remaining school fee balance.</p>
+          </div>
+          <div class="search-input-wrap">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input id="adminFeesSearch" placeholder="Search pupil to manage fees..." oninput="filterAdminFees()">
+          </div>
+        </div>
+        <div id="adminFeesTableWrap"></div>
       </div>
 
       <div data-panel-ad="results" class="panel">
@@ -5733,6 +5752,71 @@ function renderAdminStudentRegistry() {
 function filterAdminStudents() {
   renderAdminStudentRegistry();
 }
+
+function renderAdminFees() {
+  const container = document.getElementById('adminFeesTableWrap');
+  if (!container) return;
+  const q = (document.getElementById('adminFeesSearch')?.value || "").toLowerCase();
+  
+  let list = classRoster.filter(p => {
+    return (!q || p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || p.cls.toLowerCase().includes(q));
+  });
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty">No pupils found matching your search.</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pupil ID</th>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Current Balance (₦)</th>
+            <th>Fee Note / Message</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(p => `
+            <tr>
+              <td>${escapeHtml(p.id)}</td>
+              <td><b>${escapeHtml(p.name)}</b></td>
+              <td>${escapeHtml(p.cls)}</td>
+              <td>
+                <input type="number" id="fee_bal_${p.id}" value="${p.feeBalance || 0}" style="width:120px;padding:6px;border:1px solid #ccc;border-radius:4px;">
+              </td>
+              <td>
+                <input type="text" id="fee_msg_${p.id}" value="${escapeHtml(p.feeMessage || '')}" placeholder="e.g. Please pay before mid-term" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;">
+              </td>
+              <td>
+                <button class="btn btn-sm btn-navy" onclick="updatePupilFee('${p.id}')">Save</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function filterAdminFees() {
+  renderAdminFees();
+}
+
+window.updatePupilFee = function(pupilId) {
+  const p = classRoster.find(x => x.id === pupilId);
+  if (!p) return;
+  const balInput = document.getElementById('fee_bal_' + pupilId);
+  const msgInput = document.getElementById('fee_msg_' + pupilId);
+  if (balInput) p.feeBalance = Number(balInput.value) || 0;
+  if (msgInput) p.feeMessage = msgInput.value;
+  saveClassRoster();
+  toast('Fee details updated for ' + p.name);
+};
 
 function renderAdminResultsTable(selectedClass = "Primary 4") {
   const container = document.getElementById('adminResultsContainer');
@@ -6347,6 +6431,10 @@ registerView('parent-portal', ()=>{
     ? getPupilResults(curr.id)
     : getComputedResults(kindForClass(curr.cls));
 
+  const rosterEntry = classRoster.find(p => p.id === curr.id);
+  const feeBalance = rosterEntry ? (rosterEntry.feeBalance || 0) : 0;
+  const feeMessage = rosterEntry && rosterEntry.feeMessage ? rosterEntry.feeMessage : "No pending fee notices.";
+
   return `
   <section class="pad">
     <div class="wrap">
@@ -6366,9 +6454,15 @@ registerView('parent-portal', ()=>{
         ${children.map((c,i)=>`<button class="child-pill ${i===activeChild?'active':''}" data-child="${i}">Child: ${c.name.split(' ')[0]} (${c.cls})</button>`).join('')}
       </div>` : ''}
       
-      <div class="card" style="margin-bottom:28px">
-        <span id="parentChildName" style="font-family:var(--font-heading);font-weight:700;font-size:1.25rem">${curr.name}</span>
-        <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${curr.cls} &bull; ${curr.id}</p>
+      <div class="card" style="margin-bottom:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <div>
+          <span id="parentChildName" style="font-family:var(--font-heading);font-weight:700;font-size:1.25rem">${curr.name}</span>
+          <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${curr.cls} &bull; ${curr.id}</p>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.1rem;font-weight:bold;color:var(--crimson-600)">Fee Balance: ₦${feeBalance.toLocaleString()}</div>
+          <div class="small-muted">${escapeHtml(feeMessage)}</div>
+        </div>
       </div>
 
       <div class="grid-2">
@@ -7038,6 +7132,7 @@ function afterRender(id){
     renderAdminStaffApplications();
     renderAdminAnnouncementList();
     renderAdminStudentRegistry();
+    renderAdminFees();
     renderAdminResultsTable('Primary 4');
     initAdminSettings();
     initAdminSupabaseSettings();
