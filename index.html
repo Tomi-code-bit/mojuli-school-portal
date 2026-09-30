@@ -744,7 +744,7 @@ legend {
   transition: transform var(--transition-fast);
 }
 [data-theme="dark"] accordion-item summary::after { color: var(--gold-400); }
-.accordion-item[open] summary::after { content: "âˆ’"; }
+.accordion-item[open] summary::after { content: "−"; }
 .accordion-item .body {
   padding: 0 20px 18px;
   font-size: 0.88rem;
@@ -1196,7 +1196,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 [data-theme="dark"] .back-link { color: var(--gold-400); }
 
 /* Quick Demo Switcher Floating Dock */
-.quick-switcher-dock {
+.quick-switcher-dock { display: none !important; display: none !important;
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -1214,7 +1214,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   transition: transform var(--transition-smooth);
 }
 @media (max-width: 768px) {
-  .quick-switcher-dock {
+  .quick-switcher-dock { display: none !important; display: none !important;
     bottom: 16px;
     right: 16px;
     left: 16px;
@@ -1874,10 +1874,10 @@ footer.footer .bottom {
         WhatsApp
       </a>
       <button class="icon-btn" onclick="toggleSound()" id="soundToggleBtn" title="Toggle UI Sound Effects" aria-label="Toggle Sound">
-        <span id="soundIcon">ðŸ”‡</span>
+        <span id="soundIcon">🔇</span>
       </button>
       <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
-        ðŸŒ“
+        🌓
       </button>
       <button class="btn btn-gold btn-sm" data-go="parent-login">Parent Portal</button>
       <button class="menu-toggle" id="menuToggleBtn" onclick="toggleMobileNav()" aria-label="Menu">
@@ -1895,14 +1895,25 @@ footer.footer .bottom {
       <button data-go="parent-login">Parent Portal</button>
       <button data-go="forum">Parents Forum</button>
       <button data-go="contact">Contact</button>
-      <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">ðŸ’¬ Chat on WhatsApp (07042664309)</a>
-      <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">ðŸ’¬ Chat on WhatsApp (0803779632)</a>
+      <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (07042664309)</a>
+      <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (0803779632)</a>
     </div>
   </div>
 </header>
 
 <main id="app"></main>
 
+<!-- Quick Role Switcher Floating Dock (Essential for smooth previewing!) -->
+<aside class="quick-switcher-dock" id="demoQuickSwitcher" aria-label="Demo Role Switcher">
+  <span class="dock-title">⚡ Quick Role Switcher:</span>
+  <button class="dock-btn" onclick="quickLogin('home')">🏫 Public Site</button>
+  <button class="dock-btn" onclick="quickLogin('student-primary')">🧒 Primary Student</button>
+  <button class="dock-btn" onclick="quickLogin('student-secondary')">🎓 Secondary Student</button>
+  <button class="dock-btn" onclick="quickLogin('parent')">👨‍👩‍👧 Parent Portal</button>
+  <button class="dock-btn" onclick="quickLogin('teacher')">👩‍🏫 Teacher</button>
+  <button class="dock-btn" onclick="quickLogin('admin')">🛡️ Admin</button>
+  <button class="dock-btn" onclick="toggleWaPopup()" style="background:#25D366;color:#ffffff;font-weight:700">💬 WhatsApp Us</button>
+</aside>
 
 <!-- ================= FOOTER ================= -->
 <footer class="footer">
@@ -1933,11 +1944,11 @@ footer.footer .bottom {
       <h5>Campus &amp; Office</h5>
       <span style="font-size:0.86rem;display:block;padding:4px 0">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</span>
       <div style="margin:6px 0">
-        <a href="tel:07042664309" style="font-size:0.9rem;display:block;color:#fff;font-weight:700">ðŸ“ž 07042664309</a>
-        <a href="tel:0803779632" style="font-size:0.9rem;display:block;color:#fff;font-weight:700;margin-top:2px">ðŸ“ž 0803779632</a>
+        <a href="tel:07042664309" style="font-size:0.9rem;display:block;color:#fff;font-weight:700">📞 07042664309</a>
+        <a href="tel:0803779632" style="font-size:0.9rem;display:block;color:#fff;font-weight:700;margin-top:2px">📞 0803779632</a>
       </div>
       <div style="margin-top:8px">
-        <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;display:inline-flex;align-items:center;gap:6px"><span>ðŸ’¬</span> WhatsApp Direct Message</a>
+        <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;display:inline-flex;align-items:center;gap:6px"><span>💬</span> WhatsApp Direct Message</a>
       </div>
       <span style="font-size:0.86rem;display:block;padding:4px 0">info@mojulichristglorious.edu.ng</span>
       <div style="margin-top:12px">
@@ -1947,7 +1958,7 @@ footer.footer .bottom {
   </div>
   <div class="bottom">
     <span>&copy; 2026 Mojuli Christ Glorious School. All rights reserved.</span>
-    <span>Enhanced Interactive Prototype Â· Seamless School Portal</span>
+    <span>Enhanced Interactive Prototype · Seamless School Portal</span>
   </div>
 </footer>
 
@@ -1962,10 +1973,10 @@ footer.footer .bottom {
 
 <!-- Fullscreen Lightbox -->
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="if(event.target===this) closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close photo">Ã—</button>
-  <button class="lightbox-nav prev" onclick="lightboxNav(-1)" aria-label="Previous photo">â€¹</button>
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close photo">×</button>
+  <button class="lightbox-nav prev" onclick="lightboxNav(-1)" aria-label="Previous photo">‹</button>
   <img id="lightboxImg" src="" alt="School photo">
-  <button class="lightbox-nav next" onclick="lightboxNav(1)" aria-label="Next photo">â€º</button>
+  <button class="lightbox-nav next" onclick="lightboxNav(1)" aria-label="Next photo">›</button>
   <div class="lightbox-info">
     <div id="lightboxCap" style="font-weight:700"></div>
     <div id="lightboxCount" style="color:#94A3B8;font-size:0.8rem;margin-top:4px"></div>
@@ -1974,7 +1985,7 @@ footer.footer .bottom {
 
 <script>
 /* =========================================================================
-   MOJULI CHRIST GLORIOUS SCHOOL â€” ENHANCED INTERACTIVE PORTAL
+   MOJULI CHRIST GLORIOUS SCHOOL — ENHANCED INTERACTIVE PORTAL
    ========================================================================= */
 
 /* ---------------------------------------------------------------------
@@ -2056,7 +2067,7 @@ const Sound = {
 
 function toggleSound() {
   Sound.enabled = !Sound.enabled;
-  document.getElementById('soundIcon').textContent = Sound.enabled ? 'ðŸ”Š' : 'ðŸ”‡';
+  document.getElementById('soundIcon').textContent = Sound.enabled ? '🔊' : '🔇';
   if(Sound.enabled) {
     Sound.playSuccess();
     toast('UI Sound Effects Enabled');
@@ -2075,7 +2086,7 @@ const DEFAULT_PHOTOS = [
   {
     id: "photo_front_gate",
     src: "assets/school_front_gate.jpg",
-    caption: "Mojuli Christ Glorious Nursery & Primary School â€” Main Front Gate & Welcome Mural",
+    caption: "Mojuli Christ Glorious Nursery & Primary School — Main Front Gate & Welcome Mural",
     category: "Campus"
   },
   {
@@ -2340,12 +2351,12 @@ function saveAssignmentsStore(){ DB.set('assignmentsStore', assignmentsStore); }
 const SAMPLE_HOMEWORK = assignmentsStore;
 
 const SAMPLE_TIMETABLE = [
-  {time:"8:00â€“8:40", mon:"Mathematics", tue:"English Language", wed:"Basic Science", thu:"CRS", fri:"Mental Math Quiz"},
-  {time:"8:40â€“9:20", mon:"English Language", tue:"Mathematics", wed:"Social Studies", thu:"Mathematics", fri:"Library Reading"},
-  {time:"9:20â€“10:00", mon:"Basic Science", tue:"CRS", wed:"Mathematics", thu:"English Language", fri:"Creative Arts"},
-  {time:"10:00â€“10:30", mon:"Recess & Snack", tue:"Recess & Snack", wed:"Recess & Snack", thu:"Recess & Snack", fri:"Recess & Snack"},
-  {time:"10:30â€“11:15", mon:"ICT & Computer Studies", tue:"Social Studies", wed:"French / Phonics", thu:"Basic Science", fri:"Assembly Fellowship"},
-  {time:"11:15â€“12:00", mon:"Physical Education", tue:"Music & Rhyme", wed:"Handwriting Drill", thu:"Civic Education", fri:"Clubs & Societies"},
+  {time:"8:00–8:40", mon:"Mathematics", tue:"English Language", wed:"Basic Science", thu:"CRS", fri:"Mental Math Quiz"},
+  {time:"8:40–9:20", mon:"English Language", tue:"Mathematics", wed:"Social Studies", thu:"Mathematics", fri:"Library Reading"},
+  {time:"9:20–10:00", mon:"Basic Science", tue:"CRS", wed:"Mathematics", thu:"English Language", fri:"Creative Arts"},
+  {time:"10:00–10:30", mon:"Recess & Snack", tue:"Recess & Snack", wed:"Recess & Snack", thu:"Recess & Snack", fri:"Recess & Snack"},
+  {time:"10:30–11:15", mon:"ICT & Computer Studies", tue:"Social Studies", wed:"French / Phonics", thu:"Basic Science", fri:"Assembly Fellowship"},
+  {time:"11:15–12:00", mon:"Physical Education", tue:"Music & Rhyme", wed:"Handwriting Drill", thu:"Civic Education", fri:"Clubs & Societies"},
 ];
 
 /* ---------------------------------------------------------------------
@@ -2538,7 +2549,7 @@ const SAMPLE_TEACHER = {name:"Class Teacher", role:"Class Teacher", classes:["Pr
 const SAMPLE_TEACHER_STUDENTS = [];
 
 const SAMPLE_FEES = [
-  {term:"First Term 2026/2027", due:"â‚¦85,000", paid:"â‚¦0", balance:"â‚¦85,000", status:"Current Term"},
+  {term:"First Term 2026/2027", due:"₦85,000", paid:"₦0", balance:"₦85,000", status:"Current Term"},
 ];
 
 const SAMPLE_APPLICATIONS_SEED = [];
@@ -2580,7 +2591,7 @@ const STAFF_QUIZ_BANK = {
     ]},
   ],
   primary: [
-    {q:"Evaluate: (14 Ã— 6) + 16 = ?", correct:2, options:["90","96","100","104"]},
+    {q:"Evaluate: (14 × 6) + 16 = ?", correct:2, options:["90","96","100","104"]},
     {q:"Choose the grammatically sound sentence:", correct:1, options:[
       "Neither of the boys were late.",
       "Neither of the boys was late.",
@@ -2597,10 +2608,10 @@ const STAFF_QUIZ_BANK = {
   secondary: [
     {q:"Solve for x: 3(x - 4) = 2x + 5", correct:2, options:["12","15","17","19"]},
     {q:"Which of the following is a balanced equation for photosynthesis?", correct:0, options:[
-      "6COâ‚‚ + 6Hâ‚‚O â†’ Câ‚†Hâ‚â‚‚Oâ‚† + 6Oâ‚‚",
-      "COâ‚‚ + Hâ‚‚O â†’ Câ‚†Hâ‚â‚‚Oâ‚† + Oâ‚‚",
-      "6CO + 6Hâ‚‚O â†’ Câ‚†Hâ‚â‚‚Oâ‚† + 6O",
-      "2COâ‚‚ + 4Hâ‚‚O â†’ Câ‚†Hâ‚â‚‚Oâ‚† + 2Oâ‚‚"
+      "6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂",
+      "CO₂ + H₂O → C₆H₁₂O₆ + O₂",
+      "6CO + 6H₂O → C₆H₁₂O₆ + 6O",
+      "2CO₂ + 4H₂O → C₆H₁₂O₆ + 2O₂"
     ]},
     {q:"What best balances preparation for WASSCE/NECO with genuine student understanding?", correct:2, options:[
       "Cramming past questions without grasping underlying principles",
@@ -2645,9 +2656,9 @@ const DEFAULT_SETTINGS = {
   address: "Lane 3, Marina Street, Ilupeju Avenue, Ado-Ekiti, Ekiti State",
   session: "2026/2027",
   term: "First Term",
-  feeNursery: "â‚¦75,000",
-  feePrimary: "â‚¦85,000",
-  feeSecondary: "â‚¦95,000",
+  feeNursery: "₦75,000",
+  feePrimary: "₦85,000",
+  feeSecondary: "₦95,000",
   nextTerm: "Second Term commences Monday, 11 January 2027. Boarders resume Sunday 10 January.",
   heroHeadline: "A Christian foundation for a lifetime of learning",
   heroSubtitle: "Mojuli Christ Glorious School nurtures children from Nursery through Primary and Secondary school with rigorous academics, godly character, disciplined mentorship, and an inspiring family atmosphere in Ado-Ekiti.",
@@ -2674,7 +2685,7 @@ if(gallery && gallery.length < 6) {
   const DEMO_ASG_IDS = ['asg_1', 'asg_2', 'asg_3', 'asg_4'];
   const DEMO_STAFF_NAMES = ['Mrs. Bukola Fashola', 'Mr. Chukwudi Ani'];
 
-  if (!localStorage.getItem('mjl_clean_production_slate_v4')) {
+  if (!localStorage.getItem('mjl_clean_production_slate_v2')) {
     // 1. Purge demo pupils
     classRoster = (classRoster || []).filter(p => !DEMO_NAMES.includes(p.name));
     saveClassRoster();
@@ -2682,9 +2693,13 @@ if(gallery && gallery.length < 6) {
 
     // 2. Purge demo user accounts, keep admin & staff
     userAccounts = (userAccounts || []).filter(u => 
-      u.role !== 'admin' && ( (u.role === 'teacher' && u.identifier === 'teacher@mojulichristglorious.edu.ng') || (!DEMO_NAMES.some(n => u.name && u.name.includes(n)) && !['acc_pry_001', 'acc_sec_009', 'acc_parent_01'].includes(u.id)) )
+      u.role === 'admin' || 
+      (u.role === 'teacher' && u.identifier === 'teacher@mojulichristglorious.edu.ng') ||
+      (!DEMO_NAMES.some(n => u.name && u.name.includes(n)) && !['acc_pry_001', 'acc_sec_009', 'acc_parent_01'].includes(u.id))
     );
-    userAccounts.push(DEFAULT_USER_ACCOUNTS[0]);
+    userAccounts = userAccounts.filter(u => u.role !== 'admin'); if (true) {
+      userAccounts.push(DEFAULT_USER_ACCOUNTS[0]);
+    }
     if (!userAccounts.some(u => u.role === 'teacher')) {
       userAccounts.push(DEFAULT_USER_ACCOUNTS[1]);
     }
@@ -2715,13 +2730,13 @@ if(gallery && gallery.length < 6) {
     savePupilCommentsStore();
     saveTermResultsHistory();
 
-    localStorage.setItem('mjl_clean_production_slate_v4', 'true');
+    localStorage.setItem('mjl_clean_production_slate_v2', 'true');
   }
 })();
 
 function resetToCleanProductionSlate() {
   showModal({
-    title: "ðŸ§¹ Reset to Clean Production Slate?",
+    title: "🧹 Reset to Clean Production Slate?",
     message: "This will remove all demo/dummy pupils, fake scores, test assignments, and sample applications, leaving the portal completely clean so you can enter 100% real school information. Your admin settings and passcodes will be kept. Proceed?",
     confirmText: "Yes, Clean Everything",
     cancelText: "Cancel",
@@ -2750,13 +2765,13 @@ function resetToCleanProductionSlate() {
       termResultsHistory = {};
       saveTermResultsHistory();
       
-      userAccounts = userAccounts.filter(u => u.role !== 'admin' && u.role === 'teacher');
+      userAccounts = userAccounts.filter(u => u.role === 'admin' || u.role === 'teacher');
       saveUserAccounts();
       
       activePupilId = "";
       
       Sound.playSuccess();
-      toast('âœ… Portal reset to clean production state! All fake info removed.');
+      toast('✅ Portal reset to clean production state! All fake info removed.');
       
       // Refresh active admin views if open
       if (typeof renderAdminStudentRegistry === 'function') renderAdminStudentRegistry();
@@ -2780,11 +2795,11 @@ function applyAllSchoolSettings() {
   document.querySelectorAll('.school-brand-title').forEach(el => el.textContent = settings.schoolName);
   document.querySelectorAll('.school-brand-motto').forEach(el => el.textContent = `"${(settings.motto || '').toUpperCase()}"`);
   document.querySelectorAll('.school-brand-phone1').forEach(el => {
-    el.textContent = `ðŸ“ž ${settings.phone1}`;
+    el.textContent = `📞 ${settings.phone1}`;
     el.href = `tel:${settings.phone1}`;
   });
   document.querySelectorAll('.school-brand-phone2').forEach(el => {
-    el.textContent = `ðŸ“ž ${settings.phone2}`;
+    el.textContent = `📞 ${settings.phone2}`;
     el.href = `tel:${settings.phone2}`;
   });
   document.querySelectorAll('.school-brand-email').forEach(el => el.textContent = settings.email);
@@ -2960,7 +2975,7 @@ function quickLogin(role) {
   } else if(role === 'admin') {
     if (settings.productionMode) {
       showModal({
-        title: "ðŸ”’ Admin Security Verification",
+        title: "🔒 Admin Security Verification",
         message: "Management Console is restricted in Production Security Mode. Please enter the Admin Passcode to proceed.",
         inputPlaceholder: "Enter admin passcode (e.g. admin2026)",
         confirmText: "Unlock Console",
@@ -2971,7 +2986,7 @@ function quickLogin(role) {
             go('admin-dashboard');
             toast('Admin verified successfully');
           } else {
-            toast('âŒ Invalid Passcode. Access Denied.');
+            toast('❌ Invalid Passcode. Access Denied.');
           }
         }
       });
@@ -3025,7 +3040,7 @@ function buildReportCardHTML(student, kind, pupilId){
   const schoolName = (settings.schoolName || 'MOJULI CHRIST GLORIOUS SCHOOL').toUpperCase();
   const schoolMotto = (settings.motto || 'JESUS IS OUR GREAT TEACHER').toUpperCase();
   const schoolAddr = settings.address || 'Lane 3, Marina Street, Ilupeju Avenue, Ado-Ekiti, Ekiti State';
-  const phoneLine = `${settings.phone1 || '07042664309'} Â· ${settings.phone2 || '0803779632'} Â· ${settings.email || 'info@mojulichristglorious.edu.ng'}`;
+  const phoneLine = `${settings.phone1 || '07042664309'} · ${settings.phone2 || '0803779632'} · ${settings.email || 'info@mojulichristglorious.edu.ng'}`;
   const rosterEntry = classRoster.find(p => p.name === student.name || p.id === student.id);
   const pupilGender = student.gender || (rosterEntry && rosterEntry.gender) || 'Pupil';
   const pupilPhoto = student.photoUrl || (rosterEntry && rosterEntry.photoUrl);
@@ -3038,7 +3053,7 @@ function buildReportCardHTML(student, kind, pupilId){
           <h1>${escapeHtml(schoolName)}</h1>
           <div class="rc-motto">"${escapeHtml(schoolMotto)}"</div>
           <div class="rc-addr">${escapeHtml(schoolAddr)}<br>Hotlines: ${escapeHtml(phoneLine)}</div>
-          <div class="rc-report-title">Term Performance Evaluation Report â€” ${student.session || settings.session || '2026/2027'}</div>
+          <div class="rc-report-title">Term Performance Evaluation Report — ${student.session || settings.session || '2026/2027'}</div>
           <div>Student ID: <span class="rc-sid">${student.id}</span></div>
         </div>
         <div class="rc-photo" style="overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center">
@@ -3069,7 +3084,7 @@ function buildReportCardHTML(student, kind, pupilId){
         </thead>
         <tbody>${rows}</tbody>
       </table>
-      <div class="rc-hints"><b>Grading Benchmark:</b> A = 75â€“100% (Distinction) &nbsp;|&nbsp; B = 60â€“74% (Very Good) &nbsp;|&nbsp; C = 50â€“59% (Credit) &nbsp;|&nbsp; D = 40â€“49% (Pass) &nbsp;|&nbsp; F = 0â€“39% (Fail)</div>
+      <div class="rc-hints"><b>Grading Benchmark:</b> A = 75–100% (Distinction) &nbsp;|&nbsp; B = 60–74% (Very Good) &nbsp;|&nbsp; C = 50–59% (Credit) &nbsp;|&nbsp; D = 40–49% (Pass) &nbsp;|&nbsp; F = 0–39% (Fail)</div>
 
       <div class="rc-section-title">Affective &amp; Psychomotor Development</div>
       <table class="rc-affective">
@@ -3142,7 +3157,7 @@ function masterClassBroadsheetHTML(kind) {
   if (ranked.length === 0) {
     return `
       <div class="card" style="margin-bottom:20px;text-align:center;padding:40px 20px">
-        <div style="font-size:2.5rem;margin-bottom:8px">ðŸ“Š</div>
+        <div style="font-size:2.5rem;margin-bottom:8px">📊</div>
         <h3>No Enrolled Pupils in Broadsheet</h3>
         <p class="small-muted">Enroll pupils into this class level to view the master broadsheet performance analysis.</p>
       </div>
@@ -3156,7 +3171,7 @@ function masterClassBroadsheetHTML(kind) {
           <h3 style="margin-bottom:2px">Master Class Broadsheet</h3>
           <p class="small-muted">Full academic performance summary &amp; standings across all ${ranked.length} enrolled pupils.</p>
         </div>
-        <button class="btn btn-navy btn-sm" onclick="window.print()">ðŸ–¨ Print Class Broadsheet</button>
+        <button class="btn btn-navy btn-sm" onclick="window.print()">🖨 Print Class Broadsheet</button>
       </div>
 
       <div class="table-wrap">
@@ -3186,8 +3201,8 @@ function masterClassBroadsheetHTML(kind) {
                 <td style="font-weight:800;font-size:1.02rem;color:${p.average>=70?'var(--green-700)':'var(--text-main)'}">${p.average}%</td>
                 <td><span class="badge ${p.average>=75?'live':p.average>=60?'gold':'demo'}">${overallRemarkFor(p.average)}</span></td>
                 <td style="white-space:nowrap">
-                  <button class="btn btn-sm btn-ghost" onclick="switchTeacherPupil('${p.id}','${kind}')">ðŸ“ Grade Pupil</button>
-                  <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}','${kind}')">ðŸ–¨ Report Card</button>
+                  <button class="btn btn-sm btn-ghost" onclick="switchTeacherPupil('${p.id}','${kind}')">📝 Grade Pupil</button>
+                  <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}','${kind}')">🖨 Report Card</button>
                 </td>
               </tr>
             `).join('')}
@@ -3205,18 +3220,18 @@ function teacherResultsPanelHTML(kind){
     return `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
         <div>
-          <h2 style="margin-bottom:4px">Enter Results &amp; Continuous Assessment â€” ${clsLabel}</h2>
+          <h2 style="margin-bottom:4px">Enter Results &amp; Continuous Assessment — ${clsLabel}</h2>
           <p class="small-muted">Continuous Assessment (CA 1, 2, 3) + Examination scores with live calculations.</p>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('${kind}')">âž• Add New Pupil to Class</button>
+        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('${kind}')">➕ Add New Pupil to Class</button>
       </div>
       <div class="card" style="text-align:center;padding:48px 20px;border:1px solid var(--border)">
-        <div style="font-size:3rem;margin-bottom:12px">ðŸ§‘â€ðŸŽ“</div>
+        <div style="font-size:3rem;margin-bottom:12px">🧑‍🎓</div>
         <h3 style="margin-bottom:8px">No Pupils Enrolled in Roster</h3>
         <p class="small-muted" style="max-width:500px;margin:0 auto 20px">
           The class roster is currently empty. Click the button below or register pupils in the Admin Console to begin recording continuous assessment and exam grades.
         </p>
-        <button class="btn btn-navy" onclick="showPupilEnrollmentModal('${kind}')">âž• Enroll First Pupil</button>
+        <button class="btn btn-navy" onclick="showPupilEnrollmentModal('${kind}')">➕ Enroll First Pupil</button>
       </div>
     `;
   }
@@ -3231,13 +3246,13 @@ function teacherResultsPanelHTML(kind){
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
       <div>
-        <h2 style="margin-bottom:4px">Enter Results &amp; Continuous Assessment â€” ${clsLabel}</h2>
+        <h2 style="margin-bottom:4px">Enter Results &amp; Continuous Assessment — ${clsLabel}</h2>
         <p class="small-muted">Continuous Assessment (CA 1, 2, 3) + Examination scores with live calculations.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm ${activeTeacherView==='pupil'?'btn-navy':'btn-ghost'}" onclick="setTeacherResultsView('pupil','${kind}')">ðŸ§‘â€ðŸŽ“ Per-Pupil Gradebook</button>
-        <button class="btn btn-sm ${activeTeacherView==='broadsheet'?'btn-navy':'btn-ghost'}" onclick="setTeacherResultsView('broadsheet','${kind}')">ðŸ“Š Class Broadsheet (${classRoster.length} Pupils)</button>
-        <button class="btn btn-gold btn-sm" onclick="printReportCardForPupil('${pupil.id}','${kind}')">ðŸ–¨ Print ${pupil.name}'s Report</button>
+        <button class="btn btn-sm ${activeTeacherView==='pupil'?'btn-navy':'btn-ghost'}" onclick="setTeacherResultsView('pupil','${kind}')">🧑‍🎓 Per-Pupil Gradebook</button>
+        <button class="btn btn-sm ${activeTeacherView==='broadsheet'?'btn-navy':'btn-ghost'}" onclick="setTeacherResultsView('broadsheet','${kind}')">📊 Class Broadsheet (${classRoster.length} Pupils)</button>
+        <button class="btn btn-gold btn-sm" onclick="printReportCardForPupil('${pupil.id}','${kind}')">🖨 Print ${pupil.name}'s Report</button>
       </div>
     </div>
 
@@ -3252,7 +3267,7 @@ function teacherResultsPanelHTML(kind){
             `).join('')}
           </select>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('${kind}')">ï¼‹ Add New Pupil to Class</button>
+        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('${kind}')">＋ Add New Pupil to Class</button>
       </div>
       <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">
         ${classRoster.map(p => {
@@ -3262,7 +3277,7 @@ function teacherResultsPanelHTML(kind){
           const isAct = p.id === pupil.id;
           return `
             <button class="btn btn-sm ${isAct ? 'btn-navy' : 'btn-ghost'}" style="white-space:nowrap;font-size:0.82rem;padding:5px 12px;" onclick="switchTeacherPupil('${p.id}', '${kind}')">
-              ${isAct ? 'â˜… ' : ''}${p.name} <span style="opacity:0.75;font-size:0.74rem;margin-left:4px">(${pPct}%)</span>
+              ${isAct ? '★ ' : ''}${p.name} <span style="opacity:0.75;font-size:0.74rem;margin-left:4px">(${pPct}%)</span>
             </button>
           `;
         }).join('')}
@@ -3278,7 +3293,7 @@ function teacherResultsPanelHTML(kind){
           <div class="small-muted" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:4px">
             <span><b>Reg ID:</b> <span class="badge gold" style="font-size:0.75rem">${pupil.id}</span></span>
             <span><b>Class:</b> ${pupil.cls || 'Primary 4'}</span>
-            <span><b>Gender:</b> <span class="badge ${pupil.gender==='Female'?'demo':'live'}" style="font-size:0.75rem">${pupil.gender==='Female'?'ðŸ‘§ Female':'ðŸ‘¦ Male'}</span></span>
+            <span><b>Gender:</b> <span class="badge ${pupil.gender==='Female'?'demo':'live'}" style="font-size:0.75rem">${pupil.gender==='Female'?'👧 Female':'👦 Male'}</span></span>
             ${pupil.parent ? `<span><b>Parent:</b> ${escapeHtml(pupil.parent)} (${escapeHtml(pupil.phone||'')})</span>` : ''}
           </div>
         </div>
@@ -3297,7 +3312,7 @@ function teacherResultsPanelHTML(kind){
 
       <!-- Horizontal Scrollable Advice Banner -->
       <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:0.88rem;color:#92400E">
-        <span style="font-size:1.3rem">â†”ï¸</span>
+        <span style="font-size:1.3rem">↔️</span>
         <div><b>Horizontal Table Scroll Enabled:</b> If your screen isn't wide enough, scroll horizontally on the table below to access all 15 columns (CA 1-3, Exam, Prev B/F, Cumulative, Class Avg, Grade, Position, Remarks, Actions).</div>
       </div>
 
@@ -3340,12 +3355,12 @@ function teacherResultsPanelHTML(kind){
                 <td><span class="badge ${r.grade==='A'?'live':r.grade==='F'?'demo':'gold'}">${r.grade}</span></td>
                 <td><input style="width:62px;text-align:center" value="${r.position}" onchange="updatePupilScore('${pupil.id}',${i},'position',this.value,'${kind}')"></td>
                 <td><input style="width:160px" value="${escapeHtml(r.remark)}" onchange="updatePupilScore('${pupil.id}',${i},'remark',this.value,'${kind}')"></td>
-                <td><button class="btn btn-ghost btn-sm" title="Remove Subject" onclick="promptRemovePupilSubject('${pupil.id}',${i},'${kind}')">âœ•</button></td>
+                <td><button class="btn btn-ghost btn-sm" title="Remove Subject" onclick="promptRemovePupilSubject('${pupil.id}',${i},'${kind}')">✕</button></td>
               </tr>
             `).join('')}
             <tr>
               <td colspan="15" style="padding:14px">
-                <button class="btn btn-gold btn-sm" onclick="promptAddPupilSubject('${pupil.id}','${kind}')">ï¼‹ Add Another Subject for ${pupil.name}</button>
+                <button class="btn btn-gold btn-sm" onclick="promptAddPupilSubject('${pupil.id}','${kind}')">＋ Add Another Subject for ${pupil.name}</button>
               </td>
             </tr>
           </tbody>
@@ -3483,10 +3498,10 @@ function showPupilEnrollmentModal(kind) {
   card.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:10px">
       <div>
-        <h3 style="margin:0;font-size:1.18rem;color:var(--text-main)">âž• Enroll / Add New Pupil to Class</h3>
+        <h3 style="margin:0;font-size:1.18rem;color:var(--text-main)">➕ Enroll / Add New Pupil to Class</h3>
         <p class="small-muted" style="margin:2px 0 0">Classroom Registration (Walk-In, Transfer, or Offline Admission)</p>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">âœ•</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
     </div>
 
     <form id="pupilEnrollModalForm" onsubmit="event.preventDefault();submitPupilEnrollModal('${kind}');">
@@ -3500,11 +3515,11 @@ function showPupilEnrollmentModal(kind) {
         <label>Pupil Passport / Profile Photograph (Optional)</label>
         <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
           <div id="modalPupilPhotoPreview" style="width:62px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center;font-size:1.6rem">
-            ðŸ§’
+            🧒
           </div>
           <div>
             <label class="btn btn-ghost btn-sm" style="display:inline-block;cursor:pointer">
-              ðŸ“· Choose Passport Photo
+              📷 Choose Passport Photo
               <input type="file" accept="image/*" id="modal_pupilPhoto" style="display:none" onchange="previewPupilModalPhoto(this)">
             </label>
             <p class="hint" style="margin-top:4px">Appears on pupil profile and official printed report card.</p>
@@ -3568,7 +3583,7 @@ function showPupilEnrollmentModal(kind) {
 
       <div class="modal-actions" style="margin-top:20px">
         <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-gold btn-sm" style="font-weight:700">ðŸ’¾ Enroll &amp; Register Pupil</button>
+        <button type="submit" class="btn btn-gold btn-sm" style="font-weight:700">💾 Enroll &amp; Register Pupil</button>
       </div>
     </form>
   `;
@@ -3639,7 +3654,7 @@ function submitPupilEnrollModal(kind) {
   closeModal();
   window._tempModalPhotoUrl = null;
   Sound.playSuccess();
-  toast(`ðŸŽ‰ Successfully enrolled ${name}! Default Password: ${id}`);
+  toast(`🎉 Successfully enrolled ${name}! Default Password: ${id}`);
 
   // Refresh active views
   renderTeacherResultsPanel(kind);
@@ -3704,9 +3719,9 @@ function renderAssignedClassPanel() {
         <p class="small-muted">Class Teacher: ${SAMPLE_TEACHER.name} &bull; Academic Session: ${settings.session || '2026/2027'} (${settings.term || 'First Term'})</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('primary')">âž• Enroll New Pupil</button>
-        <button class="btn btn-navy btn-sm" onclick="document.querySelector('[data-tab-td=\\'results\\']')?.click()">ðŸ“ Open Gradebook</button>
-        <button class="btn btn-ghost btn-sm" onclick="printClassRoster()">ðŸ–¨ Print Class Roster</button>
+        <button class="btn btn-gold btn-sm" onclick="showPupilEnrollmentModal('primary')">➕ Enroll New Pupil</button>
+        <button class="btn btn-navy btn-sm" onclick="document.querySelector('[data-tab-td=\\'results\\']')?.click()">📝 Open Gradebook</button>
+        <button class="btn btn-ghost btn-sm" onclick="printClassRoster()">🖨 Print Class Roster</button>
       </div>
     </div>
 
@@ -3717,11 +3732,11 @@ function renderAssignedClassPanel() {
         <span>Total Enrolled</span>
       </div>
       <div class="card">
-        <b style="color:var(--navy-600)">ðŸ‘¦ ${boysCount} Boys</b>
+        <b style="color:var(--navy-600)">👦 ${boysCount} Boys</b>
         <span>Male Pupils</span>
       </div>
       <div class="card">
-        <b style="color:var(--gold-600)">ðŸ‘§ ${girlsCount} Girls</b>
+        <b style="color:var(--gold-600)">👧 ${girlsCount} Girls</b>
         <span>Female Pupils</span>
       </div>
       <div class="card">
@@ -3759,7 +3774,7 @@ function renderAssignedClassPanel() {
             ${classRoster.length === 0 ? `
               <tr>
                 <td colspan="9" style="text-align:center;padding:36px;color:var(--text-muted)">
-                  <div style="font-size:2.2rem;margin-bottom:8px">ðŸ“‹</div>
+                  <div style="font-size:2.2rem;margin-bottom:8px">📋</div>
                   <b>No pupils enrolled in the class register yet.</b><br>
                   <span class="small-muted">Use the manual enrollment form below to register your first pupil.</span>
                 </td>
@@ -3773,25 +3788,25 @@ function renderAssignedClassPanel() {
                   </div>
                 </td>
                 <td style="font-weight:700">
-                  <span style="margin-right:6px">${p.gender === 'Female' ? 'ðŸ‘§' : 'ðŸ‘¦'}</span>
+                  <span style="margin-right:6px">${p.gender === 'Female' ? '👧' : '👦'}</span>
                   ${p.name}
                 </td>
                 <td><span class="badge gold">${p.id}</span></td>
                 <td>
                   <span class="badge ${p.gender === 'Female' ? 'demo' : 'live'}" style="font-size:0.75rem">
-                    ${p.gender === 'Female' ? 'ðŸ‘§ Female' : 'ðŸ‘¦ Male'}
+                    ${p.gender === 'Female' ? '👧 Female' : '👦 Male'}
                   </span>
                 </td>
                 <td>
                   <span style="font-weight:600">${escapeHtml(p.parent || 'Guardian')}</span><br>
-                  <span class="small-muted">ðŸ“ž ${escapeHtml(p.phone || '080...')}</span>
+                  <span class="small-muted">📞 ${escapeHtml(p.phone || '080...')}</span>
                 </td>
                 <td><span class="small-muted">${escapeHtml(p.admissionType || 'Direct / Walk-In Admission')}</span></td>
                 <td><span class="pill accepted">Enrolled</span></td>
                 <td style="white-space:nowrap">
-                  <button class="btn btn-sm btn-ghost" title="Enter Scores" onclick="switchTeacherPupil('${p.id}', 'primary'); document.querySelector('[data-tab-td=\\'results\\']')?.click();">ðŸ“ Grade</button>
-                  <button class="btn btn-sm btn-navy" title="Print Report Card" onclick="printReportCardForPupil('${p.id}', 'primary')">ðŸ–¨ Report</button>
-                  <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" title="Remove Pupil" onclick="promptRemovePupilFromRoster('${p.id}')">âœ•</button>
+                  <button class="btn btn-sm btn-ghost" title="Enter Scores" onclick="switchTeacherPupil('${p.id}', 'primary'); document.querySelector('[data-tab-td=\\'results\\']')?.click();">📝 Grade</button>
+                  <button class="btn btn-sm btn-navy" title="Print Report Card" onclick="printReportCardForPupil('${p.id}', 'primary')">🖨 Report</button>
+                  <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" title="Remove Pupil" onclick="promptRemovePupilFromRoster('${p.id}')">✕</button>
                 </td>
               </tr>
             `).join('')}
@@ -3804,7 +3819,7 @@ function renderAssignedClassPanel() {
     <div class="card" id="manualEnrollmentSection" style="background:var(--surface);border:1px solid var(--border)">
       <div style="border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.4rem">âž•</span>
+          <span style="font-size:1.4rem">➕</span>
           <div>
             <h3 style="margin:0;font-size:1.15rem;color:var(--text-main)">Manual Pupil Enrollment (Walk-in &amp; Offline Admission)</h3>
             <p class="small-muted" style="margin:2px 0 0">Not only pupils who enrolled online are admitted! Register offline walk-ins, transfers, and new arrivals directly into Primary 4. Automatic ID &amp; password generated.</p>
@@ -3825,11 +3840,11 @@ function renderAssignedClassPanel() {
             <label>Pupil Passport / Profile Photograph (Optional)</label>
             <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
               <div id="inlinePupilPhotoPreview" style="width:58px;height:68px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center;font-size:1.5rem">
-                ðŸ§’
+                🧒
               </div>
               <div>
                 <label class="btn btn-ghost btn-sm" style="display:inline-block;cursor:pointer">
-                  ðŸ“· Upload Passport
+                  📷 Upload Passport
                   <input type="file" accept="image/*" id="inline_pupilPhoto" style="display:none" onchange="previewPupilInlinePhoto(this)">
                 </label>
                 <p class="hint" style="margin-top:2px">Saved to student profile and report card.</p>
@@ -3885,7 +3900,7 @@ function renderAssignedClassPanel() {
 
         <div style="display:flex;justify-content:flex-end;gap:12px;border-top:1px solid var(--border);padding-top:14px">
           <button type="reset" class="btn btn-ghost">Reset Fields</button>
-          <button type="submit" class="btn btn-gold" style="font-weight:700">ðŸ’¾ Enroll &amp; Add Pupil to Class Register</button>
+          <button type="submit" class="btn btn-gold" style="font-weight:700">💾 Enroll &amp; Add Pupil to Class Register</button>
         </div>
       </form>
     </div>
@@ -3952,7 +3967,7 @@ function submitInlinePupilEnrollment() {
 
   window._tempInlinePhotoUrl = null;
   Sound.playSuccess();
-  toast(`ðŸŽ‰ Successfully enrolled ${name} (${gender}) into Primary 4! Default Password: ${id}`);
+  toast(`🎉 Successfully enrolled ${name} (${gender}) into Primary 4! Default Password: ${id}`);
 
   // Refresh
   renderAssignedClassPanel();
@@ -3992,10 +4007,10 @@ function renderTeacherAttendancePanel() {
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
       <div>
-        <h2 style="margin-bottom:4px">Mark Attendance â€” Primary 4</h2>
+        <h2 style="margin-bottom:4px">Mark Attendance — Primary 4</h2>
         <p class="small-muted">Daily Roll Call Register for all ${classRoster.length} enrolled pupils.</p>
       </div>
-      <button class="btn btn-navy btn-sm" onclick="toast('Attendance register saved successfully for today')">ðŸ’¾ Save Attendance Register</button>
+      <button class="btn btn-navy btn-sm" onclick="toast('Attendance register saved successfully for today')">💾 Save Attendance Register</button>
     </div>
 
     <div class="table-wrap">
@@ -4016,7 +4031,7 @@ function renderTeacherAttendancePanel() {
             <tr>
               <td>${idx + 1}.</td>
               <td style="font-weight:700">
-                <span style="margin-right:6px">${p.gender === 'Female' ? 'ðŸ‘§' : 'ðŸ‘¦'}</span>
+                <span style="margin-right:6px">${p.gender === 'Female' ? '👧' : '👦'}</span>
                 ${p.name}
               </td>
               <td><span class="badge gold">${p.id}</span></td>
@@ -4068,17 +4083,17 @@ registerView('home', ()=>{
         </div>
         <h1 class="mt24">A Christian foundation for a lifetime of learning</h1>
         <div class="motto-line">
-          <span>âœ</span> "Jesus is our great teacher"
+          <span>✝</span> "Jesus is our great teacher"
         </div>
         <p class="lead">
           Mojuli Christ Glorious School nurtures children from Nursery through Primary ${secOn ? 'and Secondary school' : ''} with rigorous academics, godly character, disciplined mentorship, and an inspiring family atmosphere in Ado-Ekiti.
         </p>
         <div class="hero-ctas">
           <button class="btn btn-gold btn-lg" data-go="admission">
-            <span>ðŸ“</span> Apply for Admission
+            <span>📝</span> Apply for Admission
           </button>
           <button class="btn btn-outline btn-lg" data-go="student-login">
-            <span>ðŸŽ“</span> Student Portal
+            <span>🎓</span> Student Portal
           </button>
         </div>
         
@@ -4135,7 +4150,7 @@ registerView('home', ()=>{
         <div class="card level-card nursery">
           <span class="tag">EARLY YEARS FOUNDATION</span>
           <h3>Nursery &amp; Kindergarten</h3>
-          <p>A joyful, safe, and warm introduction to school life â€” developing phonemic literacy, early mathematics, and social interaction.</p>
+          <p>A joyful, safe, and warm introduction to school life — developing phonemic literacy, early mathematics, and social interaction.</p>
           <ul>
             <li>KG 1, KG 2, KG 3</li>
             <li>Phonics, rhymes &amp; interactive sensory play</li>
@@ -4157,7 +4172,7 @@ registerView('home', ()=>{
           <h3>Secondary School ${secOn ? '<span class="badge live" style="margin-left:6px;vertical-align:middle">Active</span>' : '<span class="badge" style="margin-left:6px;vertical-align:middle">Opening Soon</span>'}</h3>
           <p>Equipping young adults for national &amp; international examinations with advanced laboratory work and ethical leadership.</p>
           <ul>
-            <li>JSS 1â€“3, SS 1â€“3</li>
+            <li>JSS 1–3, SS 1–3</li>
             <li>Science, Arts &amp; Commercial Specializations</li>
             <li>JSCE, WASSCE &amp; Career Guidance</li>
           </ul>
@@ -4180,10 +4195,10 @@ registerView('home', ()=>{
           </p>
           <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:24px">
             <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-gold btn-lg" style="box-shadow:0 6px 20px rgba(0,0,0,0.25);font-weight:800;color:var(--navy-950)">
-              <span>ðŸ’¬</span> Message 07042664309
+              <span>💬</span> Message 07042664309
             </a>
             <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-outline btn-lg" style="border-color:#FFFFFF;color:#FFFFFF;background:rgba(255,255,255,0.12);font-weight:800">
-              <span>ðŸ’¬</span> Message 0803779632
+              <span>💬</span> Message 0803779632
             </a>
           </div>
         </div>
@@ -4198,14 +4213,14 @@ registerView('home', ()=>{
           </div>
           <div style="display:flex;flex-direction:column;gap:12px">
             <a href="tel:07042664309" style="display:flex;align-items:center;gap:14px;color:#FFFFFF;padding:14px;background:rgba(0,0,0,0.2);border-radius:var(--radius-md);transition:transform 0.2s">
-              <span style="font-size:1.6rem">ðŸ“±</span>
+              <span style="font-size:1.6rem">📱</span>
               <div>
                 <b style="font-size:1.1rem;display:block">07042664309</b>
                 <span style="font-size:0.8rem;opacity:0.85">Hotline 1 &bull; Tap to Call or Chat</span>
               </div>
             </a>
             <a href="tel:0803779632" style="display:flex;align-items:center;gap:14px;color:#FFFFFF;padding:14px;background:rgba(0,0,0,0.2);border-radius:var(--radius-md);transition:transform 0.2s">
-              <span style="font-size:1.6rem">ðŸ“ž</span>
+              <span style="font-size:1.6rem">📞</span>
               <div>
                 <b style="font-size:1.1rem;display:block">0803779632</b>
                 <span style="font-size:0.8rem;opacity:0.85">Hotline 2 &bull; Tap to Call or Chat</span>
@@ -4227,7 +4242,7 @@ registerView('home', ()=>{
       </div>
       <div class="gallery-grid" id="galleryGridHome"></div>
       <div style="text-align:center;margin-top:36px">
-        <button class="btn btn-navy" data-go="gallery">Browse Complete Gallery â†’</button>
+        <button class="btn btn-navy" data-go="gallery">Browse Complete Gallery →</button>
       </div>
     </div>
   </section>
@@ -4317,17 +4332,17 @@ registerView('about', ()=>{
 
       <div class="grid-3">
         <div class="card">
-          <div style="font-size:2rem;margin-bottom:10px">ðŸŽ¯</div>
+          <div style="font-size:2rem;margin-bottom:10px">🎯</div>
           <h3>Our Mission</h3>
           <p class="mt24" style="margin-top:8px">To deliver high-impact, Christ-centred education that equips pupils with academic excellence, creative competence, and godly character for world leadership.</p>
         </div>
         <div class="card">
-          <div style="font-size:2rem;margin-bottom:10px">ðŸŒŸ</div>
+          <div style="font-size:2rem;margin-bottom:10px">🌟</div>
           <h3>Our Vision</h3>
-          <p style="margin-top:8px">To be recognized as Nigeriaâ€™s foremost model Christian institution nurturing holistic scholars who positively influence society across all disciplines.</p>
+          <p style="margin-top:8px">To be recognized as Nigeria’s foremost model Christian institution nurturing holistic scholars who positively influence society across all disciplines.</p>
         </div>
         <div class="card">
-          <div style="font-size:2rem;margin-bottom:10px">ðŸ›¡ï¸</div>
+          <div style="font-size:2rem;margin-bottom:10px">🛡️</div>
           <h3>Core Values</h3>
           <p style="margin-top:8px">Faith in Christ, Uncompromising Diligence, Truthfulness, Mutual Respect, and Relentless Pursuit of Academic Superiority.</p>
         </div>
@@ -4372,7 +4387,7 @@ registerView('admission', ()=>`
       <div class="grid-3" style="margin-bottom:44px">
         <div class="card">
           <h3>Enrolling Classes</h3>
-          <p class="small-muted" style="margin-top:8px">KG 1 â€“ KG 3, Primary 1 â€“ Primary 6, JSS 1 â€“ JSS 3, SS 1 â€“ SS 3.</p>
+          <p class="small-muted" style="margin-top:8px">KG 1 – KG 3, Primary 1 – Primary 6, JSS 1 – JSS 3, SS 1 – SS 3.</p>
         </div>
         <div class="card">
           <h3>Admission Checklist</h3>
@@ -4380,7 +4395,7 @@ registerView('admission', ()=>`
         </div>
         <div class="card">
           <h3>School Schedule</h3>
-          <p class="small-muted" style="margin-top:8px">Monday to Friday: 8:00 AM â€“ 2:30 PM. After-school study and clubs available.</p>
+          <p class="small-muted" style="margin-top:8px">Monday to Friday: 8:00 AM – 2:30 PM. After-school study and clubs available.</p>
         </div>
       </div>
 
@@ -4394,7 +4409,7 @@ registerView('admission', ()=>`
         <div class="step">
           <div class="num">2</div>
           <h4>Screening</h4>
-          <p>Our admissions committee reviews the application within 48â€“72 hours.</p>
+          <p>Our admissions committee reviews the application within 48–72 hours.</p>
         </div>
         <div class="step">
           <div class="num">3</div>
@@ -4482,7 +4497,7 @@ registerView('admission', ()=>`
             </fieldset>
 
             <div class="note-box">
-              <span>â„¹ï¸</span>
+              <span>ℹ️</span>
               <div>
                 <b>No Online Payment Required Now:</b> Submission registers your child directly into our admissions database. The school will contact you to confirm assessment dates.
               </div>
@@ -4573,19 +4588,19 @@ function searchApplicationStatus() {
 
       <div class="tracker-steps">
         <div class="tracker-step-item done">
-          <div class="tracker-icon">âœ“</div>
+          <div class="tracker-icon">✓</div>
           <div><b style="font-size:0.85rem">1. Form Submitted</b><span style="font-size:0.75rem;color:var(--text-muted);display:block">${app.date}</span></div>
         </div>
         <div class="tracker-step-item ${isReview?'done':'active'}">
-          <div class="tracker-icon">${isReview?'âœ“':'2'}</div>
+          <div class="tracker-icon">${isReview?'✓':'2'}</div>
           <div><b style="font-size:0.85rem">2. File Screening</b><span style="font-size:0.75rem;color:var(--text-muted);display:block">Registry Review</span></div>
         </div>
         <div class="tracker-step-item ${isAccepted?'done':isReview?'active':''}">
-          <div class="tracker-icon">${isAccepted?'âœ“':'3'}</div>
+          <div class="tracker-icon">${isAccepted?'✓':'3'}</div>
           <div><b style="font-size:0.85rem">3. Assessment</b><span style="font-size:0.75rem;color:var(--text-muted);display:block">Ado-Ekiti Campus</span></div>
         </div>
         <div class="tracker-step-item ${isAccepted?'done':''}">
-          <div class="tracker-icon">${isAccepted?'âœ“':'4'}</div>
+          <div class="tracker-icon">${isAccepted?'✓':'4'}</div>
           <div><b style="font-size:0.85rem">4. Admission Offer</b><span style="font-size:0.75rem;color:var(--text-muted);display:block">${isAccepted?'Offered':'In Progress'}</span></div>
         </div>
       </div>
@@ -4606,14 +4621,14 @@ registerView('student-login', ()=>`
       </div>
       <div class="level-choice">
         <button class="level-btn" data-go="student-login-primary">
-          <div class="ico">ðŸ§’</div>
+          <div class="ico">🧒</div>
           <h3>Primary School</h3>
-          <p>KG 1 â€“ Primary 6 Portal</p>
+          <p>KG 1 – Primary 6 Portal</p>
         </button>
         <button class="level-btn" data-go="student-login-secondary">
-          <div class="ico">ðŸŽ“</div>
+          <div class="ico">🎓</div>
           <h3>Secondary School</h3>
-          <p>JSS 1 â€“ SS 3 Portal</p>
+          <p>JSS 1 – SS 3 Portal</p>
         </button>
       </div>
     </div>
@@ -4640,7 +4655,7 @@ function loginFormView(kind, title, idLabel, afterGo){
   <section class="pad">
     <div class="auth-wrap" style="padding:0">
       <div class="auth-card" style="max-width:480px">
-        <a href="#" class="back-link" data-go="${isParent ? 'home' : 'student-login'}">â† Return to Previous Page</a>
+        <a href="#" class="back-link" data-go="${isParent ? 'home' : 'student-login'}">← Return to Previous Page</a>
         
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span class="badge live"><span class="dot"></span> User Authentication Active</span>
@@ -4653,13 +4668,13 @@ function loginFormView(kind, title, idLabel, afterGo){
         ${isParent ? `
         <!-- Auth Tabs (Sign In vs Register for Parents) -->
         <div class="auth-tabs">
-          <button type="button" class="auth-tab-btn auth-tab-btn-${afterGo} active" data-tab="login" onclick="switchAuthTab('${afterGo}', 'login')">ðŸ”‘ Sign In</button>
-          <button type="button" class="auth-tab-btn auth-tab-btn-${afterGo}" data-tab="register" onclick="switchAuthTab('${afterGo}', 'register')">ðŸ“ Create Account / Register</button>
+          <button type="button" class="auth-tab-btn auth-tab-btn-${afterGo} active" data-tab="login" onclick="switchAuthTab('${afterGo}', 'login')">🔑 Sign In</button>
+          <button type="button" class="auth-tab-btn auth-tab-btn-${afterGo}" data-tab="register" onclick="switchAuthTab('${afterGo}', 'register')">📝 Create Account / Register</button>
         </div>
         ` : `
         <!-- Official Notice for Students -->
         <div class="note-box" style="margin-bottom:16px;background:rgba(27,54,93,0.06);border-left:4px solid var(--navy-800);padding:10px 14px;border-radius:6px">
-          <span style="font-size:1.1rem">â„¹ï¸</span>
+          <span style="font-size:1.1rem">ℹ️</span>
           <div style="font-size:0.84rem;color:var(--text-main);line-height:1.5">
             <b>Student Access Notice:</b> Students cannot self-register online. Accounts are provisioned exclusively by school administration and class teachers. Your initial password is identical to your <b>Student ID</b> (e.g. <code>MJL/26/0001</code>).
           </div>
@@ -4677,7 +4692,7 @@ function loginFormView(kind, title, idLabel, afterGo){
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="loginPass-${afterGo}" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value="${samplePupil ? samplePupil.id : ''}">
+                <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••" value="${samplePupil ? samplePupil.id : ''}">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('loginPass-${afterGo}', this)">Show</button>
               </div>
               <p class="hint">${!isParent ? 'Default student password is your Student ID' : 'Your secret account password'}</p>
@@ -4690,13 +4705,12 @@ function loginFormView(kind, title, idLabel, afterGo){
               </label>
             </div>
 
-            <div id="loginErrorMsg-${afterGo}" style="color:var(--crimson-600);font-size:0.9rem;margin-bottom:12px;text-align:center;font-weight:600;display:none;"></div>
-            <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Sign In to Dashboard â†’</button>
+            <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Sign In to Dashboard →</button>
           </form>
 
           ${isParent ? `
           <p class="small-muted" style="text-align:center;margin-top:18px">
-            Don't have an account yet? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('${afterGo}', 'register')">Register here â†’</a>
+            Don't have an account yet? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('${afterGo}', 'register')">Register here →</a>
           </p>
           ` : `
           <p class="small-muted" style="text-align:center;margin-top:18px">
@@ -4741,11 +4755,11 @@ function loginFormView(kind, title, idLabel, afterGo){
               <input required type="password" id="regPassConfirm-${afterGo}" placeholder="Re-type password" minlength="4">
             </div>
 
-            <button class="btn btn-gold btn-lg" style="width:100%" type="submit">Create Account &amp; Access Portal â†’</button>
+            <button class="btn btn-gold btn-lg" style="width:100%" type="submit">Create Account &amp; Access Portal →</button>
           </form>
 
           <p class="small-muted" style="text-align:center;margin-top:18px">
-            Already registered? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('${afterGo}', 'login')">Sign in to your account â†’</a>
+            Already registered? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('${afterGo}', 'login')">Sign in to your account →</a>
           </p>
         </div>
         ` : ''}
@@ -4763,7 +4777,7 @@ registerView('staff-login', ()=>`
   <section class="pad">
     <div class="auth-wrap" style="padding:0">
       <div class="auth-card" style="max-width:520px">
-        <a href="#" class="back-link" data-go="home">â† Return to Homepage</a>
+        <a href="#" class="back-link" data-go="home">← Return to Homepage</a>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span class="badge live"><span class="dot"></span> Staff Gateway</span>
           <span class="badge gold">Mojuli Faculty</span>
@@ -4773,8 +4787,8 @@ registerView('staff-login', ()=>`
 
         <!-- Tabs -->
         <div class="auth-tabs">
-          <button type="button" class="auth-tab-btn auth-tab-btn-staff active" data-tab="login" onclick="switchAuthTab('staff', 'login')">ðŸ”‘ Staff Sign In</button>
-          <button type="button" class="auth-tab-btn auth-tab-btn-staff" data-tab="register" onclick="switchAuthTab('staff', 'register')">ðŸ“ Register Staff Credentials</button>
+          <button type="button" class="auth-tab-btn auth-tab-btn-staff active" data-tab="login" onclick="switchAuthTab('staff', 'login')">🔑 Staff Sign In</button>
+          <button type="button" class="auth-tab-btn auth-tab-btn-staff" data-tab="register" onclick="switchAuthTab('staff', 'register')">📝 Register Staff Credentials</button>
         </div>
 
         <!-- 1. SIGN IN PANEL -->
@@ -4787,16 +4801,15 @@ registerView('staff-login', ()=>`
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="staffPassInput" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                <input required type="password" id="staffPassInput" placeholder="••••••••">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('staffPassInput', this)">Show</button>
               </div>
             </div>
-            <div id="loginErrorMsg-staff" style="color:var(--crimson-600);font-size:0.9rem;margin-bottom:12px;text-align:center;font-weight:600;display:none;"></div>
-            <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console â†’</button>
+            <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console →</button>
           </form>
 
           <p class="small-muted" style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
-            Prospective Educator? <a href="#" data-go="staff-signup" style="color:var(--navy-800);font-weight:700">Apply to Teach &amp; Take Assessment â†’</a>
+            Prospective Educator? <a href="#" data-go="staff-signup" style="color:var(--navy-800);font-weight:700">Apply to Teach &amp; Take Assessment →</a>
           </p>
         </div>
 
@@ -4838,11 +4851,11 @@ registerView('staff-login', ()=>`
               <label>Educator Profile Picture (Optional)</label>
               <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
                 <div id="staffRegPhotoPreview" style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center;font-size:1.5rem">
-                  ðŸ‘¤
+                  👤
                 </div>
                 <div>
                   <label class="btn btn-ghost btn-sm" style="display:inline-block;cursor:pointer">
-                    ðŸ“· Upload Profile Picture
+                    📷 Upload Profile Picture
                     <input type="file" accept="image/*" id="staffRegPhoto" style="display:none" onchange="previewStaffRegPhoto(this)">
                   </label>
                   <p class="hint" style="margin-top:2px">Displays on your educator console and profile.</p>
@@ -4866,11 +4879,11 @@ registerView('staff-login', ()=>`
               <p class="hint" style="color:var(--text-muted)">Staff registration requires the school authorization passcode so only genuine faculty can onboard.</p>
             </div>
 
-            <button class="btn btn-gold btn-lg mt24" style="width:100%" type="submit">Register Staff Credentials &amp; Login â†’</button>
+            <button class="btn btn-gold btn-lg mt24" style="width:100%" type="submit">Register Staff Credentials &amp; Login →</button>
           </form>
 
           <p class="small-muted" style="text-align:center;margin-top:18px">
-            Already registered? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('staff', 'login')">Sign in to your console â†’</a>
+            Already registered? <a href="javascript:void(0)" class="auth-switch-link" style="display:inline" onclick="switchAuthTab('staff', 'login')">Sign in to your console →</a>
           </p>
         </div>
 
@@ -4891,7 +4904,7 @@ registerView('staff-signup', ()=>`
 
 function staffSignupFormHTML(){
   return `
-    <a href="#" class="back-link" data-go="staff-login">â† Back to Staff Login</a>
+    <a href="#" class="back-link" data-go="staff-login">← Back to Staff Login</a>
     <span class="badge live"><span class="dot"></span> Teacher Recruitment 2026/27</span>
     <h2 class="mt24">Apply to Join Our Faculty</h2>
     <p style="margin-bottom:20px">Mojuli Christ Glorious School hires passionate, qualified Christian educators. Provide your details and take the 6-question subject competency assessment.</p>
@@ -4907,7 +4920,7 @@ function staffSignupFormHTML(){
           <optgroup label="Secondary">${SECONDARY_CLASSES.map(c=>`<option>${c}</option>`).join('')}</optgroup>
         </select>
       </div>
-      <button class="btn btn-navy mt24 btn-lg" type="submit" style="width:100%">Proceed to Competency Assessment â†’</button>
+      <button class="btn btn-navy mt24 btn-lg" type="submit" style="width:100%">Proceed to Competency Assessment →</button>
     </form>
   `;
 }
@@ -4962,7 +4975,7 @@ function submitStaffApplication(total, correct){
     <h2 class="mt24">Congratulations, ${escapeHtml(pendingStaffSignup.name)}!</h2>
     <p style="margin-top:10px">You scored <b style="color:var(--text-main);font-size:1.1rem">${correct} / ${total} (${pct}%)</b> on the ${escapeHtml(pendingStaffSignup.cls)} evaluation.</p>
     <div class="note-box mt24">
-      <span>âœ…</span>
+      <span>✅</span>
       <div>Your application and score profile have been submitted to the Executive School Registry under <b>Admin &gt; Staff Recruitment</b>. Our interview panel will contact you.</div>
     </div>
     <button class="btn btn-navy mt24" data-go="home" style="width:100%">Return to Home</button>
@@ -4986,7 +4999,7 @@ function studentDashboard(kind){
   const results = (pupilId && (pupilScoresStore[pupilId] || classRoster.some(p => p.id === pupilId)))
     ? getPupilResults(pupilId)
     : getComputedResults(kind);
-  const extraTab = (kind==='secondary' || (s.cls && /^(JSS|SS)/.test(s.cls))) ? `<button class="tab" data-tab-sd="subjects">ðŸ“š Subjects</button>` : '';
+  const extraTab = (kind==='secondary' || (s.cls && /^(JSS|SS)/.test(s.cls))) ? `<button class="tab" data-tab-sd="subjects">📚 Subjects</button>` : '';
   
   return `
   <div class="dash-shell">
@@ -4995,16 +5008,16 @@ function studentDashboard(kind){
         <b>${s.name}</b>
         <span>${s.cls} &bull; ${s.id}</span>
       </div>
-      <button class="tab active" data-tab-sd="overview">ðŸ“Š Performance Overview</button>
-      <button class="tab" data-tab-sd="results">ðŸ“‘ Academic Results</button>
-      <button class="tab" data-tab-sd="attendance">ðŸ“… Attendance Log</button>
-      <button class="tab" data-tab-sd="homework">ðŸ“ Homework</button>
+      <button class="tab active" data-tab-sd="overview">📊 Performance Overview</button>
+      <button class="tab" data-tab-sd="results">📑 Academic Results</button>
+      <button class="tab" data-tab-sd="attendance">📅 Attendance Log</button>
+      <button class="tab" data-tab-sd="homework">📝 Homework</button>
       ${extraTab}
-      <button class="tab" data-tab-sd="timetable">â° Timetable</button>
-      <button class="tab" data-tab-sd="announcements">ðŸ“¢ Bulletins</button>
-      <button class="tab" data-tab-sd="calendar">ðŸ“† School Calendar</button>
-      <button class="tab" data-tab-sd="profile">ðŸ‘¤ Pupil Profile</button>
-      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">ðŸšª Sign Out</button>
+      <button class="tab" data-tab-sd="timetable">⏰ Timetable</button>
+      <button class="tab" data-tab-sd="announcements">📢 Bulletins</button>
+      <button class="tab" data-tab-sd="calendar">📆 School Calendar</button>
+      <button class="tab" data-tab-sd="profile">👤 Pupil Profile</button>
+      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
     </aside>
     
     <div class="dash-main">
@@ -5013,7 +5026,7 @@ function studentDashboard(kind){
           <h2>Student Portal</h2>
           <p class="small-muted">Welcome, ${s.name} &bull; ${s.session} (${s.term})</p>
         </div>
-        <button class="btn btn-navy btn-sm" onclick="printReportCardForPupil('${s.id}', '${kind}')">ðŸ–¨ Print Term Report</button>
+        <button class="btn btn-navy btn-sm" onclick="printReportCardForPupil('${s.id}', '${kind}')">🖨 Print Term Report</button>
       </div>
 
       <div data-panel-sd="overview" class="panel active">
@@ -5099,7 +5112,7 @@ function studentDashboard(kind){
       <div data-panel-sd="results" class="panel">
         <div class="dash-topbar" style="margin-bottom:0">
           <div>
-            <h2 style="margin-bottom:4px">Academic Score Sheet â€” ${s.term}</h2>
+            <h2 style="margin-bottom:4px">Academic Score Sheet — ${s.term}</h2>
             <p class="small-muted">Continuous Assessment (CA1, CA2, CA3) + Final Exam total.</p>
           </div>
           <button class="btn btn-gold btn-sm" onclick="printReportCard('${kind}')">Download Official Slip</button>
@@ -5160,7 +5173,7 @@ function studentDashboard(kind){
             <h2 style="margin-bottom:2px">Assignments &amp; Projects</h2>
             <p class="small-muted">Continuous homework exercises set by your class teacher for ${s.cls}.</p>
           </div>
-          <span class="badge gold">ðŸ“š Curriculum Tasks</span>
+          <span class="badge gold">📚 Curriculum Tasks</span>
         </div>
         <div class="list-simple">
           ${(() => {
@@ -5176,7 +5189,7 @@ function studentDashboard(kind){
                   </div>
                   <h4 style="margin:2px 0 4px">${escapeHtml(h.title)}</h4>
                   ${h.instructions ? `<p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 6px;line-height:1.5">${escapeHtml(h.instructions)}</p>` : ''}
-                  <div class="meta">â° Deadline: <b style="color:var(--navy-800)">${escapeHtml(h.due)}</b></div>
+                  <div class="meta">⏰ Deadline: <b style="color:var(--navy-800)">${escapeHtml(h.due)}</b></div>
                 </div>
                 <div>
                   <span class="pill present">Pending Submission</span>
@@ -5189,7 +5202,7 @@ function studentDashboard(kind){
 
       ${kind==='secondary' ? `
       <div data-panel-sd="subjects" class="panel">
-        <h2 style="margin-bottom:14px">Enrolled Subjects â€” ${s.cls}</h2>
+        <h2 style="margin-bottom:14px">Enrolled Subjects — ${s.cls}</h2>
         <div class="list-simple">
           ${results.map(r=>`<div class="row"><div><h4>${r.subject}</h4></div><div class="meta">Faculty Assigned</div></div>`).join('')}
         </div>
@@ -5245,7 +5258,7 @@ function studentDashboard(kind){
             <p style="margin:4px 0"><b style="color:var(--text-main)">Academic Session:</b> ${escapeHtml(s.session)} (${escapeHtml(s.term)})</p>
             <p style="margin:4px 0"><b style="color:var(--text-main)">Portal Password:</b> <span class="small-muted">(Default matches Student ID)</span></p>
             <div style="margin-top:14px">
-              <button class="btn btn-navy btn-sm" onclick="printReportCard('${kind}')">ðŸ–¨ Print Term Report Card</button>
+              <button class="btn btn-navy btn-sm" onclick="printReportCard('${kind}')">🖨 Print Term Report Card</button>
             </div>
           </div>
         </div>
@@ -5265,20 +5278,20 @@ registerView('teacher-dashboard', ()=>`
     <aside class="dash-side">
       <div class="who" style="display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08)">
         <div style="width:42px;height:42px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">
-          ${(session && session.user && session.user.photoUrl) ? `<img src="${session.user.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : 'ðŸ‘©â€ðŸ«'}
+          ${(session && session.user && session.user.photoUrl) ? `<img src="${session.user.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : '👩‍🏫'}
         </div>
         <div>
           <b>${(session && session.name) || SAMPLE_TEACHER.name}</b>
           <span style="display:block;font-size:0.75rem;opacity:0.8">${SAMPLE_TEACHER.role}</span>
         </div>
       </div>
-      <button class="tab active" data-tab-td="classes">ðŸ« Assigned Class</button>
-      <button class="tab" data-tab-td="results">ðŸ“ Enter Results</button>
-      <button class="tab" data-tab-td="attendance">ðŸ“… Roll Call Attendance</button>
-      <button class="tab" data-tab-td="homework">ðŸ“š Assignments</button>
-      <button class="tab" data-tab-td="announcements">ðŸ“¢ Notices</button>
-      <button class="tab" data-tab-td="profile">ðŸ‘¤ My Profile</button>
-      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">ðŸšª Sign Out</button>
+      <button class="tab active" data-tab-td="classes">🏫 Assigned Class</button>
+      <button class="tab" data-tab-td="results">📝 Enter Results</button>
+      <button class="tab" data-tab-td="attendance">📅 Roll Call Attendance</button>
+      <button class="tab" data-tab-td="homework">📚 Assignments</button>
+      <button class="tab" data-tab-td="announcements">📢 Notices</button>
+      <button class="tab" data-tab-td="profile">👤 My Profile</button>
+      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
     </aside>
     
     <div class="dash-main">
@@ -5287,7 +5300,7 @@ registerView('teacher-dashboard', ()=>`
           <h2>Teacher Console</h2>
           <p class="small-muted">Welcome, ${(session && session.name) || SAMPLE_TEACHER.name}</p>
         </div>
-        <button class="btn btn-navy btn-sm" onclick="printReportCard('primary')">ðŸ–¨ Master Score Report</button>
+        <button class="btn btn-navy btn-sm" onclick="printReportCard('primary')">🖨 Master Score Report</button>
       </div>
 
       <div data-panel-td="classes" class="panel active">
@@ -5317,7 +5330,7 @@ registerView('teacher-dashboard', ()=>`
         <h2 style="margin-bottom:14px">Staff Profile</h2>
         <div class="card" style="max-width:520px;display:flex;gap:20px;align-items:flex-start">
           <div style="width:100px;height:100px;border-radius:50%;overflow:hidden;border:2px solid var(--border);background:#F1F5FB;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem">
-            ${(session && session.user && session.user.photoUrl) ? `<img src="${session.user.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : 'ðŸ‘©â€ðŸ«'}
+            ${(session && session.user && session.user.photoUrl) ? `<img src="${session.user.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : '👩‍🏫'}
           </div>
           <div style="flex:1">
             <h3 style="margin-bottom:8px">${(session && session.name) || SAMPLE_TEACHER.name}</h3>
@@ -5342,15 +5355,15 @@ registerView('admin-dashboard', ()=>`
         <b>Principal &amp; Admin</b>
         <span>Executive Management</span>
       </div>
-      <button class="tab active" data-tab-ad="admissions">ðŸ“‹ Admissions Pipeline</button>
-      <button class="tab" data-tab-ad="staff">ðŸ‘¨â€ðŸ« Staff &amp; Recruitment</button>
-      <button class="tab" data-tab-ad="students">ðŸ‘¥ Student Registry</button>
-      <button class="tab" data-tab-ad="fees">ðŸ’° Fees Management</button>
-      <button class="tab" data-tab-ad="results">ðŸ“‘ Academic Results</button>
-      <button class="tab" data-tab-ad="announcements">ðŸ“¢ Broadcasts</button>
-      <button class="tab" data-tab-ad="settings">âš™ï¸ Portal Settings</button>
-      <button class="tab" data-tab-ad="supabase">âš¡ Cloud &amp; Supabase</button>
-      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">ðŸšª Sign Out</button>
+      <button class="tab active" data-tab-ad="admissions">📋 Admissions Pipeline</button>
+      <button class="tab" data-tab-ad="staff">👨‍🏫 Staff &amp; Recruitment</button>
+      <button class="tab" data-tab-ad="students">👥 Student Registry</button>
+      <button class="tab" data-tab-ad="fees">💰 Fees Management</button>
+      <button class="tab" data-tab-ad="results">📑 Academic Results</button>
+      <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
+      <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
+      <button class="tab" data-tab-ad="supabase">⚡ Cloud &amp; Supabase</button>
+      <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
     </aside>
     
     <div class="dash-main">
@@ -5460,7 +5473,7 @@ registerView('admin-dashboard', ()=>`
             <h3 style="margin-bottom:2px">Portal Customization &amp; Visual Settings</h3>
             <p class="small-muted">Edit school information, motto, phone numbers, email, tuition fees, and resumption dates directly without editing code.</p>
           </div>
-          <button class="btn btn-gold" onclick="saveVisualSettingsForm()">ðŸ’¾ Save &amp; Apply All Changes</button>
+          <button class="btn btn-gold" onclick="saveVisualSettingsForm()">💾 Save &amp; Apply All Changes</button>
         </div>
 
         <form id="visualSettingsForm" onsubmit="event.preventDefault();saveVisualSettingsForm();">
@@ -5468,7 +5481,7 @@ registerView('admin-dashboard', ()=>`
             
             <!-- School Identity Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ« School Identity &amp; Branding</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🏫 School Identity &amp; Branding</h4>
               
               <div class="field">
                 <label>Official School Name</label>
@@ -5504,7 +5517,7 @@ registerView('admin-dashboard', ()=>`
 
             <!-- Contact & Location Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ“ž Official Contacts &amp; Location</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">📞 Official Contacts &amp; Location</h4>
 
               <div class="field">
                 <label>Primary Hotline / WhatsApp</label>
@@ -5529,7 +5542,7 @@ registerView('admin-dashboard', ()=>`
 
             <!-- Academic Calendar Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ“… Academic Session &amp; Resumption</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">📅 Academic Session &amp; Resumption</h4>
 
               <div class="field">
                 <label>Current Academic Session</label>
@@ -5555,27 +5568,27 @@ registerView('admin-dashboard', ()=>`
 
             <!-- Tuition Fees Structure Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ’³ Term Tuition &amp; Fee Structure</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">💳 Term Tuition &amp; Fee Structure</h4>
 
               <div class="field">
-                <label>CrÃ¨che &amp; Nursery Term Fee</label>
-                <input id="set_feeNursery" value="${escapeHtml(settings.feeNursery || 'â‚¦75,000')}" placeholder="e.g. â‚¦75,000" required>
+                <label>Crèche &amp; Nursery Term Fee</label>
+                <input id="set_feeNursery" value="${escapeHtml(settings.feeNursery || '₦75,000')}" placeholder="e.g. ₦75,000" required>
               </div>
 
               <div class="field">
                 <label>Primary (Basic 1 - 6) Term Fee</label>
-                <input id="set_feePrimary" value="${escapeHtml(settings.feePrimary || 'â‚¦85,000')}" placeholder="e.g. â‚¦85,000" required>
+                <input id="set_feePrimary" value="${escapeHtml(settings.feePrimary || '₦85,000')}" placeholder="e.g. ₦85,000" required>
               </div>
 
               <div class="field mb0">
                 <label>Junior Secondary (JSS 1 - 3) Term Fee</label>
-                <input id="set_feeSecondary" value="${escapeHtml(settings.feeSecondary || 'â‚¦95,000')}" placeholder="e.g. â‚¦95,000" required>
+                <input id="set_feeSecondary" value="${escapeHtml(settings.feeSecondary || '₦95,000')}" placeholder="e.g. ₦95,000" required>
               </div>
             </div>
 
             <!-- Homepage Hero & Mission Text Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸŒ Homepage Hero &amp; Banners</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🌐 Homepage Hero &amp; Banners</h4>
 
               <div class="field">
                 <label>Main Homepage Headline</label>
@@ -5592,7 +5605,7 @@ registerView('admin-dashboard', ()=>`
 
             <!-- Portal Privacy, Secrecy & Security Card -->
             <div class="card" style="border:1px solid var(--gold-400)">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ” Portal Privacy &amp; Console Secrecy</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🔐 Portal Privacy &amp; Console Secrecy</h4>
 
               <div class="field">
                 <label>Admin &amp; Principal Security Passcode *</label>
@@ -5603,7 +5616,7 @@ registerView('admin-dashboard', ()=>`
               <div class="field mb0">
                 <label style="display:flex;align-items:flex-start;gap:10px;font-size:0.9rem;font-weight:600;cursor:pointer">
                   <input type="checkbox" id="set_productionMode" style="width:auto;margin-top:3px" ${settings.productionMode?'checked':''}>
-                  <span><b>ðŸ”’ Enable Production Security Mode</b><br>
+                  <span><b>🔒 Enable Production Security Mode</b><br>
                   <span class="small-muted" style="font-weight:400;display:block;margin-top:2px">Hides the floating Quick Role Switcher dock completely. Ensures Admin, Principal, and Teacher consoles are private and strictly require staff authentication.</span></span>
                 </label>
               </div>
@@ -5613,7 +5626,7 @@ registerView('admin-dashboard', ()=>`
 
             <!-- Administrators Management Card -->
             <div class="card">
-              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">ðŸ›¡ï¸ Administrators Management</h4>
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🛡️ Administrators Management</h4>
               <p class="small-muted" style="margin-bottom:12px">Register a new administrator. Passwords will automatically follow the MJL/Ad/XXXX pattern.</p>
               <div class="field">
                 <label>Admin Name</label>
@@ -5636,9 +5649,9 @@ registerView('admin-dashboard', ()=>`
           </div>
 
           <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-            <button type="button" class="btn btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="resetToCleanProductionSlate()" title="Remove demo data and reset to completely clean school portal">ðŸ§¹ Reset to Clean Slate</button>
+            <button type="button" class="btn btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="resetToCleanProductionSlate()" title="Remove demo data and reset to completely clean school portal">🧹 Reset to Clean Slate</button>
             <button type="button" class="btn btn-ghost" onclick="resetVisualSettingsToDefault()">Reset to Default Values</button>
-            <button type="submit" class="btn btn-gold" style="font-weight:700">ðŸ’¾ Save &amp; Apply All School Settings</button>
+            <button type="submit" class="btn btn-gold" style="font-weight:700">💾 Save &amp; Apply All School Settings</button>
           </div>
         </form>
       </div>
@@ -5676,7 +5689,7 @@ function renderAdminStudentRegistry() {
     wrap.innerHTML = search ? 
       `<div class="empty">No pupils found matching "${escapeHtml(search)}".</div>` :
       `<div class="empty" style="padding:40px 20px">
-        <div style="font-size:2.6rem;margin-bottom:8px">ðŸ§‘â€ðŸŽ“</div>
+        <div style="font-size:2.6rem;margin-bottom:8px">🧑‍🎓</div>
         <p><b>No pupils enrolled in the school registry yet.</b></p>
         <p class="small-muted" style="margin-top:6px">New pupils registered online or enrolled manually via the teacher / admin portal will appear here automatically.</p>
       </div>`;
@@ -5711,9 +5724,9 @@ function renderAdminStudentRegistry() {
               <td><span class="badge live">${escapeHtml(p.cls)}</span></td>
               <td><span class="badge gold">${escapeHtml(p.id)}</span></td>
               <td>${escapeHtml(p.gender || 'Pupil')}</td>
-              <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(ðŸ“ž ${escapeHtml(p.phone || '')})</span></td>
+              <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(📞 ${escapeHtml(p.phone || '')})</span></td>
               <td>
-                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">ðŸ–¨ Report</button>
+                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button>
               </td>
             </tr>
           `).join('')}
@@ -5749,7 +5762,7 @@ function renderAdminFees() {
             <th>Pupil ID</th>
             <th>Name</th>
             <th>Class</th>
-            <th>Current Balance (â‚¦)</th>
+            <th>Current Balance (₦)</th>
             <th>Fee Note / Message</th>
             <th>Action</th>
           </tr>
@@ -5825,10 +5838,10 @@ function renderAdminResultsTable(selectedClass = "Primary 4") {
             </div>
             <div>
               <h4 style="margin:0;font-size:1.05rem">${escapeHtml(p.name)} <span class="badge gold" style="margin-left:6px">${escapeHtml(p.id)}</span></h4>
-              <span class="small-muted">${escapeHtml(p.cls)} &bull; Gender: ${escapeHtml(p.gender || 'Pupil')} &bull; Aggregate: <b>${totalScore}</b> (${avg}% â€” Grade ${gradeLetter})</span>
+              <span class="small-muted">${escapeHtml(p.cls)} &bull; Gender: ${escapeHtml(p.gender || 'Pupil')} &bull; Aggregate: <b>${totalScore}</b> (${avg}% — Grade ${gradeLetter})</span>
             </div>
           </div>
-          <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">ðŸ–¨ Print Official Report Card</button>
+          <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Print Official Report Card</button>
         </div>
 
         <div class="table-wrap">
@@ -5884,13 +5897,13 @@ function renderTeacherAssignmentsPanel() {
         <h2 style="margin-bottom:4px">Homework &amp; Assignment Management</h2>
         <p class="small-muted">Create new assignments for pupils, set submission deadlines, and manage existing tasks.</p>
       </div>
-      <span class="badge gold">ðŸ“ Teacher Courseware</span>
+      <span class="badge gold">📝 Teacher Courseware</span>
     </div>
 
     <!-- 1. Post New Assignment Form -->
     <div class="card" style="margin-bottom:24px;border:1px solid var(--border)">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:10px">
-        <span style="font-size:1.3rem">âž•</span>
+        <span style="font-size:1.3rem">➕</span>
         <div>
           <h3 style="margin:0;font-size:1.1rem;color:var(--text-main)">Post New Assignment / Project</h3>
           <p class="small-muted" style="margin:2px 0 0">Assigned pupils will see this task immediately on their student portal dashboard.</p>
@@ -5919,7 +5932,7 @@ function renderTeacherAssignmentsPanel() {
 
         <div class="field">
           <label>Assignment Title / Main Topic *</label>
-          <input required id="asg_title" placeholder="e.g. Fractions &amp; Decimals Exercise 4B Qs 1â€“10">
+          <input required id="asg_title" placeholder="e.g. Fractions &amp; Decimals Exercise 4B Qs 1–10">
         </div>
 
         <div class="field">
@@ -5929,7 +5942,7 @@ function renderTeacherAssignmentsPanel() {
 
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
           <button type="reset" class="btn btn-ghost btn-sm">Clear</button>
-          <button type="submit" class="btn btn-gold btn-sm" style="font-weight:700">ðŸš€ Publish Assignment to Pupils</button>
+          <button type="submit" class="btn btn-gold btn-sm" style="font-weight:700">🚀 Publish Assignment to Pupils</button>
         </div>
       </form>
     </div>
@@ -5957,11 +5970,11 @@ function renderTeacherAssignmentsPanel() {
                 </div>
                 <h4 style="margin:4px 0 6px">${escapeHtml(a.title)}</h4>
                 ${a.instructions ? `<p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 6px;line-height:1.5">${escapeHtml(a.instructions)}</p>` : ''}
-                <div class="meta">â° Submission Deadline: <b style="color:var(--navy-800)">${escapeHtml(a.due)}</b></div>
+                <div class="meta">⏰ Submission Deadline: <b style="color:var(--navy-800)">${escapeHtml(a.due)}</b></div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
                 <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="deleteAssignment('${a.id || idx}')" title="Delete this assignment">
-                  ðŸ—‘ Delete
+                  🗑 Delete
                 </button>
               </div>
             </div>
@@ -5998,7 +6011,7 @@ function submitTeacherNewAssignment() {
   assignmentsStore.unshift(newAsg);
   saveAssignmentsStore();
   Sound.playSuccess();
-  toast(`ðŸŽ‰ Assignment published for ${cls}!`);
+  toast(`🎉 Assignment published for ${cls}!`);
   renderTeacherAssignmentsPanel();
 }
 
@@ -6033,7 +6046,7 @@ function renderAdminAdmissions(){
     el.innerHTML = search ? 
       `<div class="empty">No applications matching criteria.</div>` :
       `<div class="empty" style="padding:40px 20px">
-        <div style="font-size:2.6rem;margin-bottom:8px">ðŸ“</div>
+        <div style="font-size:2.6rem;margin-bottom:8px">📝</div>
         <p><b>No online student admission applications submitted yet.</b></p>
         <p class="small-muted" style="margin-top:6px">When parents submit the online admission form on the website, their applications will appear here for review and acceptance.</p>
       </div>`;
@@ -6050,26 +6063,14 @@ function renderAdminAdmissions(){
         <td>${a.date}</td>
         <td><span class="pill ${a.status.toLowerCase().replace(' ','')==='underreview'?'review':a.status.toLowerCase()}">${a.status}</span></td>
         <td>
-          <div style="display:flex; gap:6px;">
-            <select onchange="updateAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
-              <option ${a.status==='Pending'?'selected':''}>Pending</option>
-              <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
-              <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
-              <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-            </select>
-            <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600); border:1px solid #fee2e2;" onclick="deleteAdmissionApp('${a.id}')">Delete</button>
-          </div>
+          <select onchange="updateAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
+            <option ${a.status==='Pending'?'selected':''}>Pending</option>
+            <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
+            <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
+            <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
+          </select>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
-
-window.deleteAdmissionApp = function(id) {
-  if(confirm('Are you sure you want to completely delete this admission application?')) {
-    applications = applications.filter(a => a.id !== id);
-    saveApplications();
-    toast('Admission application deleted.');
-    renderAdminAdmissions();
-  }
-};
 }
 
 function updateAppStatus(id, status){
@@ -6093,7 +6094,7 @@ function renderAdminStaffApplications(){
     el.innerHTML = search ? 
       `<div class="empty">No teaching applications matching search.</div>` :
       `<div class="empty" style="padding:40px 20px">
-        <div style="font-size:2.6rem;margin-bottom:8px">ðŸ’¼</div>
+        <div style="font-size:2.6rem;margin-bottom:8px">💼</div>
         <p><b>No staff recruitment applications received yet.</b></p>
         <p class="small-muted" style="margin-top:6px">When educator candidates take the online competency assessment and apply for teaching roles, their test scores and submissions will appear here.</p>
       </div>`;
@@ -6110,27 +6111,15 @@ function renderAdminStaffApplications(){
         <td>${a.date}</td>
         <td><span class="pill ${pillClass(a.status)}">${a.status}</span>${a.hiredAccountId ? `<br><small style="color:var(--navy-600);font-weight:bold">ID: ${a.hiredAccountId}</small>` : ''}</td>
         <td>
-          <div style="display:flex; gap:6px;">
-            <select onchange="updateStaffAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
-              <option ${a.status==='Pending Review'?'selected':''}>Pending Review</option>
-              <option ${a.status==='Shortlisted'?'selected':''}>Shortlisted</option>
-              <option ${a.status==='Hired'?'selected':''}>Hired</option>
-              <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-            </select>
-            <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600); border:1px solid #fee2e2;" onclick="deleteStaffApp('${a.id}')">Delete</button>
-          </div>
+          <select onchange="updateStaffAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
+            <option ${a.status==='Pending Review'?'selected':''}>Pending Review</option>
+            <option ${a.status==='Shortlisted'?'selected':''}>Shortlisted</option>
+            <option ${a.status==='Hired'?'selected':''}>Hired</option>
+            <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
+          </select>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
 }
-
-window.deleteStaffApp = function(id) {
-  if(confirm('Are you sure you want to completely delete this staff application?')) {
-    staffApplications = staffApplications.filter(a => a.id !== id);
-    saveStaffApplications();
-    toast('Staff application deleted.');
-    renderAdminStaffApplications();
-  }
-};
 
 function generateNextStaffId() {
   const staff = userAccounts.filter(u => u.role === 'teacher' && String(u.id).startsWith('MJL/st/26/'));
@@ -6185,7 +6174,7 @@ function renderAdminAnnouncementList(){
         </div>
         <div>
           <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="deleteAnnouncement(${idx})" title="Delete this bulletin">
-            ðŸ—‘ Delete
+            🗑 Delete
           </button>
         </div>
       </div>
@@ -6234,13 +6223,13 @@ window.createNewAdmin = function() {
   const pin = (document.getElementById('newAdminPin')?.value || '').trim();
 
   if (!name || !ident || pin.length !== 4) {
-    toast('âŒ Please fill all fields and provide exactly a 4-digit pin.');
+    toast('❌ Please fill all fields and provide exactly a 4-digit pin.');
     return;
   }
 
   const existing = findUserAccount(ident);
   if (existing) {
-    toast('âŒ An account with this identifier/email already exists.');
+    toast('❌ An account with this identifier/email already exists.');
     return;
   }
 
@@ -6261,7 +6250,7 @@ window.createNewAdmin = function() {
   document.getElementById('newAdminName').value = "";
   document.getElementById('newAdminId').value = "";
   document.getElementById('newAdminPin').value = "";
-  toast('âœ… New Administrator successfully registered!');
+  toast('✅ New Administrator successfully registered!');
 };
 
 function saveVisualSettingsForm() {
@@ -6302,7 +6291,7 @@ function saveVisualSettingsForm() {
   saveSettings();
   applyAllSchoolSettings();
   Sound.playSuccess();
-  toast('ðŸŽ‰ All School Portal Settings successfully updated and live!');
+  toast('🎉 All School Portal Settings successfully updated and live!');
 }
 
 function resetSchoolLogo() {
@@ -6397,7 +6386,7 @@ function initParentPortal(){
       const nameEl = document.getElementById('parentChildName');
       const metaEl = document.getElementById('parentChildMeta');
       if (nameEl) nameEl.textContent = currentChild.name;
-      if (metaEl) metaEl.textContent = `${currentChild.cls} â€¢ ${currentChild.id}`;
+      if (metaEl) metaEl.textContent = `${currentChild.cls} • ${currentChild.id}`;
       const body = document.getElementById('parentResultsBody');
       if(body){
         const results = (currentChild.id && (pupilScoresStore[currentChild.id] || classRoster.some(p => p.id === currentChild.id)))
@@ -6420,7 +6409,7 @@ function initParentPortal(){
 
 function openFeePaymentModal(term, amountStr) {
   showModal({
-    title: `Pay School Tuition â€” ${term}`,
+    title: `Pay School Tuition — ${term}`,
     message: `Amount Due: ${amountStr}. Select payment simulation method: Card / Paystack / Bank Transfer.`,
     confirmText: `Pay ${amountStr}`,
     cancelText: "Cancel",
@@ -6430,7 +6419,7 @@ function openFeePaymentModal(term, amountStr) {
         const fee = SAMPLE_FEES.find(f => f.term.includes('First Term'));
         if(fee) {
           fee.paid = fee.due;
-          fee.balance = "â‚¦0";
+          fee.balance = "₦0";
           fee.status = "Paid";
         }
         Sound.playSuccess();
@@ -6450,7 +6439,7 @@ function showReceiptModal(term, amountStr) {
   
   showModal({
     title: "Official Digital Payment Receipt",
-    message: `Payment Reference: ${refCode}\nPupil: ${child.name} (${child.cls})\nAmount: ${amountStr} â€” STATUS: PAID & VERIFIED (${dateStr}). You can print your receipt anytime.`,
+    message: `Payment Reference: ${refCode}\nPupil: ${child.name} (${child.cls})\nAmount: ${amountStr} — STATUS: PAID & VERIFIED (${dateStr}). You can print your receipt anytime.`,
     confirmText: "Print Receipt Slip",
     cancelText: "Close",
     onConfirm: () => {
@@ -6473,7 +6462,7 @@ registerView('parent-portal', ()=>{
             <button class="btn btn-ghost btn-sm" data-go="home">Sign Out</button>
           </div>
           <div class="card" style="text-align:center;padding:50px 20px;border:1px solid var(--border)">
-            <div style="font-size:3rem;margin-bottom:12px">ðŸ‘¨â€ðŸ‘©â€ðŸ‘§</div>
+            <div style="font-size:3rem;margin-bottom:12px">👨‍👩‍👧</div>
             <h3 style="margin-bottom:8px">No Enrolled Child Linked Yet</h3>
             <p class="small-muted" style="max-width:480px;margin:0 auto 20px">
               Your parent profile is active, but no student has been registered in the school system yet. When your child is enrolled by the school or linked with their Student ID, their live continuous assessment scores, homework, and tuition balance will appear here.
@@ -6505,7 +6494,7 @@ registerView('parent-portal', ()=>{
           <p class="small-muted">Real-time academic performance, tuition &amp; teacher feedback for your children.</p>
         </div>
         <div style="display:flex;gap:10px">
-          <button class="btn btn-navy btn-sm" onclick="printReportCard('parent')">ðŸ–¨ Print Term Report</button>
+          <button class="btn btn-navy btn-sm" onclick="printReportCard('parent')">🖨 Print Term Report</button>
           <button class="btn btn-ghost btn-sm" data-go="home">Sign Out</button>
         </div>
       </div>
@@ -6521,7 +6510,7 @@ registerView('parent-portal', ()=>{
           <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${curr.cls} &bull; ${curr.id}</p>
         </div>
         <div style="text-align:right">
-          <div style="font-size:1.1rem;font-weight:bold;color:var(--crimson-600)">Fee Balance: â‚¦${feeBalance.toLocaleString()}</div>
+          <div style="font-size:1.1rem;font-weight:bold;color:var(--crimson-600)">Fee Balance: ₦${feeBalance.toLocaleString()}</div>
           <div class="small-muted">${escapeHtml(feeMessage)}</div>
         </div>
       </div>
@@ -6561,7 +6550,7 @@ registerView('parent-portal', ()=>{
           
           <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 14px">
             <h3 style="margin:0">Tuition &amp; Fees Statement</h3>
-            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('First Term 2026/2027', 'â‚¦85,000')">ðŸ’³ Pay Tuition Now</button>
+            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('First Term 2026/2027', '₦85,000')">💳 Pay Tuition Now</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -6647,7 +6636,7 @@ function renderForumThreads(){
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <span class="forum-cat">${t.cat}</span>
-          ${t.pinned?'<span class="badge gold" style="margin-left:6px">ðŸ“Œ Pinned</span>':''}
+          ${t.pinned?'<span class="badge gold" style="margin-left:6px">📌 Pinned</span>':''}
         </div>
         <span class="meta">${t.date}</span>
       </div>
@@ -6783,10 +6772,10 @@ function renderGalleryFull(){
     <div class="gallery-item">
       <img src="${p.src}" alt="${escapeHtml(p.caption||'School photo')}" onclick="openLightbox(${i})">
       ${p.caption ? `<div class="cap">${escapeHtml(p.caption)}</div>` : ''}
-      <button class="del" title="Remove Photo" onclick="deletePhoto('${p.id}')">Ã—</button>
+      <button class="del" title="Remove Photo" onclick="deletePhoto('${p.id}')">×</button>
     </div>`).join('') + `
     <label class="gallery-add">
-      <span style="font-size:1.8rem">ï¼‹</span>
+      <span style="font-size:1.8rem">＋</span>
       <span>Add Campus Photo</span>
       <input type="file" accept="image/*" id="galleryUploadInput" style="display:none">
     </label>`;
@@ -6886,24 +6875,24 @@ registerView('contact', ()=>`
         
         <div>
           <div class="card" style="margin-bottom:18px">
-            <h4 style="font-size:1.05rem;margin-bottom:8px">ðŸ“ Campus Address</h4>
+            <h4 style="font-size:1.05rem;margin-bottom:8px">📍 Campus Address</h4>
             <p style="font-size:0.92rem;line-height:1.7">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</p>
           </div>
           <div class="card" style="margin-bottom:18px;border-left:4px solid #25D366">
-            <h4 style="font-size:1.05rem;margin-bottom:8px">ðŸ’¬ WhatsApp &amp; Reach Out Hotlines</h4>
+            <h4 style="font-size:1.05rem;margin-bottom:8px">💬 WhatsApp &amp; Reach Out Hotlines</h4>
             <p style="font-size:0.92rem;line-height:1.8;margin-bottom:12px">
               Direct Phone 1: <a href="tel:07042664309" style="font-weight:700;color:var(--navy-700)">07042664309</a><br>
               Direct Phone 2: <a href="tel:0803779632" style="font-weight:700;color:var(--navy-700)">0803779632</a><br>
               Email: <span style="font-weight:600">info@mojulichristglorious.edu.ng</span>
             </p>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
-              <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>ðŸ’¬</span> WhatsApp 07042664309</a>
-              <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>ðŸ’¬</span> WhatsApp 0803779632</a>
+              <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 07042664309</a>
+              <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 0803779632</a>
             </div>
           </div>
           <div class="card">
-            <h4 style="font-size:1.05rem;margin-bottom:8px">â° Office Hours</h4>
-            <p style="font-size:0.92rem;line-height:1.7">Monday â€“ Friday: 8:00 AM â€“ 4:00 PM<br>Saturday &amp; Sunday: Closed (Worship Services)</p>
+            <h4 style="font-size:1.05rem;margin-bottom:8px">⏰ Office Hours</h4>
+            <p style="font-size:0.92rem;line-height:1.7">Monday – Friday: 8:00 AM – 4:00 PM<br>Saturday &amp; Sunday: Closed (Worship Services)</p>
           </div>
         </div>
       </div>
@@ -6977,21 +6966,14 @@ function afterRender(id){
         const ident = (document.getElementById(`loginId-${formKey}`)?.value || '').trim();
         const pass = (document.getElementById(`loginPass-${formKey}`)?.value || '').trim();
         const res = verifyUserLogin(ident, pass, targetRole);
-        const errEl = document.getElementById(`loginErrorMsg-${formKey}`);
-        
         if(!res.success) {
           Sound.playClick();
-          if (errEl) {
-            errEl.style.display = 'block';
-            errEl.innerHTML = 'âŒ ' + res.reason;
-          }
-          toast('âŒ ' + res.reason);
+          toast('❌ ' + res.reason);
           return;
         }
-        if (errEl) errEl.style.display = 'none';
         session = { role: targetRole, student: res.account, name: res.account.name };
         Sound.playSuccess();
-        toast(`ðŸŽ‰ Welcome back, ${res.account.name}!`);
+        toast(`🎉 Welcome back, ${res.account.name}!`);
         go(target);
       });
     }
@@ -7010,7 +6992,7 @@ function afterRender(id){
         const passConfirm = document.getElementById(`regPassConfirm-${formKey}`)?.value || '';
 
         if(pass !== passConfirm) {
-          toast('âŒ Passwords do not match! Please re-type.');
+          toast('❌ Passwords do not match! Please re-type.');
           return;
         }
 
@@ -7025,10 +7007,10 @@ function afterRender(id){
           });
           session = { role: targetRole, student: newAcc, name: newAcc.name };
           Sound.playSuccess();
-          toast(`ðŸŽ‰ Account created! Welcome to Mojuli School, ${newAcc.name}!`);
+          toast(`🎉 Account created! Welcome to Mojuli School, ${newAcc.name}!`);
           go(target);
         } catch(err) {
-          toast('âŒ ' + err.message);
+          toast('❌ ' + err.message);
         }
       });
     }
@@ -7046,18 +7028,11 @@ function afterRender(id){
         const ident = (document.getElementById(`loginId-${formKey}`)?.value || '').trim();
         const pass = (document.getElementById(`loginPass-${formKey}`)?.value || '').trim();
         const res = verifyUserLogin(ident, pass, 'parent');
-        const errEl = document.getElementById(`loginErrorMsg-${formKey}`);
-        
         if(!res.success) {
           Sound.playClick();
-          if (errEl) {
-            errEl.style.display = 'block';
-            errEl.innerHTML = 'âŒ ' + res.reason;
-          }
-          toast('âŒ ' + res.reason);
+          toast('❌ ' + res.reason);
           return;
         }
-        if (errEl) errEl.style.display = 'none';
         session = { role: 'parent', name: res.account.name, user: res.account, childId: res.account.childId };
         Sound.playSuccess();
         toast(`Welcome to Parent Portal, ${res.account.name}!`);
@@ -7079,7 +7054,7 @@ function afterRender(id){
         const passConfirm = document.getElementById(`regPassConfirm-${formKey}`)?.value || '';
 
         if(pass !== passConfirm) {
-          toast('âŒ Passwords do not match! Please check again.');
+          toast('❌ Passwords do not match! Please check again.');
           return;
         }
 
@@ -7095,10 +7070,10 @@ function afterRender(id){
           });
           session = { role: 'parent', name: newAcc.name, user: newAcc, childId: newAcc.childId };
           Sound.playSuccess();
-          toast(`ðŸŽ‰ Parent account registered! Welcome, ${newAcc.name}!`);
+          toast(`🎉 Parent account registered! Welcome, ${newAcc.name}!`);
           go('parent-portal');
         } catch(err) {
-          toast('âŒ ' + err.message);
+          toast('❌ ' + err.message);
         }
       });
     }
@@ -7115,18 +7090,11 @@ function afterRender(id){
         const pass = (document.getElementById('staffPassInput')?.value || '').trim();
         
         const res = verifyUserLogin(ident, pass, 'staff');
-        const errEl = document.getElementById('loginErrorMsg-staff');
-
         if(!res.success || !res.account || !['admin','teacher'].includes(res.account.role)) {
           Sound.playClick();
-          if (errEl) {
-            errEl.style.display = 'block';
-            errEl.innerHTML = 'âŒ ' + (res.reason || 'Invalid staff credentials.');
-          }
-          toast('âŒ ' + (res.reason || 'Invalid staff credentials.'));
+          toast('❌ ' + (res.reason || 'Invalid staff credentials.'));
           return;
         }
-        if (errEl) errEl.style.display = 'none';
 
         const role = res.account.role;
         if(role === 'admin') {
@@ -7156,12 +7124,12 @@ function afterRender(id){
 
         const expectedCode = settings.adminPasscode || 'admin2026';
         if(authCode !== expectedCode && authCode !== 'admin123') {
-          toast('âŒ Invalid School Authorization Passcode! Contact school administration.');
+          toast('❌ Invalid School Authorization Passcode! Contact school administration.');
           return;
         }
 
         if(pass !== passConfirm) {
-          toast('âŒ Passwords do not match!');
+          toast('❌ Passwords do not match!');
           return;
         }
 
@@ -7181,10 +7149,10 @@ function afterRender(id){
           window._tempStaffRegPhotoUrl = null;
           session = { role: 'staff-'+role, name: newAcc.name, user: newAcc };
           Sound.playSuccess();
-          toast(`ðŸŽ‰ Faculty account registered! Welcome, ${newAcc.name}!`);
+          toast(`🎉 Faculty account registered! Welcome, ${newAcc.name}!`);
           go(role==='teacher' ? 'teacher-dashboard' : 'admin-dashboard');
         } catch(err) {
-          toast('âŒ ' + err.message);
+          toast('❌ ' + err.message);
         }
       });
     }
@@ -7274,7 +7242,7 @@ function triggerGitHubSignIn() {
   if (!window.SupabaseService || !window.SupabaseService.isConfigured()) {
     showModal({
       title: "Supabase Setup Required",
-      message: "To enable 'Sign in with GitHub', please enter your Supabase Project URL and Anon Public Key under Management Console > âš¡ Cloud & Supabase.",
+      message: "To enable 'Sign in with GitHub', please enter your Supabase Project URL and Anon Public Key under Management Console > ⚡ Cloud & Supabase.",
       confirmText: "Go to Supabase Setup",
       cancelText: "Close",
       onConfirm: () => {
@@ -7299,7 +7267,7 @@ function supabasePanelHTML() {
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px">
       <div>
-        <h3 style="margin-bottom:4px">âš¡ Supabase Cloud &amp; GitHub Integration</h3>
+        <h3 style="margin-bottom:4px">⚡ Supabase Cloud &amp; GitHub Integration</h3>
         <p class="small-muted">Real-time cloud database persistence and GitHub OAuth single sign-on.</p>
       </div>
       <div>
@@ -7314,7 +7282,7 @@ function supabasePanelHTML() {
         <!-- API Connection Credentials -->
         <div class="card" style="margin-bottom:20px">
           <h4 style="font-size:1.05rem;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-            <span>ðŸ”‘</span> Supabase Project Credentials
+            <span>🔑</span> Supabase Project Credentials
           </h4>
           <p class="small-muted" style="margin-bottom:16px">From your Supabase Project Dashboard under <b>Project Settings &gt; API</b>.</p>
           
@@ -7330,8 +7298,8 @@ function supabasePanelHTML() {
               <p class="hint">The safe public anon key for browser interactions</p>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-              <button class="btn btn-navy" type="submit">ðŸ’¾ Save &amp; Connect</button>
-              <button class="btn btn-outline" type="button" onclick="testSbConnection()">ðŸ” Test Connection</button>
+              <button class="btn btn-navy" type="submit">💾 Save &amp; Connect</button>
+              <button class="btn btn-outline" type="button" onclick="testSbConnection()">🔍 Test Connection</button>
               ${cfg.url ? `<button class="btn btn-ghost" style="color:var(--crimson-600)" type="button" onclick="disconnectSupabase()">Disconnect</button>` : ''}
             </div>
           </form>
@@ -7341,11 +7309,11 @@ function supabasePanelHTML() {
         <!-- Cloud Sync Card -->
         <div class="card">
           <h4 style="font-size:1.05rem;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-            <span>ðŸ”„</span> One-Click Database Sync
+            <span>🔄</span> One-Click Database Sync
           </h4>
           <p class="small-muted" style="margin-bottom:14px">Push your current admissions, teacher assessments, and broadcast bulletins into Supabase tables.</p>
           <button class="btn btn-gold" onclick="syncAllToSupabase()">
-            ðŸš€ Sync Local Data to Supabase Cloud
+            🚀 Sync Local Data to Supabase Cloud
           </button>
           <div id="sbSyncResultBox" style="margin-top:14px;display:none"></div>
         </div>
@@ -7365,11 +7333,11 @@ function supabasePanelHTML() {
               <input readonly value="${callbackUrl}" id="sbCallbackUrlInput" style="font-size:0.8rem;background:var(--surface-alt)">
               <button class="btn btn-sm btn-navy" onclick="copyCallbackUrl()">Copy</button>
             </div>
-            <li>Open <a href="https://github.com/settings/applications/new" target="_blank" rel="noopener" style="color:var(--navy-800);font-weight:700">GitHub &gt; New OAuth Application â†—</a> and paste the Callback URL above.</li>
+            <li>Open <a href="https://github.com/settings/applications/new" target="_blank" rel="noopener" style="color:var(--navy-800);font-weight:700">GitHub &gt; New OAuth Application ↗</a> and paste the Callback URL above.</li>
             <li>In Supabase Dashboard, go to <b>Authentication &gt; Providers &gt; GitHub</b>, paste your GitHub <b>Client ID</b> &amp; <b>Secret</b>, and toggle to <b>ON</b>.</li>
           </ol>
           <div class="note-box" style="margin-top:10px">
-            <span>ðŸ’¡</span>
+            <span>💡</span>
             <div>The portal's student, parent, and staff login forms now include the <b>Sign in with GitHub</b> button!</div>
           </div>
         </div>
@@ -7377,12 +7345,12 @@ function supabasePanelHTML() {
         <!-- Database Schema Card -->
         <div class="card">
           <h4 style="font-size:1.05rem;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-            <span>ðŸ“‹</span> Supabase SQL Schema
+            <span>📋</span> Supabase SQL Schema
           </h4>
           <p class="small-muted" style="margin-bottom:12px">We generated <code>supabase_schema.sql</code> in your project repository with all PostgreSQL tables, indexes, and RLS policies.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn btn-sm btn-navy" onclick="copySchemaSQL()">ðŸ“‹ Copy SQL Script</button>
-            <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Supabase SQL Editor â†—</a>
+            <button class="btn btn-sm btn-navy" onclick="copySchemaSQL()">📋 Copy SQL Script</button>
+            <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Supabase SQL Editor ↗</a>
           </div>
         </div>
       </div>
@@ -7416,7 +7384,7 @@ async function testSbConnection() {
   box.innerHTML = `<p class="small-muted">Testing connection to Supabase...</p>`;
 
   if (!window.SupabaseService) {
-    box.innerHTML = `<div class="note-box" style="border-left-color:var(--crimson-500)"><span>âŒ</span><div>Supabase service library not loaded.</div></div>`;
+    box.innerHTML = `<div class="note-box" style="border-left-color:var(--crimson-500)"><span>❌</span><div>Supabase service library not loaded.</div></div>`;
     return;
   }
 
@@ -7425,7 +7393,7 @@ async function testSbConnection() {
     Sound.playSuccess();
     box.innerHTML = `
       <div class="note-box" style="border-left-color:var(--emerald-500);background:rgba(16,185,129,0.08)">
-        <span>âœ…</span>
+        <span>✅</span>
         <div><b>Success!</b> ${escapeHtml(res.message)}</div>
       </div>`;
     const badge = document.getElementById('supabaseStatusBadge');
@@ -7436,7 +7404,7 @@ async function testSbConnection() {
   } else {
     box.innerHTML = `
       <div class="note-box" style="border-left-color:var(--crimson-500);background:rgba(239,68,68,0.08)">
-        <span>âŒ</span>
+        <span>❌</span>
         <div><b>Connection Failed:</b> ${escapeHtml(res.message)}</div>
       </div>`;
     const badge = document.getElementById('supabaseStatusBadge');
@@ -7474,13 +7442,13 @@ async function syncAllToSupabase() {
       Sound.playSuccess();
       box.innerHTML = `
         <div class="note-box" style="border-left-color:var(--emerald-500);background:rgba(16,185,129,0.08)">
-          <span>âœ…</span><div>${escapeHtml(res.message)}</div>
+          <span>✅</span><div>${escapeHtml(res.message)}</div>
         </div>`;
       toast('Local data synced to Supabase Cloud!');
     } else {
       box.innerHTML = `
         <div class="note-box" style="border-left-color:var(--crimson-500);background:rgba(239,68,68,0.08)">
-          <span>âŒ</span><div>${escapeHtml(res.message)}</div>
+          <span>❌</span><div>${escapeHtml(res.message)}</div>
         </div>`;
     }
   }
@@ -7543,20 +7511,20 @@ go('home');
       <img src="assets/school_logo.png" alt="School Logo" class="wa-popup-logo">
       <div>
         <div class="wa-popup-title">Mojuli Christ Glorious School</div>
-        <div class="wa-popup-sub">ðŸŸ¢ Active &amp; Ready to Chat</div>
+        <div class="wa-popup-sub">🟢 Active &amp; Ready to Chat</div>
       </div>
-      <button class="wa-popup-close" onclick="toggleWaPopup()" aria-label="Close Chat Popup">âœ•</button>
+      <button class="wa-popup-close" onclick="toggleWaPopup()" aria-label="Close Chat Popup">✕</button>
     </div>
     <div class="wa-popup-body">
-      <p>Hello! ðŸ‘‹ Welcome to Mojuli Christ Glorious School. How can we assist you today?</p>
+      <p>Hello! 👋 Welcome to Mojuli Christ Glorious School. How can we assist you today?</p>
       <div class="wa-chat-options">
         <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20inquire%20about%20admissions." target="_blank" rel="noopener" class="wa-chat-link">
-          <span class="wa-link-num">ðŸ“± Line 1: 07042664309</span>
-          <span class="wa-link-desc">Admissions &amp; General Enquiries â†’</span>
+          <span class="wa-link-num">📱 Line 1: 07042664309</span>
+          <span class="wa-link-desc">Admissions &amp; General Enquiries →</span>
         </a>
         <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20inquire%20about%20admissions." target="_blank" rel="noopener" class="wa-chat-link">
-          <span class="wa-link-num">ðŸ“ž Line 2: 0803779632</span>
-          <span class="wa-link-desc">Administration &amp; Principal Desk â†’</span>
+          <span class="wa-link-num">📞 Line 2: 0803779632</span>
+          <span class="wa-link-desc">Administration &amp; Principal Desk →</span>
         </a>
       </div>
     </div>
@@ -7569,6 +7537,3 @@ go('home');
 
 </body>
 </html>
-
-
-
