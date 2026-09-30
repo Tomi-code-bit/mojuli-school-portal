@@ -2365,12 +2365,12 @@ const SAMPLE_TIMETABLE = [
 const DEFAULT_USER_ACCOUNTS = [
   {
     id: "acc_admin_01",
-    identifier: "admin@mojulichristglorious.edu.ng",
-    email: "admin@mojulichristglorious.edu.ng",
+    identifier: "Success Tomisin Ajakaye",
+    email: "Success Tomisin Ajakaye",
     phone: "07042664309",
-    name: "School Administrator",
+    name: "Success Tomisin Ajakaye",
     role: "admin",
-    password: "admin2026",
+    password: "MJL/Ad/3145",
     registeredAt: "01 Jan 2026"
   },
   {
@@ -2481,19 +2481,7 @@ function verifyUserLogin(identifier, password, requiredRole) {
 
   const acc = findUserAccount(cleanId);
   if (!acc) {
-    // Check fallback demo credentials
-    if (cleanPass === cleanId || cleanPass === 'student123' || cleanPass === 'parent123' || cleanPass === 'staffpass' || cleanPass === 'admin2026' || cleanPass === 'admin123') {
-      return { 
-        success: true, 
-        account: { 
-          id: cleanId, 
-          identifier: cleanId, 
-          name: cleanId.includes('/') ? "Enrolled Student" : (cleanId.includes('@') ? "Staff Member" : "Parent User"), 
-          role: requiredRole || 'student-primary',
-          cls: 'Primary 4'
-        } 
-      };
-    }
+    // Demo fallback removed for production purity
     if (isStudentAuth) {
       return { 
         success: false, 
@@ -4807,22 +4795,15 @@ registerView('staff-login', ()=>`
         <div id="authLoginPanel-staff">
           <form id="loginForm-staff">
             <div class="field">
-              <label>Staff Identifier / Official Email *</label>
-              <input required id="staffEmailInput" placeholder="admin@mojulichristglorious.edu.ng" value="admin@mojulichristglorious.edu.ng">
+              <label>Staff Identifier / Official Username *</label>
+              <input required id="staffEmailInput" placeholder="e.g. MJL/st/26/001 or Admin">
             </div>
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="staffPassInput" placeholder="••••••••" value="admin2026">
+                <input required type="password" id="staffPassInput" placeholder="••••••••">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('staffPassInput', this)">Show</button>
               </div>
-            </div>
-            <div class="field">
-              <label>Designated Console Role *</label>
-              <select id="staffRoleSelect" required>
-                <option value="admin">Principal &amp; Administrator</option>
-                <option value="teacher">Classroom Teacher</option>
-              </select>
             </div>
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console →</button>
           </form>
@@ -5641,6 +5622,30 @@ registerView('admin-dashboard', ()=>`
               </div>
             </div>
 
+            </div>
+
+            <!-- Administrators Management Card -->
+            <div class="card">
+              <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🛡️ Administrators Management</h4>
+              <p class="small-muted" style="margin-bottom:12px">Register a new administrator. Passwords will automatically follow the MJL/Ad/XXXX pattern.</p>
+              <div class="field">
+                <label>Admin Name</label>
+                <input id="newAdminName" placeholder="e.g. Success Tomisin Ajakaye">
+              </div>
+              <div class="field">
+                <label>Identifier / Email</label>
+                <input id="newAdminId" placeholder="e.g. admin2@mojulichristglorious.edu.ng">
+              </div>
+              <div class="field">
+                <label>4-Digit Secure Pin</label>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-weight:bold;background:var(--surface);padding:10px;border:1px solid var(--border);border-radius:4px">MJL/Ad/</span>
+                  <input type="text" id="newAdminPin" placeholder="3145" maxlength="4" style="flex:1">
+                </div>
+              </div>
+              <button type="button" class="btn btn-navy" style="width:100%" onclick="createNewAdmin()">+ Add Administrator</button>
+            </div>
+
           </div>
 
           <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:20px;flex-wrap:wrap">
@@ -6104,7 +6109,7 @@ function renderAdminStaffApplications(){
         <td style="font-weight:700">${escapeHtml(a.cls)}</td>
         <td><b>${a.correct} / ${a.total}</b> (${a.score}%)</td>
         <td>${a.date}</td>
-        <td><span class="pill ${pillClass(a.status)}">${a.status}</span></td>
+        <td><span class="pill ${pillClass(a.status)}">${a.status}</span>${a.hiredAccountId ? `<br><small style="color:var(--navy-600);font-weight:bold">ID: ${a.hiredAccountId}</small>` : ''}</td>
         <td>
           <select onchange="updateStaffAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
             <option ${a.status==='Pending Review'?'selected':''}>Pending Review</option>
@@ -6116,10 +6121,37 @@ function renderAdminStaffApplications(){
       </tr>`).join('')}</tbody></table></div>`;
 }
 
+function generateNextStaffId() {
+  const staff = userAccounts.filter(u => u.role === 'teacher' && String(u.id).startsWith('MJL/st/26/'));
+  const max = staff.reduce((m, u) => {
+    const num = parseInt(u.id.split('/').pop(), 10) || 0;
+    return num > m ? num : m;
+  }, 0);
+  return `MJL/st/26/${String(max + 1).padStart(3, '0')}`;
+}
+
 function updateStaffAppStatus(id, status){
   const app = staffApplications.find(a=>a.id===id);
   if(app){
     app.status = status;
+    if (status === 'Hired' && !app.hiredAccountId) {
+      const newId = generateNextStaffId();
+      const newAcc = {
+        id: newId,
+        identifier: newId,
+        email: app.email,
+        phone: app.phone,
+        name: app.name,
+        role: "teacher",
+        cls: app.cls,
+        password: newId,
+        registeredAt: new Date().toLocaleDateString('en-GB')
+      };
+      userAccounts.push(newAcc);
+      saveUserAccounts();
+      app.hiredAccountId = newId;
+      toast(`Account created for ${app.name}: ${newId}`);
+    }
     saveStaffApplications();
     if(window.SupabaseService) window.SupabaseService.updateStaffAppStatus(id, status);
     toast(`Recruitment status changed to "${status}"`);
@@ -6184,6 +6216,42 @@ function deleteAnnouncement(idx) {
     }
   });
 }
+
+window.createNewAdmin = function() {
+  const name = (document.getElementById('newAdminName')?.value || '').trim();
+  const ident = (document.getElementById('newAdminId')?.value || '').trim();
+  const pin = (document.getElementById('newAdminPin')?.value || '').trim();
+
+  if (!name || !ident || pin.length !== 4) {
+    toast('❌ Please fill all fields and provide exactly a 4-digit pin.');
+    return;
+  }
+
+  const existing = findUserAccount(ident);
+  if (existing) {
+    toast('❌ An account with this identifier/email already exists.');
+    return;
+  }
+
+  const id = "acc_admin_" + Date.now();
+  const newAcc = {
+    id: id,
+    identifier: ident,
+    email: ident.includes('@') ? ident : "",
+    phone: "",
+    name: name,
+    role: "admin",
+    password: "MJL/Ad/" + pin,
+    registeredAt: new Date().toLocaleDateString('en-GB')
+  };
+  userAccounts.push(newAcc);
+  saveUserAccounts();
+  
+  document.getElementById('newAdminName').value = "";
+  document.getElementById('newAdminId').value = "";
+  document.getElementById('newAdminPin').value = "";
+  toast('✅ New Administrator successfully registered!');
+};
 
 function saveVisualSettingsForm() {
   const getVal = (id, fallback) => {
@@ -7019,22 +7087,18 @@ function afterRender(id){
       f.addEventListener('submit', e=>{
         e.preventDefault();
         const ident = (document.getElementById('staffEmailInput')?.value || '').trim();
-        const role = document.getElementById('staffRoleSelect').value;
         const pass = (document.getElementById('staffPassInput')?.value || '').trim();
         
-        const res = verifyUserLogin(ident, pass, role);
-        if(!res.success) {
+        const res = verifyUserLogin(ident, pass, 'staff');
+        if(!res.success || !res.account || !['admin','teacher'].includes(res.account.role)) {
           Sound.playClick();
-          toast('❌ ' + res.reason);
+          toast('❌ ' + (res.reason || 'Invalid staff credentials.'));
           return;
         }
 
+        const role = res.account.role;
         if(role === 'admin') {
-          const expected = settings.adminPasscode || 'admin2026';
-          if(settings.productionMode && pass !== expected && pass !== 'admin123' && pass !== 'staffpass') {
-            toast('❌ Invalid Admin/Principal Passcode');
-            return;
-          }
+          // Additional admin passcode check if needed (can be removed if they just use their account password)
         }
         session = { role: 'staff-'+role, name: res.account.name, user: res.account };
         Sound.playSuccess();
