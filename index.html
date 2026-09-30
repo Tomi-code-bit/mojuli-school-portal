@@ -1903,17 +1903,6 @@ footer.footer .bottom {
 
 <main id="app"></main>
 
-<!-- Quick Role Switcher Floating Dock (Essential for smooth previewing!) -->
-<aside class="quick-switcher-dock" id="demoQuickSwitcher" aria-label="Demo Role Switcher">
-  <span class="dock-title">⚡ Quick Role Switcher:</span>
-  <button class="dock-btn" onclick="quickLogin('home')">🏫 Public Site</button>
-  <button class="dock-btn" onclick="quickLogin('student-primary')">🧒 Primary Student</button>
-  <button class="dock-btn" onclick="quickLogin('student-secondary')">🎓 Secondary Student</button>
-  <button class="dock-btn" onclick="quickLogin('parent')">👨‍👩‍👧 Parent Portal</button>
-  <button class="dock-btn" onclick="quickLogin('teacher')">👩‍🏫 Teacher</button>
-  <button class="dock-btn" onclick="quickLogin('admin')">🛡️ Admin</button>
-  <button class="dock-btn" onclick="toggleWaPopup()" style="background:#25D366;color:#ffffff;font-weight:700">💬 WhatsApp Us</button>
-</aside>
 
 <!-- ================= FOOTER ================= -->
 <footer class="footer">
@@ -2685,7 +2674,7 @@ if(gallery && gallery.length < 6) {
   const DEMO_ASG_IDS = ['asg_1', 'asg_2', 'asg_3', 'asg_4'];
   const DEMO_STAFF_NAMES = ['Mrs. Bukola Fashola', 'Mr. Chukwudi Ani'];
 
-  if (!localStorage.getItem('mjl_clean_production_slate_v2')) {
+  if (!localStorage.getItem('mjl_clean_production_slate_v3')) {
     // 1. Purge demo pupils
     classRoster = (classRoster || []).filter(p => !DEMO_NAMES.includes(p.name));
     saveClassRoster();
@@ -2730,7 +2719,7 @@ if(gallery && gallery.length < 6) {
     savePupilCommentsStore();
     saveTermResultsHistory();
 
-    localStorage.setItem('mjl_clean_production_slate_v2', 'true');
+    localStorage.setItem('mjl_clean_production_slate_v3', 'true');
   }
 })();
 
@@ -4705,6 +4694,7 @@ function loginFormView(kind, title, idLabel, afterGo){
               </label>
             </div>
 
+            <div id="loginErrorMsg-${afterGo}" style="color:var(--crimson-600);font-size:0.9rem;margin-bottom:12px;text-align:center;font-weight:600;display:none;"></div>
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Sign In to Dashboard →</button>
           </form>
 
@@ -4805,6 +4795,7 @@ registerView('staff-login', ()=>`
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('staffPassInput', this)">Show</button>
               </div>
             </div>
+            <div id="loginErrorMsg-staff" style="color:var(--crimson-600);font-size:0.9rem;margin-bottom:12px;text-align:center;font-weight:600;display:none;"></div>
             <button class="btn btn-navy btn-lg" style="width:100%" type="submit">Access Console →</button>
           </form>
 
@@ -6063,14 +6054,26 @@ function renderAdminAdmissions(){
         <td>${a.date}</td>
         <td><span class="pill ${a.status.toLowerCase().replace(' ','')==='underreview'?'review':a.status.toLowerCase()}">${a.status}</span></td>
         <td>
-          <select onchange="updateAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
-            <option ${a.status==='Pending'?'selected':''}>Pending</option>
-            <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
-            <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
-            <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-          </select>
+          <div style="display:flex; gap:6px;">
+            <select onchange="updateAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
+              <option ${a.status==='Pending'?'selected':''}>Pending</option>
+              <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
+              <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
+              <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
+            </select>
+            <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600); border:1px solid #fee2e2;" onclick="deleteAdmissionApp('${a.id}')">Delete</button>
+          </div>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
+
+window.deleteAdmissionApp = function(id) {
+  if(confirm('Are you sure you want to completely delete this admission application?')) {
+    applications = applications.filter(a => a.id !== id);
+    saveApplications();
+    toast('Admission application deleted.');
+    renderAdminAdmissions();
+  }
+};
 }
 
 function updateAppStatus(id, status){
@@ -6111,15 +6114,27 @@ function renderAdminStaffApplications(){
         <td>${a.date}</td>
         <td><span class="pill ${pillClass(a.status)}">${a.status}</span>${a.hiredAccountId ? `<br><small style="color:var(--navy-600);font-weight:bold">ID: ${a.hiredAccountId}</small>` : ''}</td>
         <td>
-          <select onchange="updateStaffAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
-            <option ${a.status==='Pending Review'?'selected':''}>Pending Review</option>
-            <option ${a.status==='Shortlisted'?'selected':''}>Shortlisted</option>
-            <option ${a.status==='Hired'?'selected':''}>Hired</option>
-            <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-          </select>
+          <div style="display:flex; gap:6px;">
+            <select onchange="updateStaffAppStatus('${a.id}', this.value)" style="width:auto;padding:6px 10px;font-size:0.8rem">
+              <option ${a.status==='Pending Review'?'selected':''}>Pending Review</option>
+              <option ${a.status==='Shortlisted'?'selected':''}>Shortlisted</option>
+              <option ${a.status==='Hired'?'selected':''}>Hired</option>
+              <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
+            </select>
+            <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600); border:1px solid #fee2e2;" onclick="deleteStaffApp('${a.id}')">Delete</button>
+          </div>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
 }
+
+window.deleteStaffApp = function(id) {
+  if(confirm('Are you sure you want to completely delete this staff application?')) {
+    staffApplications = staffApplications.filter(a => a.id !== id);
+    saveStaffApplications();
+    toast('Staff application deleted.');
+    renderAdminStaffApplications();
+  }
+};
 
 function generateNextStaffId() {
   const staff = userAccounts.filter(u => u.role === 'teacher' && String(u.id).startsWith('MJL/st/26/'));
@@ -6966,11 +6981,18 @@ function afterRender(id){
         const ident = (document.getElementById(`loginId-${formKey}`)?.value || '').trim();
         const pass = (document.getElementById(`loginPass-${formKey}`)?.value || '').trim();
         const res = verifyUserLogin(ident, pass, targetRole);
+        const errEl = document.getElementById(`loginErrorMsg-${formKey}`);
+        
         if(!res.success) {
           Sound.playClick();
+          if (errEl) {
+            errEl.style.display = 'block';
+            errEl.innerHTML = '❌ ' + res.reason;
+          }
           toast('❌ ' + res.reason);
           return;
         }
+        if (errEl) errEl.style.display = 'none';
         session = { role: targetRole, student: res.account, name: res.account.name };
         Sound.playSuccess();
         toast(`🎉 Welcome back, ${res.account.name}!`);
@@ -7028,11 +7050,18 @@ function afterRender(id){
         const ident = (document.getElementById(`loginId-${formKey}`)?.value || '').trim();
         const pass = (document.getElementById(`loginPass-${formKey}`)?.value || '').trim();
         const res = verifyUserLogin(ident, pass, 'parent');
+        const errEl = document.getElementById(`loginErrorMsg-${formKey}`);
+        
         if(!res.success) {
           Sound.playClick();
+          if (errEl) {
+            errEl.style.display = 'block';
+            errEl.innerHTML = '❌ ' + res.reason;
+          }
           toast('❌ ' + res.reason);
           return;
         }
+        if (errEl) errEl.style.display = 'none';
         session = { role: 'parent', name: res.account.name, user: res.account, childId: res.account.childId };
         Sound.playSuccess();
         toast(`Welcome to Parent Portal, ${res.account.name}!`);
@@ -7090,11 +7119,18 @@ function afterRender(id){
         const pass = (document.getElementById('staffPassInput')?.value || '').trim();
         
         const res = verifyUserLogin(ident, pass, 'staff');
+        const errEl = document.getElementById('loginErrorMsg-staff');
+
         if(!res.success || !res.account || !['admin','teacher'].includes(res.account.role)) {
           Sound.playClick();
+          if (errEl) {
+            errEl.style.display = 'block';
+            errEl.innerHTML = '❌ ' + (res.reason || 'Invalid staff credentials.');
+          }
           toast('❌ ' + (res.reason || 'Invalid staff credentials.'));
           return;
         }
+        if (errEl) errEl.style.display = 'none';
 
         const role = res.account.role;
         if(role === 'admin') {
