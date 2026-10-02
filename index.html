@@ -90,8 +90,8 @@ html, body {
   overflow-x: hidden;
   width: 100%;
 }
-body {
-  margin: 0;
+html, body { overflow-x: hidden; width: 100%; }
+body { margin: 0;
   font-family: var(--font-body);
   color: var(--text-main);
   background-color: var(--bg-main);
@@ -398,6 +398,7 @@ nav.links button.active::after {
 
 @media (max-width: 1060px) {
   nav.links { display: none; }
+    .nav-actions .btn { display: none !important; }
     .nav-actions .btn { display: none !important; }
   .menu-toggle { display: inline-flex; }
   .mobile-nav { display: flex; }
@@ -1660,7 +1661,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 .rc-affective td { border: 1px solid #94A3B8; padding: 6px 8px; text-align: center; }
 .rc-affective td.trait { text-align: left; font-weight: 700; }
 @media(max-width: 600px) { .rc-comments, .rc-sign { grid-template-columns: 1fr !important; } }
-  .rc-comments { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 18px; font-size: 0.8rem; }
+  .rc-comments { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; margin-top: 18px; font-size: 0.8rem; }
 .rc-comments p { margin-bottom: 8px; color: #0F172A; }
 .rc-comments .rc-next { margin-top: 12px; font-weight: 800; color: #DC2626; }
 .rc-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: center; }
@@ -1870,6 +1871,29 @@ footer.footer .bottom {
     }
   }
 
+
+  #mobilePageTitle { display: none; }
+  @media (max-width: 1060px) {
+    .brand .name, .brand .motto { display: none; }
+    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
+  }
+  @media (max-width: 768px) {
+    .gallery-grid {
+      display: flex !important;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+    .gallery-grid::-webkit-scrollbar { height: 6px; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
+    .gallery-item {
+      min-width: 80vw;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1882,7 +1906,8 @@ footer.footer .bottom {
         <img src="assets/school_logo.png" alt="Mojuli Christ Glorious Nursery & Primary School Logo" style="width:100%;height:100%;object-fit:contain">
       </div>
       <div>
-        <div class="name">Mojuli Christ Glorious School</div>`n        <div id="mobilePageTitle">Home</div>
+        <div class="name">Mojuli Christ Glorious School</div>
+        <div id="mobilePageTitle">Home</div>
         <div class="motto">"JESUS IS OUR GREAT TEACHER"</div>
       </div>
     </div>
@@ -1910,8 +1935,9 @@ footer.footer .bottom {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
-    
-    <div class="mobile-nav" id="mobileNav">
+  </div>
+  
+  <div class="mobile-nav" id="mobileNav">
       <button data-go="home">Home</button>
       <button data-go="about">About</button>
       <button data-go="admission">Admissions</button>
@@ -1924,7 +1950,6 @@ footer.footer .bottom {
       <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (07042664309)</a>
       <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 18px;color:#25D366;font-weight:700">💬 Chat on WhatsApp (0803779632)</a>
     </div>
-  </div>
 </header>
 
 <main id="app"></main>
@@ -5772,8 +5797,8 @@ function renderAdminStudentRegistry() {
               <td>${escapeHtml(p.gender || 'Pupil')}</td>
               <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(📞 ${escapeHtml(p.phone || '')})</span></td>
               <td>
-                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">?? Report</button>
-<button class="btn btn-outline btn-sm" onclick="deleteEnrolledStudent('${p.id}')" style="padding:4px 6px;margin-left:8px;border-color:var(--crimson-500);color:var(--crimson-600)">Del</button></td>
+                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button>
+              </td>
             </tr>
           `).join('')}
         </tbody>
@@ -7554,6 +7579,48 @@ if (window.SupabaseService) {
 
 // Launch application
 go('home');
+function deleteAdmissionApp(id) {
+  showModal({
+    title: 'Delete Application',
+    message: 'Permanently delete this student admission application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      applications = applications.filter(a => a.id !== id);
+      saveApplications();
+      renderAdminAdmissions();
+      toast('Application deleted');
+    }
+  });
+}
+function deleteStaffApp(id) {
+  showModal({
+    title: 'Delete Staff Application',
+    message: 'Permanently delete this teacher recruitment application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      staffApplications = staffApplications.filter(a => a.id !== id);
+      saveStaffApplications();
+      renderAdminStaffApplications();
+      toast('Teacher application deleted');
+    }
+  });
+}
+function deleteEnrolledStudent(id) {
+  showModal({
+    title: 'Delete Enrolled Student',
+    message: 'Permanently remove this student from the registry?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      const idx = classRoster.findIndex(p => p.id === id);
+      if(idx > -1) {
+        classRoster.splice(idx, 1);
+        DB.set('classRoster', classRoster);
+        renderAdminStudentRegistry();
+        toast('Student removed from registry');
+      }
+    }
+  });
+}
 function deleteAdmissionApp(id) {
   showModal({
     title: 'Delete Application',
