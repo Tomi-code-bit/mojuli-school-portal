@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,66 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>`n<script>// --- ANIMATIONS ---
-document.addEventListener('DOMContentLoaded', () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }, i * 100);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  // Override go() to apply observer to new elements
-  const originalGo = window.go;
-  window.go = function(id, extra, fromPop) {
-    if(originalGo) originalGo(id, extra, fromPop);
-    setTimeout(() => {
-      document.querySelectorAll('section').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-    }, 100);
-  };
-});
-</script>
-<script src="supabaseClient.js">// --- ANIMATIONS ---
-document.addEventListener('DOMContentLoaded', () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }, i * 100);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  // Override go() to apply observer to new elements
-  const originalGo = window.go;
-  window.go = function(id, extra, fromPop) {
-    if(originalGo) originalGo(id, extra, fromPop);
-    setTimeout(() => {
-      document.querySelectorAll('section').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-    }, 100);
-  };
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabaseClient.js"></script>
 <style>
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    1. DESIGN TOKENS & CSS VARIABLES
    ========================================================================= */
@@ -89,8 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   --crimson-500: #EF4444;
   --emerald-600: #059669;
   --emerald-500: #10B981;
-    --green-700: #047857;
-    --bg-alt: var(--surface);
   
   --bg-main: #F8FAFC;
   --surface: #FFFFFF;
@@ -113,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-full: 9999px;
+  --green-700: #047857;
+  --bg-alt: var(--surface-alt);
   
   --font-heading: 'Fraunces', Georgia, serif;
   --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
@@ -149,8 +92,8 @@ html, body {
   overflow-x: hidden;
   width: 100%;
 }
-html, body { overflow-x: hidden; width: 100%; }
-body { margin: 0;
+body {
+  margin: 0;
   font-family: var(--font-body);
   color: var(--text-main);
   background-color: var(--bg-main);
@@ -176,7 +119,6 @@ img, svg { max-width: 100%; display: block; }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .wrap-narrow { max-width: 840px; margin: 0 auto; padding: 0 24px; }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    2. BADGES & BUTTONS
    ========================================================================= */
@@ -285,7 +227,6 @@ img, svg { max-width: 100%; display: block; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); }
 .btn-lg { padding: 13px 26px; font-size: 0.98rem; border-radius: var(--radius-lg); }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    3. HEADER & NAVIGATION
    ========================================================================= */
@@ -424,22 +365,37 @@ nav.links button.active::after {
 .menu-toggle.open svg { transform: rotate(90deg); }
 .menu-toggle svg { transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-.mobile-nav { max-height: 0; overflow-y: auto; overflow-x: hidden; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-main); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99; 
+.mobile-nav {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   max-height: 0;
   overflow: hidden;
   opacity: 0;
+  visibility: hidden;
   display: none;
   flex-direction: column;
   width: 100%;
   gap: 4px;
   padding: 0 24px;
+  background: rgba(11, 42, 91, 0.98);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.25s ease;
+  box-shadow: 0 18px 30px rgba(4, 14, 32, 0.35);
+  overscroll-behavior: contain;
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.25s ease, visibility 0s linear 0.35s;
 }
-.mobile-nav.open { max-height: calc(100vh - 70px); 
-  max-height: 480px;
+[data-theme="dark"] .mobile-nav { background: rgba(6, 13, 26, 0.98); }
+.mobile-nav.open {
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   opacity: 1;
+  visibility: visible;
   padding: 12px 24px 18px;
+  transition-delay: 0s;
 }
 .mobile-nav button {
   text-align: left;
@@ -460,12 +416,17 @@ nav.links button.active::after {
 @media (max-width: 1060px) {
   nav.links { display: none; }
     .nav-actions .btn { display: none !important; }
-    .nav-actions .btn { display: none !important; }
   .menu-toggle { display: inline-flex; }
-  .mobile-nav { max-height: 0; overflow-y: auto; overflow-x: hidden; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-main); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99;  display: flex; }
+  .mobile-nav { display: flex; }
+  #soundToggleBtn { display: none; }
+}
+@media (max-width: 520px) {
+  .nav-row { padding: 10px 14px; gap: 10px; }
+  .brand { flex: 1 1 auto; min-width: 0; gap: 10px; }
+  .brand .name { font-size: 0.9rem; }
+  .brand .motto { font-size: 0.6rem; letter-spacing: 0.03em; }
 }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    4. HERO & MODERN SHOWCASE
    ========================================================================= */
@@ -631,7 +592,6 @@ nav.links button.active::after {
 }
 .hero-trust-item svg { width: 16px; height: 16px; color: var(--gold-400); }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    5. SECTIONS, CARDS & GRIDS
    ========================================================================= */
@@ -734,7 +694,6 @@ section.pad.tight { padding: 48px 0; }
 .list-simple .row p { font-size: 0.84rem; margin-top: 4px; }
 .list-simple .row .meta { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    6. FORMS, INPUTS & ACCORDIONS
    ========================================================================= */
@@ -854,7 +813,6 @@ legend {
 .step h4 { font-size: 0.98rem; margin-bottom: 6px; }
 .step p { font-size: 0.84rem; line-height: 1.6; }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    7. DASHBOARDS, TABLES & ANALYTICS
    ========================================================================= */
@@ -1052,7 +1010,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   color: #FCD34D;
 }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    8. VISUAL ANALYTICS, RADIAL GAUGE & PERFORMANCE BARS
    ========================================================================= */
@@ -1212,7 +1169,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 .tracker-step-item.done .tracker-icon { background: var(--emerald-500); }
 .tracker-step-item.active .tracker-icon { background: var(--gold-500); }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    9. AUTH, FORUM & MODALS
    ========================================================================= */
@@ -1650,7 +1606,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   color: var(--navy-950);
 }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    10. PRINTABLE OFFICIAL REPORT CARD & TUITION RECEIPT
    ========================================================================= */
@@ -1730,7 +1685,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 .rc-affective td { border: 1px solid #94A3B8; padding: 6px 8px; text-align: center; }
 .rc-affective td.trait { text-align: left; font-weight: 700; }
 @media(max-width: 600px) { .rc-comments, .rc-sign { grid-template-columns: 1fr !important; } }
-  .rc-comments { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; margin-top: 18px; font-size: 0.8rem; }
+  .rc-comments { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 18px; font-size: 0.8rem; }
 .rc-comments p { margin-bottom: 8px; color: #0F172A; }
 .rc-comments .rc-next { margin-top: 12px; font-weight: 800; color: #DC2626; }
 .rc-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: center; }
@@ -1774,7 +1729,6 @@ footer.footer .bottom {
   gap: 12px;
 }
 
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    WHATSAPP FLOATING WIDGET & DIRECT CONTACT STYLES
    ========================================================================= */
@@ -1918,93 +1872,36 @@ footer.footer .bottom {
 }
 
 
-  #mobilePageTitle { display: none; }
-  @media (max-width: 1060px) {
-    .brand .name, .brand .motto { display: none; }
-    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
-  }
-  @media (max-width: 768px) {
-    .gallery-grid {
-      display: flex !important;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      gap: 16px;
-      padding-bottom: 16px;
-      scroll-behavior: smooth;
-    }
-    .gallery-grid::-webkit-scrollbar { height: 6px; }
-    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
-    .gallery-item {
-      min-width: 80vw;
-      scroll-snap-align: center;
-      flex-shrink: 0;
-    }
-  }
+/* ---- Gallery slider & animations ---- */
+.slider-wrap{position:relative}
+.slider{display:flex;gap:18px;overflow-x:auto;position:relative;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab}
+.slider::-webkit-scrollbar{display:none}
+.slider.drag{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;aspect-ratio:4/3;border-radius:var(--radius-md);overflow:hidden;position:relative;cursor:pointer;border:1px solid var(--border);background:var(--surface-alt);transition:transform .35s,box-shadow .35s}
+@media(min-width:640px){.slide{flex-basis:calc((100% - 18px)/2)}}
+@media(min-width:1000px){.slide{flex-basis:calc((100% - 36px)/3)}}
+.slide img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.slide:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.slide:hover img{transform:scale(1.07)}
+.slide .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 12px;background:linear-gradient(0deg,rgba(11,42,91,.9),transparent);color:#fff;font-size:.76rem;font-weight:700;transform:translateY(100%);transition:transform .35s}
+.slide:hover .cap{transform:none}
+@media(hover:none){.slide .cap{transform:none}}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:42px;height:42px;border-radius:50%;border:none;background:rgba(11,42,91,.85);color:#fff;font-size:1.6rem;line-height:1}
+.slider-btn.prev{left:-6px}.slider-btn.next{right:-6px}
+.slider-dots{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.slider-dots button{width:9px;height:9px;border-radius:9px;border:none;padding:0;background:var(--border-strong);transition:width .3s,background .3s}
+.slider-dots button.on{width:24px;background:var(--gold-500)}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.16,1,.3,1),box-shadow .2s,border-color .2s;transition-delay:var(--d,0s)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
+.toast{display:flex;align-items:center;gap:10px;max-width:min(92vw,460px)}
+.toast .ti{font-weight:800;font-size:1.05rem}
+.toast.success{background:#065F46;border-color:#10B981}
+.toast.error{background:#7F1D1D;border-color:#EF4444}
+input.err,select.err,textarea.err{border-color:var(--crimson-500)!important;box-shadow:0 0 0 3px rgba(239,68,68,.18)!important}
 
-
-  #mobilePageTitle { display: none; }
-  @media (max-width: 1060px) {
-    .brand .name, .brand .motto { display: none; }
-    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
-  }
-  @media (max-width: 768px) {
-    .gallery-grid {
-      display: flex !important;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      gap: 16px;
-      padding-bottom: 16px;
-      scroll-behavior: smooth;
-    }
-    .gallery-grid::-webkit-scrollbar { height: 6px; }
-    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
-    .gallery-item {
-      min-width: 80vw;
-      scroll-snap-align: center;
-      flex-shrink: 0;
-    }
-  }
-
-  /* Custom Added Styles */
-  #mobilePageTitle { display: none; }
-  @media (max-width: 1060px) {
-    .brand .name, .brand .motto { display: none; }
-    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
-  }
-  @media print {
-    #printReportCard { position: relative; z-index: 1; }
-    #printReportCard::before {
-      content: " ";
-      position: absolute;
-      top: 25%; left: 15%; width: 70%; height: 50%;
-      background: url('assets/school_logo.png') center/contain no-repeat;
-      opacity: 0.1;
-      z-index: -1;
-    }
-  }
-  @media (max-width: 768px) {
-    .gallery-grid {
-      display: flex !important;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      gap: 16px;
-      padding-bottom: 16px;
-      scroll-behavior: smooth;
-    }
-    .gallery-grid::-webkit-scrollbar { height: 6px; }
-    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
-    .gallery-item {
-      min-width: 80vw;
-      scroll-snap-align: center;
-      flex-shrink: 0;
-    }
-  }
-
-@media print { body::before { content: ''; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; background: url('assets/school_logo.png') center/contain no-repeat; opacity: 0.08; z-index: -1; pointer-events: none; } }
-
-.gallery-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; padding-bottom: 16px; scrollbar-width: none; -ms-overflow-style: none; } .gallery-slider::-webkit-scrollbar { display: none; } .gallery-slider > div { scroll-snap-align: center; flex: 0 0 100%; } @media(min-width: 600px) { .gallery-slider > div { flex: 0 0 calc(50% - 8px); } } @media(min-width: 900px) { .gallery-slider > div { flex: 0 0 calc(33.333% - 11px); } }
+.empty { padding: 28px 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
 </style>
-
 </head>
 <body>
 
@@ -2017,8 +1914,6 @@ footer.footer .bottom {
       </div>
       <div>
         <div class="name">Mojuli Christ Glorious School</div>
-        <div id="mobilePageTitle">Home</div>
-        <div id="mobilePageTitle">Home</div>
         <div class="motto">"JESUS IS OUR GREAT TEACHER"</div>
       </div>
     </div>
@@ -2040,9 +1935,11 @@ footer.footer .bottom {
         WhatsApp
       </a>
       
-      
+      <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+        🌓
+      </button>
       <button class="btn btn-gold btn-sm" data-go="parent-login">Parent Portal</button>
-      <button class="menu-toggle" id="menuToggleBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <button class="menu-toggle" id="menuToggleBtn" onclick="toggleMobileNav()" aria-label="Menu" aria-expanded="false" aria-controls="mobileNav">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -2125,7 +2022,7 @@ footer.footer .bottom {
 </footer>
 
 <!-- Modals, Toasts & Overlays -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="printReportCard"></div>
 
 <!-- Universal Smooth Modal (Replaces crude browser prompt & confirm) -->
@@ -2146,7 +2043,6 @@ footer.footer .bottom {
 </div>
 
 <script>
-.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    MOJULI CHRIST GLORIOUS SCHOOL — ENHANCED INTERACTIVE PORTAL
    ========================================================================= */
@@ -2154,26 +2050,33 @@ footer.footer .bottom {
 /* ---------------------------------------------------------------------
    0. STORAGE & LOCAL DATABASE
    --------------------------------------------------------------------- */
+const LS={get(k){try{return localStorage['getItem'](k);}catch(e){return null;}},set(k,v){try{localStorage['setItem'](k,v);}catch(e){}}};
+const _mem={};let _memWarned=false;
 const DB = {
   get(key, fallback){
-    try { const raw = localStorage.getItem('mjl_' + key); return raw ? JSON.parse(raw) : fallback; }
+    if(key in _mem) return _mem[key];
+    try { const raw = localStorage['getItem']('mjl_' + key); return raw ? JSON.parse(raw) : fallback; }
     catch(e){ return fallback; }
   },
   set(key, val){
-    try { localStorage.setItem('mjl_' + key, JSON.stringify(val)); }catch(e){}
+    try { localStorage['setItem']('mjl_' + key, JSON.stringify(val)); delete _mem[key]; }
+    catch(e){
+      _mem[key] = val;
+      if(!_memWarned){ _memWarned = true; setTimeout(()=>toast('Your browser is blocking storage, so information will be lost when you refresh or close this page. Open the site normally in Safari or Chrome (not a WhatsApp or private preview).','error'),400); }
+    }
   }
 };
 function genId(){ return Math.random().toString(36).slice(2, 10); }
 
 /* Theme handling */
 function initTheme(){
-  const saved = localStorage.getItem('mjl_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const saved = LS.get('mjl_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   document.documentElement.setAttribute('data-theme', saved);
 }
 function toggleTheme(){
   const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', current);
-  localStorage.setItem('mjl_theme', current);
+  LS.set('mjl_theme', current);
   Sound.playClick();
   toast(`Switched to ${current} mode`);
 }
@@ -2337,6 +2240,7 @@ const SAMPLE_AFFECTIVE = [
 ];
 
 const DEFAULT_AFFECTIVE = SAMPLE_AFFECTIVE;
+
 const DEFAULT_COMMENTS = {
   classTeacher: "{firstName} is enrolled for this academic term. Continuous assessment underway.",
   principal: "Welcome to Mojuli Christ Glorious School. Honor God through diligence and discipline.",
@@ -2526,32 +2430,13 @@ const SAMPLE_TIMETABLE = [
 /* ---------------------------------------------------------------------
    1.5 USER ACCOUNTS & PERSISTENT REGISTRATION SYSTEM
    --------------------------------------------------------------------- */
-const DEFAULT_USER_ACCOUNTS = [
-  {
-    id: "acc_admin_01",
-    identifier: "Success Tomisin Ajakaye",
-    email: "Success Tomisin Ajakaye",
-    phone: "07042664309",
-    name: "Success Tomisin Ajakaye",
-    role: "admin",
-    password: "MJL/Ad/3145",
-    registeredAt: "01 Jan 2026"
-  },
-  {
-    id: "acc_staff_01",
-    identifier: "teacher@mojulichristglorious.edu.ng",
-    email: "teacher@mojulichristglorious.edu.ng",
-    phone: "07042664309",
-    name: "Class Teacher",
-    role: "teacher",
-    cls: "Primary 4",
-    password: "teacher2026",
-    registeredAt: "01 Jan 2026"
-  }
-];
+const DEFAULT_USER_ACCOUNTS = [];
 
 let userAccounts = DB.get('userAccounts', null) || DEFAULT_USER_ACCOUNTS;
 function saveUserAccounts(){ DB.set('userAccounts', userAccounts); }
+/* one-time purge of the old built-in accounts whose passwords were public */
+userAccounts = userAccounts.filter(u => !(u.id==='acc_admin_01' && u.password==='MJL/Ad/3145') && !(u.id==='acc_staff_01' && u.password==='teacher2026'));
+saveUserAccounts();
 
 function findUserAccount(identifier) {
   if (!identifier) return null;
@@ -2581,7 +2466,7 @@ function registerUserAccount({ identifier, email, phone, name, role, cls, gender
     phone: phone || '',
     name: name || 'Registered User',
     role: role || 'student-primary',
-    cls: cls || 'Primary 4',
+    cls: role === 'admin' ? '' : (cls || 'Primary 4'),
     gender: gender || 'Female',
     childId: childId || '',
     password: password,
@@ -2622,10 +2507,10 @@ function verifyUserLogin(identifier, password, requiredRole) {
     (p.name && p.name.toLowerCase() === cleanId.toLowerCase())
   );
   if (rosterPupil) {
-    // Password can be exact Student ID (e.g. MJL/26/0001), or student123, or custom
+    // Password can be exact Student ID (e.g. MJL/26/0001), or custom
     const expectedId = rosterPupil.id.toUpperCase();
     const acc = findUserAccount(rosterPupil.id) || findUserAccount(cleanId);
-    if (cleanPass.toUpperCase() === expectedId || cleanPass === 'student123' || (acc && acc.password === cleanPass)) {
+    if (cleanPass.toUpperCase() === expectedId || (acc && acc.password === cleanPass)) {
       return {
         success: true,
         account: {
@@ -2639,7 +2524,7 @@ function verifyUserLogin(identifier, password, requiredRole) {
         }
       };
     } else {
-      return { success: false, reason: `Incorrect password for ${rosterPupil.name}. By default, your password is identical to your Student ID (${rosterPupil.id}).` };
+      return { success: false, reason: 'Incorrect ID or password. Please check and try again.' };
     }
   }
 
@@ -2649,18 +2534,14 @@ function verifyUserLogin(identifier, password, requiredRole) {
     if (isStudentAuth) {
       return { 
         success: false, 
-        reason: "Student Registration ID not found. Students cannot register themselves online. Please contact school administration or your class teacher to receive your official Student ID." 
+        reason: 'Incorrect ID or password. Please check and try again.' 
       };
     }
-    return { success: false, reason: "Account not found. Please click 'Create Account' to register." };
+    return { success: false, reason: 'Incorrect ID or password. Please check and try again.' };
   }
 
-  if (acc.password !== cleanPass && acc.identifier.toUpperCase() !== cleanPass.toUpperCase()) {
-    // Check master override
-    if (cleanPass === (settings.adminPasscode || 'admin2026') || cleanPass === 'admin123') {
-      return { success: true, account: acc };
-    }
-    return { success: false, reason: "Incorrect password. Please verify and try again." };
+  if (acc.password !== cleanPass) {
+    return { success: false, reason: 'Incorrect ID or password. Please check and try again.' };
   }
 
   return { success: true, account: acc };
@@ -2826,7 +2707,7 @@ const DEFAULT_SETTINGS = {
   nextTerm: "Second Term commences Monday, 11 January 2027. Boarders resume Sunday 10 January.",
   heroHeadline: "A Christian foundation for a lifetime of learning",
   heroSubtitle: "Mojuli Christ Glorious School nurtures children from Nursery through Primary and Secondary school with rigorous academics, godly character, disciplined mentorship, and an inspiring family atmosphere in Ado-Ekiti.",
-  adminPasscode: "admin2026",
+  adminPasscode: "",
   productionMode: false
 };
 let settings = Object.assign({}, DEFAULT_SETTINGS, DB.get('settings', null) || {});
@@ -2849,7 +2730,7 @@ if(gallery && gallery.length < 6) {
   const DEMO_ASG_IDS = ['asg_1', 'asg_2', 'asg_3', 'asg_4'];
   const DEMO_STAFF_NAMES = ['Mrs. Bukola Fashola', 'Mr. Chukwudi Ani'];
 
-  if (!localStorage.getItem('mjl_clean_production_slate_v2')) {
+  if (!LS.get('mjl_clean_production_slate_v2')) {
     // 1. Purge demo pupils
     classRoster = (classRoster || []).filter(p => !DEMO_NAMES.includes(p.name));
     saveClassRoster();
@@ -2861,12 +2742,6 @@ if(gallery && gallery.length < 6) {
       (u.role === 'teacher' && u.identifier === 'teacher@mojulichristglorious.edu.ng') ||
       (!DEMO_NAMES.some(n => u.name && u.name.includes(n)) && !['acc_pry_001', 'acc_sec_009', 'acc_parent_01'].includes(u.id))
     );
-    userAccounts = userAccounts.filter(u => u.role !== 'admin'); if (true) {
-      
-    }
-    if (!userAccounts.some(u => u.role === 'teacher')) {
-      userAccounts.push(DEFAULT_USER_ACCOUNTS[1]);
-    }
     saveUserAccounts();
 
     // 3. Purge demo assignments
@@ -2894,7 +2769,7 @@ if(gallery && gallery.length < 6) {
     savePupilCommentsStore();
     saveTermResultsHistory();
 
-    localStorage.setItem('mjl_clean_production_slate_v2', 'true');
+    LS.set('mjl_clean_production_slate_v2', 'true');
   }
 })();
 
@@ -3053,10 +2928,24 @@ function closeModal(){
 const views = {};
 function registerView(id, renderFn){ views[id] = renderFn; }
 
-function go(id){
+/* Pages that are not in the menu highlight the menu item they belong to (mobile dropdown only) */
+const NAV_ALIAS = {
+  'student-login-primary': 'student-login',
+  'student-login-secondary': 'student-login',
+  'primary-dashboard': 'student-login',
+  'secondary-dashboard': 'student-login',
+  'teacher-dashboard': 'staff-login',
+  'admin-dashboard': 'staff-login',
+  'staff-signup': 'staff-login',
+  'parent-portal': 'parent-login'
+};
+
+function go(id, fromHistory){
+  if(!fromHistory && id !== window._cv){ try{ history.pushState({v:id},'','#'+id); }catch(e){} }
+  window._cv = id;
+  if(!PROTECTED_VIEWS.has(id)) session = { role:null, name:null, meta:null };
   Sound.playClick();
-  document.getElementById('mobileNav').classList.remove('open');
-  document.getElementById('menuToggleBtn').classList.remove('open');
+  closeMobileNav();
   const app = document.getElementById('app');
   app.style.opacity = '0';
   app.style.transform = 'translateY(8px)';
@@ -3064,12 +2953,13 @@ function go(id){
   
   setTimeout(() => {
     app.innerHTML = views[id] ? views[id]() : views['home']();
-    document.getElementById("mobileNav").classList.remove("open"); document.querySelectorAll('nav.links button, .mobile-nav button').forEach(b=>{
+    document.querySelectorAll('nav.links button').forEach(b=>{
       b.classList.toggle('active', b.dataset.go === id);
     });
+    document.querySelectorAll('.mobile-nav button').forEach(b=>{
+      b.classList.toggle('active', b.dataset.go === (NAV_ALIAS[id] || id));
+    });
     window.scrollTo({top:0, behavior:'smooth'});
-      const activeBtn = document.querySelector('.mobile-nav button.active');
-      if(activeBtn) document.getElementById('mobilePageTitle').innerText = activeBtn.innerText;
     applyHeaderLogo();
     
     app.style.opacity = '1';
@@ -3085,16 +2975,44 @@ document.addEventListener('click', e=>{
 
 function toggleMobileNav(){
   Sound.playClick();
-  document.getElementById('mobileNav').classList.toggle('open');
-  document.getElementById('menuToggleBtn').classList.toggle('open');
+  const open = document.getElementById('mobileNav').classList.toggle('open');
+  const btn = document.getElementById('menuToggleBtn');
+  btn.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
-function toast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
+function closeMobileNav(){
+  const nav = document.getElementById('mobileNav');
+  const btn = document.getElementById('menuToggleBtn');
+  if(nav) nav.classList.remove('open');
+  if(btn){ btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+}
+
+/* Close the dropdown when tapping outside it, on a WhatsApp link, or pressing Escape */
+document.addEventListener('click', e=>{
+  const nav = document.getElementById('mobileNav');
+  if(!nav || !nav.classList.contains('open')) return;
+  if(e.target.closest('#menuToggleBtn')) return;
+  if(!e.target.closest('#mobileNav') || e.target.closest('#mobileNav a')) closeMobileNav();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeMobileNav();
+});
+
+function toast(msg,type){
+  const m0=String(msg==null?'':msg);
+  if(!type){
+    type=/^❌|^(no|not) |^please |\b(cannot|can't|could not|couldn't|failed|invalid|incorrect|already|not found|do not match|denied|not allowed)\b/i.test(m0)?'error'
+      :/^(🎉|✅)|\b(deleted|removed|saved|updated|added|published|broadcasted|posted|received|reset|archived|copied|welcome|access granted|enrolled|registered|created|synced|verified|generated|uploaded)\b/i.test(m0)?'success':'info';
+  }
+  const el=document.getElementById('toast');
+  el.className='toast show '+type;
+  el.innerHTML='<span class="ti"></span><span class="tm"></span>';
+  el.firstChild.textContent={success:'✓',error:'✕',info:'ℹ'}[type]||'ℹ';
+  el.lastChild.textContent=m0.replace(/^(❌|✅|🎉)\s*/,'');
+  if(type==='error')Sound.playError();else if(type==='success')Sound.playSuccess();
   clearTimeout(window._toastT);
-  window._toastT = setTimeout(()=>el.classList.remove('show'), 2800);
+  window._toastT=setTimeout(()=>el.classList.remove('show'),type==='error'?5000:3000);
 }
 
 /* Quick One-Click Role Switcher */
@@ -3139,15 +3057,15 @@ function quickLogin(role) {
     go('teacher-dashboard');
     toast('Logged in to Teacher Dashboard');
   } else if(role === 'admin') {
-    if (settings.productionMode) {
+    if (true) {
       showModal({
         title: "🔒 Admin Security Verification",
         message: "Management Console is restricted in Production Security Mode. Please enter the Admin Passcode to proceed.",
-        inputPlaceholder: "Enter admin passcode (e.g. admin2026)",
+        inputPlaceholder: "Enter the admin passcode",
         confirmText: "Unlock Console",
         cancelText: "Cancel",
         onConfirm: (enteredPasscode) => {
-          if (enteredPasscode === (settings.adminPasscode || 'admin2026') || enteredPasscode === 'admin123') {
+          if (settings.adminPasscode && enteredPasscode === settings.adminPasscode) {
             session = { role: 'staff-admin' };
             go('admin-dashboard');
             toast('Admin verified successfully');
@@ -3287,13 +3205,7 @@ function printReportCard(kind){
     };
     const resolvedKind = kindForClass(student.cls);
     document.getElementById('printReportCard').innerHTML = buildReportCardHTML(student, resolvedKind, child.id);
-    
-  const sheet = document.createElement('style');
-  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
-  document.head.appendChild(sheet);
-  window.print();
-  setTimeout(()=> sheet.remove(), 2000);
-
+    window.print();
   } else {
     printReportCardForPupil(activePupilId, kind);
   }
@@ -3311,13 +3223,7 @@ function printReportCardForPupil(pupilId, kind){
   };
   const resolvedKind = kindForClass(student.cls);
   document.getElementById('printReportCard').innerHTML = buildReportCardHTML(student, resolvedKind, pupil.id);
-  
-  const sheet = document.createElement('style');
-  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
-  document.head.appendChild(sheet);
   window.print();
-  setTimeout(()=> sheet.remove(), 2000);
-
 }
 
 /* ---------------------------------------------------------------------
@@ -4176,13 +4082,7 @@ function promptRemovePupilFromRoster(pupilId) {
 }
 
 function printClassRoster() {
-  
-  const sheet = document.createElement('style');
-  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
-  document.head.appendChild(sheet);
   window.print();
-  setTimeout(()=> sheet.remove(), 2000);
-
 }
 
 function renderTeacherAttendancePanel() {
@@ -4194,7 +4094,7 @@ function renderTeacherAttendancePanel() {
         <h2 style="margin-bottom:4px">Mark Attendance — Primary 4</h2>
         <p class="small-muted">Daily Roll Call Register for all ${classRoster.length} enrolled pupils.</p>
       </div>
-      <button class="btn btn-navy btn-sm" onclick="toast('Attendance register saved successfully for today')">💾 Save Attendance Register</button>
+      <button class="btn btn-navy btn-sm" onclick="saveAttendanceRegister()">💾 Save Attendance Register</button>
     </div>
 
     <div class="table-wrap">
@@ -4220,15 +4120,15 @@ function renderTeacherAttendancePanel() {
               </td>
               <td><span class="badge gold">${p.id}</span></td>
               <td><span class="badge ${p.gender==='Female'?'demo':'live'}" style="font-size:0.75rem">${p.gender}</span></td>
-              <td style="text-align:center"><input type="radio" name="att-${p.id}" checked style="width:auto"></td>
-              <td style="text-align:center"><input type="radio" name="att-${p.id}" style="width:auto"></td>
-              <td style="text-align:center"><input type="radio" name="att-${p.id}" style="width:auto"></td>
+              <td style="text-align:center"><input type="radio" name="att-${p.id}" value="present" ${((attendanceStore[todayKey()]||{})[p.id]||'present')==='present'?'checked':''} style="width:auto"></td>
+              <td style="text-align:center"><input type="radio" name="att-${p.id}" value="absent" ${(attendanceStore[todayKey()]||{})[p.id]==='absent'?'checked':''} style="width:auto"></td>
+              <td style="text-align:center"><input type="radio" name="att-${p.id}" value="late" ${(attendanceStore[todayKey()]||{})[p.id]==='late'?'checked':''} style="width:auto"></td>
             </tr>
           `).join('')}
         </tbody>
       </table>
     </div>
-    <button class="btn btn-navy mt24" onclick="toast('Attendance register saved successfully for today')">Save Attendance Register</button>
+    <button class="btn btn-navy mt24" onclick="saveAttendanceRegister()">Save Attendance Register</button>
   `;
 }
 
@@ -4424,7 +4324,8 @@ registerView('home', ()=>{
         <h2 class="mt24">Our school in pictures</h2>
         <p>Take a tour of our vibrant classrooms, modern campus grounds, and student activities. Click on any picture to view full-screen.</p>
       </div>
-      <div class="gallery-grid" id="galleryGridHome"></div>
+      <div class="slider-wrap"><button class="slider-btn prev" onclick="slideGallery(-1)" aria-label="Previous photo">‹</button><div class="slider" id="galleryGridHome"></div><button class="slider-btn next" onclick="slideGallery(1)" aria-label="Next photo">›</button></div>
+      <div class="slider-dots" id="galleryDots"></div>
       <div style="text-align:center;margin-top:36px">
         <button class="btn btn-navy" data-go="gallery">Browse Complete Gallery →</button>
       </div>
@@ -4745,7 +4646,7 @@ function searchApplicationStatus() {
   }
   const app = applications.find(a => a.id.toLowerCase() === query || a.name.toLowerCase().includes(query));
   resBox.style.display = 'block';
-  if(!app) {
+  if(!app) { toast('No application found. Check the reference ID or full name.','error');
     resBox.innerHTML = `
       <div class="card" style="background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.2)">
         <p style="color:var(--crimson-600);font-weight:700">No application record found matching "${escapeHtml(query)}". Please verify your Reference ID or full name.</p>
@@ -4753,6 +4654,7 @@ function searchApplicationStatus() {
     return;
   }
 
+  toast('Application found','success');
   const s = app.status;
   const isAccepted = s === 'Accepted';
   const isReview = s === 'Under Review' || isAccepted;
@@ -4870,13 +4772,13 @@ function loginFormView(kind, title, idLabel, afterGo){
           <form id="loginForm-${afterGo}">
             <div class="field">
               <label>${idLabel} *</label>
-              <input required id="loginId-${afterGo}" placeholder="e.g. ${defaultDemoId}" value="${samplePupil ? samplePupil.id : ''}">
+              <input required id="loginId-${afterGo}" placeholder="e.g. ${defaultDemoId}">
             </div>
             
             <div class="field">
               <label>Password *</label>
               <div style="position:relative">
-                <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••" value="${samplePupil ? samplePupil.id : ''}">
+                <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('loginPass-${afterGo}', this)">Show</button>
               </div>
               <p class="hint">${!isParent ? 'Default student password is your Student ID' : 'Your secret account password'}</p>
@@ -4925,7 +4827,7 @@ function loginFormView(kind, title, idLabel, afterGo){
 
             <div class="field">
               <label>Child / Ward's Student ID *</label>
-              <input required id="regChildId-${afterGo}" placeholder="e.g. MJL/26/0001" value="MJL/26/0001">
+              <input required id="regChildId-${afterGo}" placeholder="e.g. MJL/26/0001">
               <p class="hint">Directly links your child's continuous assessments, term results, and tuition fees statement.</p>
             </div>
 
@@ -5019,12 +4921,12 @@ registerView('staff-login', ()=>`
             <div class="grid-2">
               <div class="field">
                 <label>Staff Role Category *</label>
-                <select id="staffRegRole" required>
+                <select id="staffRegRole" required onchange="toggleStaffClassField()">
                   <option value="teacher">Classroom Teacher</option>
                   <option value="admin">Administrator / Principal</option>
                 </select>
               </div>
-              <div class="field">
+              <div class="field" id="staffRegClassField">
                 <label>Assigned Class / Subject</label>
                 <input id="staffRegClass" placeholder="e.g. Primary 4 / Mathematics" value="Primary 4">
               </div>
@@ -5059,8 +4961,8 @@ registerView('staff-login', ()=>`
 
             <div class="field" style="background:var(--surface-alt);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border)">
               <label style="color:var(--crimson-600)">School Security Passcode *</label>
-              <input required type="password" id="staffRegAuthCode" placeholder="Enter school master passcode (e.g. admin2026)">
-              <p class="hint" style="color:var(--text-muted)">Staff registration requires the school authorization passcode so only genuine faculty can onboard.</p>
+              <input required type="password" id="staffRegAuthCode" placeholder="School passcode (first admin: create one)">
+              <p class="hint" style="color:var(--text-muted)">First administrator: choose your own passcode now (keep it safe). Everyone registered after you must enter this same passcode.</p>
             </div>
 
             <button class="btn btn-gold btn-lg mt24" style="width:100%" type="submit">Register Staff Credentials &amp; Login →</button>
@@ -5153,7 +5055,7 @@ function submitStaffApplication(total, correct){
   staffApplications.unshift(rec);
   saveStaffApplications();
   if (window.SupabaseService) window.SupabaseService.submitStaffApplication(rec);
-  Sound.playSuccess();
+  toast('Assessment submitted successfully','success');
   document.getElementById('staffSignupCard').innerHTML = `
     <span class="badge ${pct>=60?'live':'gold'}">Assessment Complete</span>
     <h2 class="mt24">Congratulations, ${escapeHtml(pendingStaffSignup.name)}!</h2>
@@ -5179,7 +5081,7 @@ function studentDashboard(kind){
     session: (window.settings && window.settings.session) || "2026/2027",
     term: (window.settings && window.settings.term) || "First Term"
   } : baseDefault;
-  const pupilId = s.id || s.identifier;
+  const pupilId = s.id || s.identifier; refreshAttendance(pupilId);
   const results = (pupilId && (pupilScoresStore[pupilId] || classRoster.some(p => p.id === pupilId)))
     ? getPupilResults(pupilId)
     : getComputedResults(kind);
@@ -5217,10 +5119,10 @@ function studentDashboard(kind){
         <div class="stat-cards">
           <div class="card">
             <b>${SAMPLE_ATTENDANCE.present} / ${SAMPLE_ATTENDANCE.total}</b>
-            <span>Days Present (${Math.round(SAMPLE_ATTENDANCE.present/SAMPLE_ATTENDANCE.total*100)}%)</span>
+            <span>Days Present (${attPct()}%)</span>
           </div>
           <div class="card">
-            <b>A</b>
+            <b>${gradeFor(Math.round(results.reduce((t,r)=>t+r.total,0)/(results.length||1)))}</b>
             <span>Overall Grade Average</span>
           </div>
           <div class="card">
@@ -5228,7 +5130,7 @@ function studentDashboard(kind){
             <span>Homework Due This Week</span>
           </div>
           <div class="card">
-            <b>2nd</b>
+            <b>${classRankFor(pupilId)}</b>
             <span>Class Rank Standing</span>
           </div>
         </div>
@@ -5244,19 +5146,19 @@ function studentDashboard(kind){
                   <circle class="gauge-circle-fill" id="studentAttCircle" cx="50" cy="50" r="45"></circle>
                 </svg>
                 <div class="gauge-label">
-                  <b>92%</b>
+                  <b>${attPct()}%</b>
                   <span>Present</span>
                 </div>
               </div>
               <div style="flex:1">
                 <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.88rem">
-                  <span>Present Sessions:</span><b style="color:var(--emerald-500)">78 Days</b>
+                  <span>Present Sessions:</span><b style="color:var(--emerald-500)">${SAMPLE_ATTENDANCE.present} Days</b>
                 </div>
                 <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.88rem">
-                  <span>Authorized Absences:</span><b style="color:var(--crimson-500)">3 Days</b>
+                  <span>Authorized Absences:</span><b style="color:var(--crimson-500)">${SAMPLE_ATTENDANCE.absent} Days</b>
                 </div>
                 <div style="display:flex;justify-content:space-between;font-size:0.88rem">
-                  <span>Late Arrivals:</span><b style="color:var(--gold-500)">4 Days</b>
+                  <span>Late Arrivals:</span><b style="color:var(--gold-500)">${SAMPLE_ATTENDANCE.late} Days</b>
                 </div>
               </div>
             </div>
@@ -5347,7 +5249,7 @@ function studentDashboard(kind){
           <div class="card"><b>${SAMPLE_ATTENDANCE.present}</b><span class="pill present">Present</span></div>
           <div class="card"><b>${SAMPLE_ATTENDANCE.absent}</b><span class="pill absent">Absent</span></div>
           <div class="card"><b>${SAMPLE_ATTENDANCE.late}</b><span class="pill late">Late</span></div>
-          <div class="card"><b>${Math.round(SAMPLE_ATTENDANCE.present/SAMPLE_ATTENDANCE.total*100)}%</b><span>Attendance Rate</span></div>
+          <div class="card"><b>${attPct()}%</b><span>Attendance Rate</span></div>
         </div>
       </div>
 
@@ -5546,6 +5448,7 @@ registerView('admin-dashboard', ()=>`
       <button class="tab" data-tab-ad="results">📑 Academic Results</button>
       <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
       <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
+      <button class="tab" data-tab-ad="messages">✉️ Messages</button>
       <button class="tab" data-tab-ad="supabase">⚡ Cloud &amp; Supabase</button>
       <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
     </aside>
@@ -5592,6 +5495,8 @@ registerView('admin-dashboard', ()=>`
           </div>
         </div>
         <div id="adminStaffApplicationsTable"></div>
+<h3 style="margin:28px 0 12px">Staff Accounts</h3>
+<div id="adminStaffAccountsTable"></div>
       </div>
 
       <div data-panel-ad="students" class="panel">
@@ -5793,7 +5698,7 @@ registerView('admin-dashboard', ()=>`
 
               <div class="field">
                 <label>Admin &amp; Principal Security Passcode *</label>
-                <input id="set_adminPasscode" value="${escapeHtml(settings.adminPasscode || 'admin2026')}" placeholder="e.g. admin2026" required>
+                <input id="set_adminPasscode" value="${escapeHtml(settings.adminPasscode || '')}" placeholder="Choose a strong passcode" required>
                 <p class="hint">Secret master code required to open Admin Console &amp; Principal management.</p>
               </div>
 
@@ -5840,6 +5745,7 @@ registerView('admin-dashboard', ()=>`
         </form>
       </div>
 
+      <div data-panel-ad="messages" class="panel"><h3 style="margin-bottom:14px">Contact Messages</h3><div id="adminMessagesList"></div></div>
       <div data-panel-ad="supabase" class="panel">
         ${supabasePanelHTML()}
       </div>
@@ -5910,7 +5816,7 @@ function renderAdminStudentRegistry() {
               <td>${escapeHtml(p.gender || 'Pupil')}</td>
               <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(📞 ${escapeHtml(p.phone || '')})</span></td>
               <td>
-                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button>
+                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStudentAccount('${p.id}')">🗑 Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -6252,8 +6158,8 @@ function renderAdminAdmissions(){
             <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
             <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-          </select>
-<button class="btn btn-outline btn-sm" onclick="deleteAdmissionApp('${a.id}')" style="padding:4px 6px;margin-left:8px;border-color:var(--crimson-500);color:var(--crimson-600)">Del</button></td>
+          </select> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteAdmission('${a.id}')">🗑 Delete</button>
+        </td>
       </tr>`).join('')}</tbody></table></div>`;
 }
 
@@ -6300,8 +6206,8 @@ function renderAdminStaffApplications(){
             <option ${a.status==='Shortlisted'?'selected':''}>Shortlisted</option>
             <option ${a.status==='Hired'?'selected':''}>Hired</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-          </select>
-<button class="btn btn-outline btn-sm" onclick="deleteStaffApp('${a.id}')" style="padding:4px 6px;margin-left:8px;border-color:var(--crimson-500);color:var(--crimson-600)">Del</button></td>
+          </select> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStaffApplication('${a.id}')">🗑 Delete</button>
+        </td>
       </tr>`).join('')}</tbody></table></div>`;
 }
 
@@ -6464,7 +6370,7 @@ function saveVisualSettingsForm() {
   settings.feeSecondary = getVal('set_feeSecondary', settings.feeSecondary);
   settings.heroHeadline = getVal('set_heroHeadline', settings.heroHeadline);
   settings.heroSubtitle = getVal('set_heroSubtitle', settings.heroSubtitle);
-  settings.adminPasscode = getVal('set_adminPasscode', settings.adminPasscode || 'admin2026');
+  settings.adminPasscode = getVal('set_adminPasscode', settings.adminPasscode || '');
 
   const secToggle = document.getElementById('set_secondaryActive');
   if (secToggle) settings.secondaryActive = secToggle.checked;
@@ -6627,13 +6533,7 @@ function showReceiptModal(term, amountStr) {
     confirmText: "Print Receipt Slip",
     cancelText: "Close",
     onConfirm: () => {
-      
-  const sheet = document.createElement('style');
-  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
-  document.head.appendChild(sheet);
-  window.print();
-  setTimeout(()=> sheet.remove(), 2000);
-
+      window.print();
     }
   });
 }
@@ -6666,7 +6566,7 @@ registerView('parent-portal', ()=>{
       </section>
     `;
   }
-  const curr = children[activeChild] || children[0];
+  const curr = children[activeChild] || children[0]; refreshAttendance(curr.id);
   const currResults = (curr.id && (pupilScoresStore[curr.id] || classRoster.some(p => p.id === curr.id)))
     ? getPupilResults(curr.id)
     : getComputedResults(kindForClass(curr.cls));
@@ -6746,15 +6646,7 @@ registerView('parent-portal', ()=>{
             <table>
               <thead><tr><th>Term Session</th><th>Total Due</th><th>Amount Paid</th><th>Balance</th><th>Status</th><th>Receipt</th></tr></thead>
               <tbody>
-                ${SAMPLE_FEES.map(f=>`
-                  <tr>
-                    <td style="font-weight:700">${f.term}</td>
-                    <td>${f.due}</td>
-                    <td>${f.paid}</td>
-                    <td><b>${f.balance}</b></td>
-                    <td><span class="pill ${f.status==='Paid'?'accepted':'pending'}">${f.status}</span></td>
-                    <td>${f.status==='Paid' ? `<button class="btn btn-ghost btn-sm" onclick="showReceiptModal('${f.term}', '${f.paid}')">Receipt</button>` : `<button class="btn btn-navy btn-sm" onclick="openFeePaymentModal('${f.term}', '${f.due}')">Pay</button>`}</td>
-                  </tr>`).join('')}
+                <tr><td style="font-weight:700">${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}</td><td>—</td><td>—</td><td><b>₦${feeBalance.toLocaleString()}</b></td><td><span class="pill ${feeBalance>0?'pending':'accepted'}">${feeBalance>0?'Outstanding':'Cleared'}</span></td><td>—</td></tr>
               </tbody>
             </table>
           </div>
@@ -6975,12 +6867,7 @@ function renderGalleryFull(){
     const file = e.target.files[0];
     if(!file) return;
     const src = await readFileAsDataUrl(file);
-    const caption = prompt('Add a short caption for this photo:') || 'School Experience';
-    gallery.unshift({id:genId(), src, caption, category:"Campus"});
-    saveGallery();
-    Sound.playSuccess();
-    toast('Photo added to gallery!');
-    renderGalleryFull();
+    showModal({title:'Add Photo Caption',message:'Add a short caption for this photo:',inputPlaceholder:'e.g. Cultural Day',confirmText:'Add Photo',onConfirm:v=>{gallery.unshift({id:genId(), src, caption:(typeof v==='string'&&v.trim())||'School Experience', category:'Campus'});saveGallery();Sound.playSuccess();toast('Photo added to gallery!');renderGalleryFull();renderGalleryHome();}});
   });
 }
 
@@ -7054,7 +6941,7 @@ registerView('contact', ()=>`
       <div class="grid-2" style="align-items:flex-start;gap:36px">
         <div class="card">
           <h3 style="font-size:1.15rem;margin-bottom:18px">Send Direct Message</h3>
-          <form onsubmit="event.preventDefault(); Sound.playSuccess(); toast('Thank you! Your message has been received.'); this.reset();">
+          <form onsubmit="submitContactMessage(event)">
             <div class="field"><label>Your Full Name *</label><input required placeholder="Mr. / Mrs. Emmanuel"></div>
             <div class="field"><label>Email Address *</label><input required type="email" placeholder="you@example.com"></div>
             <div class="field"><label>Phone Number *</label><input required placeholder="080..."></div>
@@ -7114,7 +7001,7 @@ function afterRender(id){
       applications.unshift(rec);
       saveApplications();
       if (window.SupabaseService) window.SupabaseService.submitAdmission(rec);
-      Sound.playSuccess();
+      toast('Application submitted successfully','success');
       showModal({
         title: "Application Received!",
         message: `Your admission application for ${rec.name} (${rec.cls}) has been registered with Reference ID: ${refId}. You can track its status anytime using this reference code.`,
@@ -7158,7 +7045,7 @@ function afterRender(id){
         const res = verifyUserLogin(ident, pass, targetRole);
         if(!res.success) {
           Sound.playClick();
-          toast('❌ ' + res.reason);
+          fail(res.reason, e.target);
           return;
         }
         session = { role: targetRole, student: res.account, name: res.account.name };
@@ -7220,7 +7107,7 @@ function afterRender(id){
         const res = verifyUserLogin(ident, pass, 'parent');
         if(!res.success) {
           Sound.playClick();
-          toast('❌ ' + res.reason);
+          fail(res.reason, e.target);
           return;
         }
         session = { role: 'parent', name: res.account.name, user: res.account, childId: res.account.childId };
@@ -7282,7 +7169,7 @@ function afterRender(id){
         const res = verifyUserLogin(ident, pass, 'staff');
         if(!res.success || !res.account || !['admin','teacher'].includes(res.account.role)) {
           Sound.playClick();
-          toast('❌ ' + (res.reason || 'Invalid staff credentials.'));
+          fail(res.reason, e.target);
           return;
         }
 
@@ -7307,14 +7194,17 @@ function afterRender(id){
         const email = (document.getElementById('staffRegEmail')?.value || '').trim();
         const phone = (document.getElementById('staffRegPhone')?.value || '').trim();
         const role = document.getElementById('staffRegRole')?.value || 'teacher';
-        const cls = (document.getElementById('staffRegClass')?.value || 'Primary 4').trim();
+        const cls = role === 'admin' ? '' : (document.getElementById('staffRegClass')?.value || 'Primary 4').trim();
         const pass = document.getElementById('staffRegPass')?.value || '';
         const passConfirm = document.getElementById('staffRegPassConfirm')?.value || '';
         const authCode = (document.getElementById('staffRegAuthCode')?.value || '').trim();
 
-        const expectedCode = settings.adminPasscode || 'admin2026';
-        if(authCode !== expectedCode && authCode !== 'admin123') {
-          toast('❌ Invalid School Authorization Passcode! Contact school administration.');
+        const noAdminYet = !userAccounts.some(u => u.role === 'admin');
+        const expectedCode = settings.adminPasscode || '';
+        if(noAdminYet && role !== 'admin') { toast('❌ Register the first Administrator before adding teachers.'); return; }
+        if(noAdminYet) { settings.adminPasscode = authCode; saveSettings(); }
+        else if(!expectedCode || authCode !== expectedCode) {
+          document.getElementById('staffRegAuthCode').classList.add('err'); toast(expectedCode ? '❌ Wrong school passcode. Use the passcode set by the school administrator.' : '❌ No school passcode has been set yet. Log in as an existing administrator and set one under Settings, or clear this site\'s data to start fresh on this device.');
           return;
         }
 
@@ -7352,7 +7242,7 @@ function afterRender(id){
     initDashTabs('sd');
     setTimeout(() => {
       const circle = document.getElementById('studentAttCircle');
-      if(circle) circle.style.strokeDashoffset = '23'; // 92% of 283
+      if(circle) circle.style.strokeDashoffset = String(283 - 2.83 * attPct());
     }, 150);
   }
   if(id==='teacher-dashboard') {
@@ -7579,6 +7469,7 @@ async function testSbConnection() {
   }
 
   const res = await window.SupabaseService.testConnection(url, key);
+  toast(res.success ? 'Supabase connected successfully' : 'Supabase connection failed: '+res.message, res.success?'success':'error');
   if (res.success) {
     Sound.playSuccess();
     box.innerHTML = `
@@ -7606,14 +7497,14 @@ async function testSbConnection() {
 }
 
 function disconnectSupabase() {
-  if (confirm('Disconnect from Supabase and revert to local storage?')) {
+  showModal({title:'Disconnect Supabase?',message:'Disconnect from Supabase and revert to local storage?',confirmText:'Disconnect',cancelText:'Cancel',onConfirm:()=>{
     window.SupabaseService.saveConfig('', '');
     toast('Disconnected from Supabase.');
     go('admin-dashboard');
     setTimeout(() => {
       document.querySelector('[data-tab-ad="supabase"]')?.click();
     }, 100);
-  }
+  }});
 }
 
 async function syncAllToSupabase() {
@@ -7627,6 +7518,7 @@ async function syncAllToSupabase() {
     staffApplications,
     announcements
   });
+  toast(res.success ? 'Local data synced to Supabase Cloud' : 'Sync failed: '+res.message, res.success?'success':'error');
   if (box) {
     if (res.success) {
       Sound.playSuccess();
@@ -7634,7 +7526,7 @@ async function syncAllToSupabase() {
         <div class="note-box" style="border-left-color:var(--emerald-500);background:rgba(16,185,129,0.08)">
           <span>✅</span><div>${escapeHtml(res.message)}</div>
         </div>`;
-      toast('Local data synced to Supabase Cloud!');
+      
     } else {
       box.innerHTML = `
         <div class="note-box" style="border-left-color:var(--crimson-500);background:rgba(239,68,68,0.08)">
@@ -7690,120 +7582,108 @@ if (window.SupabaseService) {
   });
 }
 
+
+/* ===== Admin deletes, messages, attendance, gallery slider, reveal animations ===== */
+const todayKey=()=>new Date().toISOString().slice(0,10);
+let attendanceStore=DB.get('attendanceStore',{});
+let contactMessages=DB.get('contactMessages',[]);
+const fmtDate=()=>new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+function cloudDelete(m,id){try{const c=window.SupabaseService;if(c&&c.isConfigured&&c.isConfigured()&&typeof c[m]==='function')c[m](id);}catch(e){}}
+function refreshAdminLists(){const f=document.getElementById('adminResultsClassFilter');
+ [()=>renderAdminStudentRegistry(),()=>renderAdminFees(),()=>renderAdminResultsTable(f?f.value:'Primary 4'),()=>renderAssignedClassPanel(),()=>renderTeacherResultsPanel('primary'),()=>renderTeacherAttendancePanel(),()=>renderAdminAdmissions(),()=>renderAdminStaffApplications(),()=>renderAdminMessages()].forEach(fn=>{try{fn();}catch(e){}});}
+function confirmDelete(title,message,fn){showModal({title,message,confirmText:'Yes, Delete',cancelText:'Cancel',onConfirm:()=>{try{fn();refreshAdminLists();Sound.playSuccess();toast('Deleted successfully');}catch(e){console.error(e);toast('Delete failed: '+e.message);}}});}
+function deleteStudentAccount(id){const p=classRoster.find(x=>x.id===id);if(!p)return;
+ confirmDelete('Delete pupil?',`Permanently delete ${p.name} (${p.id}) with all scores, remarks and login? This cannot be undone.`,()=>{
+  classRoster=classRoster.filter(x=>x.id!==id);userAccounts=userAccounts.filter(u=>u.id!==id&&u.identifier!==id);
+  [pupilScoresStore,pupilAffectiveStore,pupilCommentsStore,termResultsHistory].forEach(o=>delete o[id]);
+  if(activePupilId===id)activePupilId=(classRoster[0]&&classRoster[0].id)||'';
+  saveClassRoster();saveUserAccounts();savePupilScoresStore();savePupilAffectiveStore();savePupilCommentsStore();saveTermResultsHistory();cloudDelete('deleteStudent',id);});}
+function renderAdminStaffAccounts(){const el=document.getElementById('adminStaffAccountsTable');if(!el)return;
+ const l=userAccounts.filter(u=>u.role==='teacher'||u.role==='admin');
+ el.innerHTML=l.length?`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Identifier</th><th>Role</th><th>Class</th><th>Registered</th><th>Action</th></tr></thead><tbody>${l.map(u=>`<tr><td><b>${escapeHtml(u.name)}</b></td><td>${escapeHtml(u.identifier)}</td><td><span class="badge ${u.role==='admin'?'gold':'live'}">${u.role}</span></td><td>${escapeHtml(u.cls||'-')}</td><td>${escapeHtml(u.registeredAt||'-')}</td><td><button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStaffAccount('${u.id}')">🗑 Delete</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No staff accounts yet.</div>';}
+function deleteStaffAccount(id){const u=userAccounts.find(x=>x.id===id);if(!u)return;
+ if(session&&session.user&&session.user.id===id){toast('You cannot delete the account you are logged in as');return;}
+ if(u.role==='admin'&&userAccounts.filter(x=>x.role==='admin').length<=1){toast('Cannot delete the last remaining admin');return;}
+ confirmDelete('Delete staff account?',`Delete ${u.name} (${u.identifier})? They will no longer be able to log in.`,()=>{
+  userAccounts=userAccounts.filter(x=>x.id!==id);staffApplications.forEach(a=>{if(a.hiredAccountId===id)delete a.hiredAccountId;});
+  saveUserAccounts();saveStaffApplications();cloudDelete('deleteStaff',id);});}
+function deleteStaffApplication(id){const a=staffApplications.find(x=>x.id===id);if(!a)return;
+ confirmDelete('Delete application?',`Delete ${a.name}'s application${a.hiredAccountId?' and the teacher account created for them':''}?`,()=>{
+  if(a.hiredAccountId){userAccounts=userAccounts.filter(u=>u.id!==a.hiredAccountId);saveUserAccounts();}
+  staffApplications=staffApplications.filter(x=>x.id!==id);saveStaffApplications();cloudDelete('deleteStaffApplication',id);});}
+function deleteAdmission(id){const a=applications.find(x=>x.id===id);if(!a)return;
+ confirmDelete('Delete admission application?',`Delete ${a.name}'s application (${a.id})?`,()=>{applications=applications.filter(x=>x.id!==id);saveApplications();cloudDelete('deleteAdmission',id);});}
+const _rsa=renderAdminStaffApplications;renderAdminStaffApplications=function(){_rsa();renderAdminStaffAccounts();};
+function submitContactMessage(e){e.preventDefault();try{const f=e.target,v=[...f.querySelectorAll('input,textarea')].map(x=>x.value.trim());
+ contactMessages.unshift({id:genId(),name:v[0],email:v[1],phone:v[2],message:v[3],date:fmtDate()});DB.set('contactMessages',contactMessages);
+ f.reset();Sound.playSuccess();toast('Thank you! Your message has been received.');}catch(err){console.error(err);toast('Could not send message');}}
+function renderAdminMessages(){const el=document.getElementById('adminMessagesList');if(!el)return;
+ el.innerHTML=contactMessages.length?`<div class="list-simple">${contactMessages.map(m=>`<div class="row" style="align-items:flex-start"><div style="flex:1"><h4>${escapeHtml(m.name)} <span class="small-muted">· ${escapeHtml(m.email)} · ${escapeHtml(m.phone)}</span></h4><p>${escapeHtml(m.message)}</p><span class="meta">${m.date}</span></div><button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteContactMessage('${m.id}')">🗑 Delete</button></div>`).join('')}</div>`:'<div class="empty">No messages yet.</div>';}
+function deleteContactMessage(id){confirmDelete('Delete message?','Delete this message permanently?',()=>{contactMessages=contactMessages.filter(m=>m.id!==id);DB.set('contactMessages',contactMessages);});}
+const _ral=renderAdminAnnouncementList;renderAdminAnnouncementList=function(){_ral();renderAdminMessages();};
+function saveAttendanceRegister(){try{const d=attendanceStore[todayKey()]=attendanceStore[todayKey()]||{};
+ classRoster.forEach(p=>{const c=document.querySelector(`input[name="att-${p.id}"]:checked`);if(c)d[p.id]=c.value;});
+ DB.set('attendanceStore',attendanceStore);Sound.playSuccess();toast('Attendance saved for '+fmtDate());}catch(e){console.error(e);toast('Could not save attendance');}}
+function refreshAttendance(id){const A=SAMPLE_ATTENDANCE;A.present=A.absent=A.late=A.total=0;Object.values(attendanceStore).forEach(d=>{const v=d[id];if(v){A.total++;A[v]++;}});}
+function attPct(){const A=SAMPLE_ATTENDANCE;return A.total?Math.round((A.present+A.late)/A.total*100):0;}
+function classRankFor(id){const me=classRoster.find(p=>p.id===id);if(!me)return '-';const avg=p=>{const r=getPupilResults(p.id);return r.reduce((t,x)=>t+x.total,0)/(r.length||1);};
+ const i=classRoster.filter(p=>p.cls===me.cls).sort((a,b)=>avg(b)-avg(a)).findIndex(p=>p.id===id)+1;
+ return i+((i%10===1&&i%100!==11)?'st':(i%10===2&&i%100!==12)?'nd':(i%10===3&&i%100!==13)?'rd':'th');}
+/* gallery slider */
+const _gs={};
+function slideGallery(d){const el=document.getElementById('galleryGridHome');if(!el||!el.firstElementChild)return;const w=el.firstElementChild.getBoundingClientRect().width+18,max=el.scrollWidth-el.clientWidth;
+ if(d>0&&el.scrollLeft>=max-4)el.scrollTo({left:0,behavior:'smooth'});else if(d<0&&el.scrollLeft<=4)el.scrollTo({left:max,behavior:'smooth'});else el.scrollBy({left:d*w,behavior:'smooth'});}
+function slideTo(i){const el=document.getElementById('galleryGridHome');if(el&&el.children[i])el.scrollTo({left:el.children[i].offsetLeft,behavior:'smooth'});}
+function markDot(){const el=document.getElementById('galleryGridHome');if(!el||!el.firstElementChild)return;const w=el.firstElementChild.getBoundingClientRect().width+18,max=el.scrollWidth-el.clientWidth;
+ let i=el.scrollLeft>=max-4?el.children.length-1:Math.round(el.scrollLeft/w);document.querySelectorAll('#galleryDots button').forEach((b,k)=>b.classList.toggle('on',k===i));}
+renderGalleryHome=function(){const el=document.getElementById('galleryGridHome');if(!el)return;
+ el.innerHTML=gallery.map((p,i)=>`<div class="slide" data-i="${i}"><img src="${p.src}" alt="${escapeHtml(p.caption||'School photo')}" draggable="false">${p.caption?`<div class="cap">${escapeHtml(p.caption)}</div>`:''}</div>`).join('');
+ document.getElementById('galleryDots').innerHTML=gallery.map((_,i)=>`<button aria-label="Photo ${i+1}" onclick="slideTo(${i})"></button>`).join('');
+ el.onpointerdown=e=>{if(e.pointerType!=='mouse')return;_gs.drag=true;_gs.moved=0;_gs.x=e.clientX;_gs.sl=el.scrollLeft;el.classList.add('drag');};
+ el.onpointermove=e=>{if(!_gs.drag)return;const dx=e.clientX-_gs.x;_gs.moved=Math.max(_gs.moved,Math.abs(dx));el.scrollLeft=_gs.sl-dx;};
+ const end=()=>{_gs.drag=false;el.classList.remove('drag');};el.onpointerup=end;el.onpointerleave=end;
+ el.onclick=e=>{if(_gs.moved>5){_gs.moved=0;return;}const s=e.target.closest('.slide');if(s)openLightbox(+s.dataset.i);};
+ el.onscroll=()=>{clearTimeout(_gs.sc);_gs.sc=setTimeout(markDot,60);};
+ el.onmouseenter=()=>{_gs.pause=true;};el.onmouseleave=()=>{_gs.pause=false;};el.ontouchstart=()=>{_gs.pause=true;};el.ontouchend=()=>setTimeout(()=>{_gs.pause=false;},2500);
+ markDot();clearInterval(_gs.t);_gs.t=setInterval(()=>{if(!document.getElementById('galleryGridHome')){clearInterval(_gs.t);return;}if(!_gs.pause)slideGallery(1);},4000);};
+/* scroll-reveal animations */
+function setupReveal(){const els=document.querySelectorAll('#app section.pad .section-head, #app section.pad .card, #app .news-card, #app .step, #app .slider-wrap, #app .hero-showcase');
+ if(!('IntersectionObserver' in window)){els.forEach(e=>e.classList.add('in'));return;}
+ const io=new IntersectionObserver(en=>en.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}}),{threshold:.12});
+ els.forEach((e,i)=>{if(e.classList.contains('reveal'))return;e.classList.add('reveal');e.style.setProperty('--d',(i%4)*.08+'s');io.observe(e);});}
+const _ar=afterRender;afterRender=function(id){_ar(id);setupReveal();};
+
+
+/* ===== Success / failed feedback system ===== */
+Sound.playError=function(){if(!this.enabled)return;try{const c=this.getCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(220,c.currentTime);o.frequency.exponentialRampToValueAtTime(140,c.currentTime+.18);g.gain.setValueAtTime(.09,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);}catch(e){}};
+(function(){const ps=Sound.playSuccess.bind(Sound);let last=0;Sound.playSuccess=function(){if(Date.now()-last<400)return;last=Date.now();ps();};})();
+function fail(msg,form){toast(msg||'Incorrect ID or password. Please check and try again.','error');
+ if(form)form.querySelectorAll('input').forEach(i=>{if(i.type==='checkbox')return;i.classList.add('err');if(i.type==='password')i.value='';});}
+document.addEventListener('input',e=>{if(e.target.classList)e.target.classList.remove('err');});
+document.addEventListener('submit',e=>{const b=e.submitter||e.target.querySelector('button[type=submit]');if(!b||b._busy)return;b._busy=true;const t=b.innerHTML;b.disabled=true;b.textContent='Please wait…';
+ setTimeout(()=>{b.disabled=false;b.innerHTML=t;b._busy=false;},900);},true);
+window.addEventListener('error',e=>{if(!e.message||e.message==='Script error.')return;console.error(e.error||e.message);toast('Something went wrong: '+e.message,'error');});
+window.addEventListener('unhandledrejection',e=>{console.error(e.reason);toast('Something went wrong: '+((e.reason&&e.reason.message)||e.reason),'error');});
+
+
+/* Online payment is not connected: never show a fake "payment verified" */
+openFeePaymentModal=function(){showModal({title:'Pay School Fees',message:'Online payment is not available yet. Please pay at the school bursar\'s office or contact the school on '+(settings.phone1||'')+'. Your balance here updates after the school confirms your payment.',confirmText:'OK',cancelText:'Close'});};
+
+
+/* Browser / phone back button support */
+const PROTECTED_VIEWS=new Set(['admin-dashboard','teacher-dashboard','primary-dashboard','secondary-dashboard','parent-portal']);
+function canView(id){const r=session&&session.role;
+ return id==='admin-dashboard'?r==='staff-admin':id==='teacher-dashboard'?r==='staff-teacher':id==='primary-dashboard'?r==='student-primary':id==='secondary-dashboard'?r==='student-secondary':id==='parent-portal'?r==='parent':true;}
+window.addEventListener('popstate',e=>{closeModal();closeLightbox();closeMobileNav();
+ let id=(e.state&&e.state.v)||(location.hash||'').slice(1)||'home';
+ if(!views[id]||!canView(id)){id='home';try{history.replaceState({v:id},'','#'+id);}catch(_){}}
+ go(id,true);});
+
+
+function toggleStaffClassField(){const r=document.getElementById('staffRegRole'),f=document.getElementById('staffRegClassField'),i=document.getElementById('staffRegClass');if(!r||!f)return;const adm=r.value==='admin';f.style.display=adm?'none':'';if(i){i.required=!adm;if(adm)i.value='';}}
 // Launch application
-go('home');
-function deleteAdmissionApp(id) {
-  showModal({
-    title: 'Delete Application',
-    message: 'Permanently delete this student admission application?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      applications = applications.filter(a => a.id !== id);
-      saveApplications();
-      renderAdminAdmissions();
-      toast('Application deleted');
-    }
-  });
-}
-function deleteStaffApp(id) {
-  showModal({
-    title: 'Delete Staff Application',
-    message: 'Permanently delete this teacher recruitment application?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      staffApplications = staffApplications.filter(a => a.id !== id);
-      saveStaffApplications();
-      renderAdminStaffApplications();
-      toast('Teacher application deleted');
-    }
-  });
-}
-function deleteEnrolledStudent(id) {
-  showModal({
-    title: 'Delete Enrolled Student',
-    message: 'Permanently remove this student from the registry?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      const idx = classRoster.findIndex(p => p.id === id);
-      if(idx > -1) {
-        classRoster.splice(idx, 1);
-        DB.set('classRoster', classRoster);
-        renderAdminStudentRegistry();
-        toast('Student removed from registry');
-      }
-    }
-  });
-}
-function deleteAdmissionApp(id) {
-  showModal({
-    title: 'Delete Application',
-    message: 'Permanently delete this student admission application?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      applications = applications.filter(a => a.id !== id);
-      saveApplications();
-      renderAdminAdmissions();
-      toast('Application deleted');
-    }
-  });
-}
-function deleteStaffApp(id) {
-  showModal({
-    title: 'Delete Staff Application',
-    message: 'Permanently delete this teacher recruitment application?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      staffApplications = staffApplications.filter(a => a.id !== id);
-      saveStaffApplications();
-      renderAdminStaffApplications();
-      toast('Teacher application deleted');
-    }
-  });
-}
-function deleteEnrolledStudent(id) {
-  showModal({
-    title: 'Delete Enrolled Student',
-    message: 'Permanently remove this student from the registry?',
-    confirmText: 'Yes, Delete',
-    onConfirm: () => {
-      const idx = classRoster.findIndex(p => p.id === id);
-      if(idx > -1) {
-        classRoster.splice(idx, 1);
-        DB.set('classRoster', classRoster);
-        renderAdminStudentRegistry();
-        toast('Student removed from registry');
-      }
-    }
-  });
-}
-// --- ANIMATIONS ---
-document.addEventListener('DOMContentLoaded', () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }, i * 100);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  
-  // Override go() to apply observer to new elements
-  const originalGo = window.go;
-  window.go = function(id, extra, fromPop) {
-    if(originalGo) originalGo(id, extra, fromPop);
-    setTimeout(() => {
-      document.querySelectorAll('section').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-    }, 100);
-  };
-});
+{ const h=(location.hash||'').slice(1); const start=(views[h]&&canView(h))?h:'home';
+  try{history.replaceState({v:start},'','#'+start);}catch(_){} go(start,true); }
 </script>
 
 <!-- Floating WhatsApp Direct Chat Widget -->
@@ -7837,227 +7717,5 @@ document.addEventListener('DOMContentLoaded', () => {
   </button>
 </div>
 
-<script>
-// OVERRIDES AND FIXES
-document.addEventListener('DOMContentLoaded', () => {
-  // Fix Pay Tuition
-  window.payParentTuition = function() {
-    toast('Online payment gateway is not available yet. Please pay via bank transfer.', 'error');
-  };
-
-  // Replace prompt with showModal for Gallery
-  window.addGalleryPhoto = function() {
-    showModal({
-      title: 'Upload Photo',
-      message: 'Add a short caption for this photo:',
-      inputPlaceholder: 'School Experience',
-      confirmText: 'Add Photo',
-      onConfirm: (val) => {
-        const caption = val || 'School Experience';
-        gallery.unshift({ url: 'assets/school_front_gate.jpg', caption, cat: 'Events' });
-        saveGallery();
-        toast('Photo added to gallery', 'success');
-        if(typeof renderGallery === 'function') renderGallery();
-      }
-    });
-  };
-
-  // Staff Registration Admin hide class
-  const staffRegRole = document.getElementById('staffRegRole');
-  if (staffRegRole) {
-    staffRegRole.addEventListener('change', e => {
-      const clsField = document.getElementById('staffRegClass').parentElement;
-      if (e.target.value === 'admin' || e.target.value === 'principal') {
-        clsField.style.display = 'none';
-      } else {
-        clsField.style.display = 'block';
-      }
-    });
-  }
-
-  // Delete Staff App
-  window.deleteStaffApp = function(id) {
-    showModal({
-      title: 'Delete Staff Application',
-      message: 'Permanently delete this teacher recruitment application?',
-      confirmText: 'Yes, Delete',
-      onConfirm: async () => {
-        const app = staffApplications.find(a => a.id === id);
-        if(app && app.hiredAccountId) {
-           userAccounts = userAccounts.filter(u => u.id !== app.hiredAccountId);
-           DB.set('userAccounts', userAccounts);
-        }
-        staffApplications = staffApplications.filter(a => a.id !== id);
-        DB.set('staffApplications', staffApplications);
-        if(window.SupabaseService && window.SupabaseService.deleteRecord) {
-           await window.SupabaseService.deleteRecord('staff_applications', id);
-        }
-        if(typeof renderAdminStaffApplications === 'function') renderAdminStaffApplications();
-        toast('Application deleted', 'success');
-      }
-    });
-  };
-
-  // Delete Admission
-  window.deleteAdmissionApp = function(id) {
-    showModal({
-      title: 'Delete Admission',
-      message: 'Permanently delete this student admission application?',
-      confirmText: 'Yes, Delete',
-      onConfirm: async () => {
-        applications = applications.filter(a => a.id !== id);
-        saveApplications();
-        if(window.SupabaseService && window.SupabaseService.deleteRecord) {
-           await window.SupabaseService.deleteRecord('admissions', id);
-        }
-        if(typeof renderAdminAdmissions === 'function') renderAdminAdmissions();
-        toast('Admission application deleted', 'success');
-      }
-    });
-  };
-  
-  // Delete Student
-  window.deleteStudent = function(id) {
-     showModal({
-      title: 'Delete Student',
-      message: 'Permanently remove this student? This will delete their login, scores, and history.',
-      confirmText: 'Yes, Delete',
-      onConfirm: async () => {
-        classRoster = classRoster.filter(s => s.id !== id);
-        userAccounts = userAccounts.filter(u => u.id !== id);
-        DB.set('classRoster', classRoster);
-        DB.set('userAccounts', userAccounts);
-        if(typeof renderAdminStudentRegistry === 'function') renderAdminStudentRegistry();
-        toast('Student permanently removed', 'success');
-      }
-    });
-  };
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Add Staff Accounts Section
-  const oldDash = window.go;
-  window.go = function(id, extra, fromPop) {
-     if(oldDash) oldDash(id, extra, fromPop);
-     if(id === 'admin-dashboard') {
-         setTimeout(() => {
-            let staffPanel = document.getElementById('adminStaffAccountsWrap');
-            if(!staffPanel) {
-                const parent = document.querySelector('[data-panel-ad="settings"]');
-                if(parent) {
-                    staffPanel = document.createElement('div');
-                    staffPanel.id = 'adminStaffAccountsWrap';
-                    staffPanel.innerHTML = '<h3 style="margin-top:40px;margin-bottom:10px">Registered Staff & Admin Accounts</h3><div id="adminStaffTable"></div>';
-                    parent.appendChild(staffPanel);
-                }
-            }
-            window.renderAdminStaffAccounts = function() {
-                const tbl = document.getElementById('adminStaffTable');
-                if(!tbl) return;
-                const staff = userAccounts.filter(u => u.role !== 'student' && u.role !== 'parent');
-                tbl.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Staff ID</th><th>Name</th><th>Role</th><th>Action</th></tr></thead><tbody>' + 
-                staff.map(s => {
-                    const isAdmin = s.role === 'admin';
-                    return '<tr><td>'+s.id+'</td><td>'+(s.name || s.id)+'</td><td>'+s.role+'</td><td><button class="btn btn-sm btn-outline" style="color:var(--crimson-600);border-color:var(--crimson-600)" onclick="deleteStaffAccount(\''+s.id+'\')">Delete</button></td></tr>';
-                }).join('') + '</tbody></table></div>';
-            };
-            window.deleteStaffAccount = function(sid) {
-                if(sid === currentUser.id) {
-                    toast('You cannot delete your own account while logged in.', 'error');
-                    return;
-                }
-                const isTargetAdmin = userAccounts.find(u => u.id === sid)?.role === 'admin';
-                if(isTargetAdmin && userAccounts.filter(u => u.role === 'admin').length <= 1) {
-                    toast('Cannot delete the last administrator account.', 'error');
-                    return;
-                }
-                showModal({
-                    title: 'Delete Staff Account',
-                    message: 'Permanently remove this staff member?',
-                    confirmText: 'Yes, Delete',
-                    onConfirm: () => {
-                        userAccounts = userAccounts.filter(u => u.id !== sid);
-                        DB.set('userAccounts', userAccounts);
-                        renderAdminStaffAccounts();
-                        toast('Staff account deleted', 'success');
-                    }
-                });
-            };
-            renderAdminStaffAccounts();
-         }, 200);
-     }
-  };
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Contact Form Intercept
-  const contactForm = document.getElementById('contactForm');
-  if (contactForm) {
-      contactForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const name = document.getElementById('contactName').value;
-          const email = document.getElementById('contactEmail').value;
-          const msg = document.getElementById('contactMsg').value;
-          if(!window.adminMessages) window.adminMessages = [];
-          window.adminMessages.push({ id: Date.now().toString(), name, email, msg, date: new Date().toLocaleDateString() });
-          contactForm.reset();
-          toast('Message sent to the school successfully!', 'success');
-      });
-  }
-
-  // Admin Messages Tab Injection
-  const oldDashMsg = window.go;
-  window.go = function(id, extra, fromPop) {
-     if(oldDashMsg) oldDashMsg(id, extra, fromPop);
-     if(id === 'admin-dashboard') {
-         setTimeout(() => {
-            let msgPanel = document.getElementById('adminMessagesWrap');
-            if(!msgPanel) {
-                const parent = document.querySelector('[data-panel-ad="settings"]');
-                if(parent) {
-                    msgPanel = document.createElement('div');
-                    msgPanel.id = 'adminMessagesWrap';
-                    msgPanel.innerHTML = '<h3 style="margin-top:40px;margin-bottom:10px">Contact Form Messages</h3><div id="adminMessagesTable"></div>';
-                    parent.appendChild(msgPanel);
-                }
-            }
-            window.renderAdminMessages = function() {
-                const tbl = document.getElementById('adminMessagesTable');
-                if(!tbl) return;
-                const msgs = window.adminMessages || [];
-                if(msgs.length === 0) {
-                    tbl.innerHTML = '<div class="empty">No messages received yet.</div>';
-                    return;
-                }
-                tbl.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Message</th><th>Action</th></tr></thead><tbody>' + 
-                msgs.map(m => {
-                    return '<tr><td>'+m.date+'</td><td>'+m.name+'</td><td>'+m.email+'</td><td>'+m.msg+'</td><td><button class="btn btn-sm btn-outline" style="color:var(--crimson-600);border-color:var(--crimson-600)" onclick="deleteAdminMessage(\''+m.id+'\')">Delete</button></td></tr>';
-                }).join('') + '</tbody></table></div>';
-            };
-            window.deleteAdminMessage = function(mid) {
-                showModal({
-                    title: 'Delete Message',
-                    message: 'Remove this message permanently?',
-                    confirmText: 'Yes, Delete',
-                    onConfirm: () => {
-                        window.adminMessages = window.adminMessages.filter(m => m.id !== mid);
-                        renderAdminMessages();
-                        toast('Message deleted', 'success');
-                    }
-                });
-            };
-            renderAdminMessages();
-         }, 250);
-     }
-  };
-
-  // Override Teacher Attendance Save
-  window.saveDailyAttendance = function() {
-    toast('Attendance records have been securely saved to the database.', 'success');
-  };
-});
-</script>
 </body>
 </html>
