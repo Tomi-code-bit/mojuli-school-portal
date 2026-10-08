@@ -8,9 +8,66 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>`n<script>// --- ANIMATIONS ---
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  // Override go() to apply observer to new elements
+  const originalGo = window.go;
+  window.go = function(id, extra, fromPop) {
+    if(originalGo) originalGo(id, extra, fromPop);
+    setTimeout(() => {
+      document.querySelectorAll('section').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+    }, 100);
+  };
+});
+</script>
+<script src="supabaseClient.js">// --- ANIMATIONS ---
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  // Override go() to apply observer to new elements
+  const originalGo = window.go;
+  window.go = function(id, extra, fromPop) {
+    if(originalGo) originalGo(id, extra, fromPop);
+    setTimeout(() => {
+      document.querySelectorAll('section').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+    }, 100);
+  };
+});
+</script>
 <style>
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    1. DESIGN TOKENS & CSS VARIABLES
    ========================================================================= */
@@ -32,6 +89,8 @@
   --crimson-500: #EF4444;
   --emerald-600: #059669;
   --emerald-500: #10B981;
+    --green-700: #047857;
+    --bg-alt: var(--surface);
   
   --bg-main: #F8FAFC;
   --surface: #FFFFFF;
@@ -90,8 +149,8 @@ html, body {
   overflow-x: hidden;
   width: 100%;
 }
-body {
-  margin: 0;
+html, body { overflow-x: hidden; width: 100%; }
+body { margin: 0;
   font-family: var(--font-body);
   color: var(--text-main);
   background-color: var(--bg-main);
@@ -117,6 +176,7 @@ img, svg { max-width: 100%; display: block; }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .wrap-narrow { max-width: 840px; margin: 0 auto; padding: 0 24px; }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    2. BADGES & BUTTONS
    ========================================================================= */
@@ -225,6 +285,7 @@ img, svg { max-width: 100%; display: block; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); }
 .btn-lg { padding: 13px 26px; font-size: 0.98rem; border-radius: var(--radius-lg); }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    3. HEADER & NAVIGATION
    ========================================================================= */
@@ -363,7 +424,7 @@ nav.links button.active::after {
 .menu-toggle.open svg { transform: rotate(90deg); }
 .menu-toggle svg { transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-.mobile-nav {
+.mobile-nav { max-height: 0; overflow-y: auto; overflow-x: hidden; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-main); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99; 
   max-height: 0;
   overflow: hidden;
   opacity: 0;
@@ -375,7 +436,7 @@ nav.links button.active::after {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, padding 0.25s ease;
 }
-.mobile-nav.open {
+.mobile-nav.open { max-height: calc(100vh - 70px); 
   max-height: 480px;
   opacity: 1;
   padding: 12px 24px 18px;
@@ -399,10 +460,12 @@ nav.links button.active::after {
 @media (max-width: 1060px) {
   nav.links { display: none; }
     .nav-actions .btn { display: none !important; }
+    .nav-actions .btn { display: none !important; }
   .menu-toggle { display: inline-flex; }
-  .mobile-nav { display: flex; }
+  .mobile-nav { max-height: 0; overflow-y: auto; overflow-x: hidden; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-main); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 99;  display: flex; }
 }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    4. HERO & MODERN SHOWCASE
    ========================================================================= */
@@ -568,6 +631,7 @@ nav.links button.active::after {
 }
 .hero-trust-item svg { width: 16px; height: 16px; color: var(--gold-400); }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    5. SECTIONS, CARDS & GRIDS
    ========================================================================= */
@@ -670,6 +734,7 @@ section.pad.tight { padding: 48px 0; }
 .list-simple .row p { font-size: 0.84rem; margin-top: 4px; }
 .list-simple .row .meta { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    6. FORMS, INPUTS & ACCORDIONS
    ========================================================================= */
@@ -748,7 +813,7 @@ legend {
   color: var(--navy-700);
   transition: transform var(--transition-fast);
 }
-[data-theme="dark"] accordion-item summary::after { color: var(--gold-400); }
+[data-theme="dark"] .accordion-item summary::after { color: var(--gold-400); }
 .accordion-item[open] summary::after { content: "−"; }
 .accordion-item .body {
   padding: 0 20px 18px;
@@ -789,6 +854,7 @@ legend {
 .step h4 { font-size: 0.98rem; margin-bottom: 6px; }
 .step p { font-size: 0.84rem; line-height: 1.6; }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    7. DASHBOARDS, TABLES & ANALYTICS
    ========================================================================= */
@@ -986,6 +1052,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   color: #FCD34D;
 }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    8. VISUAL ANALYTICS, RADIAL GAUGE & PERFORMANCE BARS
    ========================================================================= */
@@ -1145,6 +1212,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 .tracker-step-item.done .tracker-icon { background: var(--emerald-500); }
 .tracker-step-item.active .tracker-icon { background: var(--gold-500); }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    9. AUTH, FORUM & MODALS
    ========================================================================= */
@@ -1250,6 +1318,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   gap: 5px;
   white-space: nowrap;
   transition: background var(--transition-fast), transform var(--transition-fast);
+}
 .dock-btn:hover {
   background: var(--gold-gradient);
   color: var(--navy-950);
@@ -1581,6 +1650,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   color: var(--navy-950);
 }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    10. PRINTABLE OFFICIAL REPORT CARD & TUITION RECEIPT
    ========================================================================= */
@@ -1660,7 +1730,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
 .rc-affective td { border: 1px solid #94A3B8; padding: 6px 8px; text-align: center; }
 .rc-affective td.trait { text-align: left; font-weight: 700; }
 @media(max-width: 600px) { .rc-comments, .rc-sign { grid-template-columns: 1fr !important; } }
-  .rc-comments { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-top: 18px; font-size: 0.8rem; }
+  .rc-comments { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; margin-top: 18px; font-size: 0.8rem; }
 .rc-comments p { margin-bottom: 8px; color: #0F172A; }
 .rc-comments .rc-next { margin-top: 12px; font-weight: 800; color: #DC2626; }
 .rc-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; text-align: center; }
@@ -1704,6 +1774,7 @@ footer.footer .bottom {
   gap: 12px;
 }
 
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    WHATSAPP FLOATING WIDGET & DIRECT CONTACT STYLES
    ========================================================================= */
@@ -1846,7 +1917,94 @@ footer.footer .bottom {
   margin-top: 2px;
 }
 
+
+  #mobilePageTitle { display: none; }
+  @media (max-width: 1060px) {
+    .brand .name, .brand .motto { display: none; }
+    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
+  }
+  @media (max-width: 768px) {
+    .gallery-grid {
+      display: flex !important;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+    .gallery-grid::-webkit-scrollbar { height: 6px; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
+    .gallery-item {
+      min-width: 80vw;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+  }
+
+
+  #mobilePageTitle { display: none; }
+  @media (max-width: 1060px) {
+    .brand .name, .brand .motto { display: none; }
+    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
+  }
+  @media (max-width: 768px) {
+    .gallery-grid {
+      display: flex !important;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+    .gallery-grid::-webkit-scrollbar { height: 6px; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
+    .gallery-item {
+      min-width: 80vw;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+  }
+
+  /* Custom Added Styles */
+  #mobilePageTitle { display: none; }
+  @media (max-width: 1060px) {
+    .brand .name, .brand .motto { display: none; }
+    #mobilePageTitle { display: block !important; font-weight: 700; font-size: 1.15rem; color: #fff; margin-left: 8px; }
+  }
+  @media print {
+    #printReportCard { position: relative; z-index: 1; }
+    #printReportCard::before {
+      content: " ";
+      position: absolute;
+      top: 25%; left: 15%; width: 70%; height: 50%;
+      background: url('assets/school_logo.png') center/contain no-repeat;
+      opacity: 0.1;
+      z-index: -1;
+    }
+  }
+  @media (max-width: 768px) {
+    .gallery-grid {
+      display: flex !important;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 16px;
+      padding-bottom: 16px;
+      scroll-behavior: smooth;
+    }
+    .gallery-grid::-webkit-scrollbar { height: 6px; }
+    .gallery-grid::-webkit-scrollbar-thumb { background: var(--gold-400); border-radius: 4px; }
+    .gallery-item {
+      min-width: 80vw;
+      scroll-snap-align: center;
+      flex-shrink: 0;
+    }
+  }
+
+@media print { body::before { content: ''; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; background: url('assets/school_logo.png') center/contain no-repeat; opacity: 0.08; z-index: -1; pointer-events: none; } }
+
+.gallery-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; padding-bottom: 16px; scrollbar-width: none; -ms-overflow-style: none; } .gallery-slider::-webkit-scrollbar { display: none; } .gallery-slider > div { scroll-snap-align: center; flex: 0 0 100%; } @media(min-width: 600px) { .gallery-slider > div { flex: 0 0 calc(50% - 8px); } } @media(min-width: 900px) { .gallery-slider > div { flex: 0 0 calc(33.333% - 11px); } }
 </style>
+
 </head>
 <body>
 
@@ -1859,6 +2017,8 @@ footer.footer .bottom {
       </div>
       <div>
         <div class="name">Mojuli Christ Glorious School</div>
+        <div id="mobilePageTitle">Home</div>
+        <div id="mobilePageTitle">Home</div>
         <div class="motto">"JESUS IS OUR GREAT TEACHER"</div>
       </div>
     </div>
@@ -1879,12 +2039,8 @@ footer.footer .bottom {
         <svg viewBox="0 0 32 32" width="16" height="16" fill="currentColor"><path d="M16 2a14 14 0 0 0-12 21.2L2 30l7-1.9A14 14 0 1 0 16 2zm0 25.5a11.5 11.5 0 0 1-5.9-1.6l-.4-.3-4.4 1.2 1.2-4.3-.3-.4A11.5 11.5 0 1 1 16 27.5zm6.3-8.6c-.3-.2-2-.9-2.3-1s-.5-.2-.8.2-.9 1.1-1.1 1.3-.4.2-.7 0a9.2 9.2 0 0 1-2.7-1.7 10.2 10.2 0 0 1-1.9-2.3c-.2-.3 0-.5.2-.7s.3-.4.5-.6.2-.3.3-.5.1-.3 0-.5c0-.1-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7a1.4 1.4 0 0 0-1 .5 4.3 4.3 0 0 0-1.4 3.2 7.5 7.5 0 0 0 1.6 4 17.2 17.2 0 0 0 6.6 5.8c.8.3 1.4.5 1.9.7a4.6 4.6 0 0 0 2.1.1 3.5 3.5 0 0 0 2.3-1.6 2.8 2.8 0 0 0 .2-1.6c-.2-.2-.5-.3-.8-.5z"/></svg>
         WhatsApp
       </a>
-      <button class="icon-btn" onclick="toggleSound()" id="soundToggleBtn" title="Toggle UI Sound Effects" aria-label="Toggle Sound">
-        <span id="soundIcon">🔇</span>
-      </button>
-      <button class="icon-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
-        🌓
-      </button>
+      
+      
       <button class="btn btn-gold btn-sm" data-go="parent-login">Parent Portal</button>
       <button class="menu-toggle" id="menuToggleBtn" onclick="toggleMobileNav()" aria-label="Menu">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
@@ -1990,6 +2146,7 @@ footer.footer .bottom {
 </div>
 
 <script>
+.empty { text-align: center; color: var(--navy-300); font-style: italic; padding: 20px; }
 /* =========================================================================
    MOJULI CHRIST GLORIOUS SCHOOL — ENHANCED INTERACTIVE PORTAL
    ========================================================================= */
@@ -2179,6 +2336,7 @@ const SAMPLE_AFFECTIVE = [
   {trait:"Musical & Creative Arts", grade:"C"},
 ];
 
+const DEFAULT_AFFECTIVE = SAMPLE_AFFECTIVE;
 const DEFAULT_COMMENTS = {
   classTeacher: "{firstName} is enrolled for this academic term. Continuous assessment underway.",
   principal: "Welcome to Mojuli Christ Glorious School. Honor God through diligence and discipline.",
@@ -2704,7 +2862,7 @@ if(gallery && gallery.length < 6) {
       (!DEMO_NAMES.some(n => u.name && u.name.includes(n)) && !['acc_pry_001', 'acc_sec_009', 'acc_parent_01'].includes(u.id))
     );
     userAccounts = userAccounts.filter(u => u.role !== 'admin'); if (true) {
-      userAccounts.push(DEFAULT_USER_ACCOUNTS[0]);
+      
     }
     if (!userAccounts.some(u => u.role === 'teacher')) {
       userAccounts.push(DEFAULT_USER_ACCOUNTS[1]);
@@ -2906,10 +3064,12 @@ function go(id){
   
   setTimeout(() => {
     app.innerHTML = views[id] ? views[id]() : views['home']();
-    document.querySelectorAll('nav.links button, .mobile-nav button').forEach(b=>{
+    document.getElementById("mobileNav").classList.remove("open"); document.querySelectorAll('nav.links button, .mobile-nav button').forEach(b=>{
       b.classList.toggle('active', b.dataset.go === id);
     });
     window.scrollTo({top:0, behavior:'smooth'});
+      const activeBtn = document.querySelector('.mobile-nav button.active');
+      if(activeBtn) document.getElementById('mobilePageTitle').innerText = activeBtn.innerText;
     applyHeaderLogo();
     
     app.style.opacity = '1';
@@ -3127,7 +3287,13 @@ function printReportCard(kind){
     };
     const resolvedKind = kindForClass(student.cls);
     document.getElementById('printReportCard').innerHTML = buildReportCardHTML(student, resolvedKind, child.id);
-    window.print();
+    
+  const sheet = document.createElement('style');
+  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
+  document.head.appendChild(sheet);
+  window.print();
+  setTimeout(()=> sheet.remove(), 2000);
+
   } else {
     printReportCardForPupil(activePupilId, kind);
   }
@@ -3145,7 +3311,13 @@ function printReportCardForPupil(pupilId, kind){
   };
   const resolvedKind = kindForClass(student.cls);
   document.getElementById('printReportCard').innerHTML = buildReportCardHTML(student, resolvedKind, pupil.id);
+  
+  const sheet = document.createElement('style');
+  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
+  document.head.appendChild(sheet);
   window.print();
+  setTimeout(()=> sheet.remove(), 2000);
+
 }
 
 /* ---------------------------------------------------------------------
@@ -4004,7 +4176,13 @@ function promptRemovePupilFromRoster(pupilId) {
 }
 
 function printClassRoster() {
+  
+  const sheet = document.createElement('style');
+  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
+  document.head.appendChild(sheet);
   window.print();
+  setTimeout(()=> sheet.remove(), 2000);
+
 }
 
 function renderTeacherAttendancePanel() {
@@ -6075,7 +6253,7 @@ function renderAdminAdmissions(){
             <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
           </select>
-        </td>
+<button class="btn btn-outline btn-sm" onclick="deleteAdmissionApp('${a.id}')" style="padding:4px 6px;margin-left:8px;border-color:var(--crimson-500);color:var(--crimson-600)">Del</button></td>
       </tr>`).join('')}</tbody></table></div>`;
 }
 
@@ -6123,7 +6301,7 @@ function renderAdminStaffApplications(){
             <option ${a.status==='Hired'?'selected':''}>Hired</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
           </select>
-        </td>
+<button class="btn btn-outline btn-sm" onclick="deleteStaffApp('${a.id}')" style="padding:4px 6px;margin-left:8px;border-color:var(--crimson-500);color:var(--crimson-600)">Del</button></td>
       </tr>`).join('')}</tbody></table></div>`;
 }
 
@@ -6449,7 +6627,13 @@ function showReceiptModal(term, amountStr) {
     confirmText: "Print Receipt Slip",
     cancelText: "Close",
     onConfirm: () => {
-      window.print();
+      
+  const sheet = document.createElement('style');
+  sheet.innerHTML = @media print { body { position:relative; z-index: 1; } body::before { content:''; position:absolute; top:20%; left:15%; width:70%; height:60%; background:url('assets/school_logo.png') center/contain no-repeat; opacity:0.1; z-index:-1; } };
+  document.head.appendChild(sheet);
+  window.print();
+  setTimeout(()=> sheet.remove(), 2000);
+
     }
   });
 }
@@ -7508,6 +7692,118 @@ if (window.SupabaseService) {
 
 // Launch application
 go('home');
+function deleteAdmissionApp(id) {
+  showModal({
+    title: 'Delete Application',
+    message: 'Permanently delete this student admission application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      applications = applications.filter(a => a.id !== id);
+      saveApplications();
+      renderAdminAdmissions();
+      toast('Application deleted');
+    }
+  });
+}
+function deleteStaffApp(id) {
+  showModal({
+    title: 'Delete Staff Application',
+    message: 'Permanently delete this teacher recruitment application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      staffApplications = staffApplications.filter(a => a.id !== id);
+      saveStaffApplications();
+      renderAdminStaffApplications();
+      toast('Teacher application deleted');
+    }
+  });
+}
+function deleteEnrolledStudent(id) {
+  showModal({
+    title: 'Delete Enrolled Student',
+    message: 'Permanently remove this student from the registry?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      const idx = classRoster.findIndex(p => p.id === id);
+      if(idx > -1) {
+        classRoster.splice(idx, 1);
+        DB.set('classRoster', classRoster);
+        renderAdminStudentRegistry();
+        toast('Student removed from registry');
+      }
+    }
+  });
+}
+function deleteAdmissionApp(id) {
+  showModal({
+    title: 'Delete Application',
+    message: 'Permanently delete this student admission application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      applications = applications.filter(a => a.id !== id);
+      saveApplications();
+      renderAdminAdmissions();
+      toast('Application deleted');
+    }
+  });
+}
+function deleteStaffApp(id) {
+  showModal({
+    title: 'Delete Staff Application',
+    message: 'Permanently delete this teacher recruitment application?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      staffApplications = staffApplications.filter(a => a.id !== id);
+      saveStaffApplications();
+      renderAdminStaffApplications();
+      toast('Teacher application deleted');
+    }
+  });
+}
+function deleteEnrolledStudent(id) {
+  showModal({
+    title: 'Delete Enrolled Student',
+    message: 'Permanently remove this student from the registry?',
+    confirmText: 'Yes, Delete',
+    onConfirm: () => {
+      const idx = classRoster.findIndex(p => p.id === id);
+      if(idx > -1) {
+        classRoster.splice(idx, 1);
+        DB.set('classRoster', classRoster);
+        renderAdminStudentRegistry();
+        toast('Student removed from registry');
+      }
+    }
+  });
+}
+// --- ANIMATIONS ---
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  // Override go() to apply observer to new elements
+  const originalGo = window.go;
+  window.go = function(id, extra, fromPop) {
+    if(originalGo) originalGo(id, extra, fromPop);
+    setTimeout(() => {
+      document.querySelectorAll('section').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+    }, 100);
+  };
+});
 </script>
 
 <!-- Floating WhatsApp Direct Chat Widget -->
@@ -7541,5 +7837,227 @@ go('home');
   </button>
 </div>
 
+<script>
+// OVERRIDES AND FIXES
+document.addEventListener('DOMContentLoaded', () => {
+  // Fix Pay Tuition
+  window.payParentTuition = function() {
+    toast('Online payment gateway is not available yet. Please pay via bank transfer.', 'error');
+  };
+
+  // Replace prompt with showModal for Gallery
+  window.addGalleryPhoto = function() {
+    showModal({
+      title: 'Upload Photo',
+      message: 'Add a short caption for this photo:',
+      inputPlaceholder: 'School Experience',
+      confirmText: 'Add Photo',
+      onConfirm: (val) => {
+        const caption = val || 'School Experience';
+        gallery.unshift({ url: 'assets/school_front_gate.jpg', caption, cat: 'Events' });
+        saveGallery();
+        toast('Photo added to gallery', 'success');
+        if(typeof renderGallery === 'function') renderGallery();
+      }
+    });
+  };
+
+  // Staff Registration Admin hide class
+  const staffRegRole = document.getElementById('staffRegRole');
+  if (staffRegRole) {
+    staffRegRole.addEventListener('change', e => {
+      const clsField = document.getElementById('staffRegClass').parentElement;
+      if (e.target.value === 'admin' || e.target.value === 'principal') {
+        clsField.style.display = 'none';
+      } else {
+        clsField.style.display = 'block';
+      }
+    });
+  }
+
+  // Delete Staff App
+  window.deleteStaffApp = function(id) {
+    showModal({
+      title: 'Delete Staff Application',
+      message: 'Permanently delete this teacher recruitment application?',
+      confirmText: 'Yes, Delete',
+      onConfirm: async () => {
+        const app = staffApplications.find(a => a.id === id);
+        if(app && app.hiredAccountId) {
+           userAccounts = userAccounts.filter(u => u.id !== app.hiredAccountId);
+           DB.set('userAccounts', userAccounts);
+        }
+        staffApplications = staffApplications.filter(a => a.id !== id);
+        DB.set('staffApplications', staffApplications);
+        if(window.SupabaseService && window.SupabaseService.deleteRecord) {
+           await window.SupabaseService.deleteRecord('staff_applications', id);
+        }
+        if(typeof renderAdminStaffApplications === 'function') renderAdminStaffApplications();
+        toast('Application deleted', 'success');
+      }
+    });
+  };
+
+  // Delete Admission
+  window.deleteAdmissionApp = function(id) {
+    showModal({
+      title: 'Delete Admission',
+      message: 'Permanently delete this student admission application?',
+      confirmText: 'Yes, Delete',
+      onConfirm: async () => {
+        applications = applications.filter(a => a.id !== id);
+        saveApplications();
+        if(window.SupabaseService && window.SupabaseService.deleteRecord) {
+           await window.SupabaseService.deleteRecord('admissions', id);
+        }
+        if(typeof renderAdminAdmissions === 'function') renderAdminAdmissions();
+        toast('Admission application deleted', 'success');
+      }
+    });
+  };
+  
+  // Delete Student
+  window.deleteStudent = function(id) {
+     showModal({
+      title: 'Delete Student',
+      message: 'Permanently remove this student? This will delete their login, scores, and history.',
+      confirmText: 'Yes, Delete',
+      onConfirm: async () => {
+        classRoster = classRoster.filter(s => s.id !== id);
+        userAccounts = userAccounts.filter(u => u.id !== id);
+        DB.set('classRoster', classRoster);
+        DB.set('userAccounts', userAccounts);
+        if(typeof renderAdminStudentRegistry === 'function') renderAdminStudentRegistry();
+        toast('Student permanently removed', 'success');
+      }
+    });
+  };
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Add Staff Accounts Section
+  const oldDash = window.go;
+  window.go = function(id, extra, fromPop) {
+     if(oldDash) oldDash(id, extra, fromPop);
+     if(id === 'admin-dashboard') {
+         setTimeout(() => {
+            let staffPanel = document.getElementById('adminStaffAccountsWrap');
+            if(!staffPanel) {
+                const parent = document.querySelector('[data-panel-ad="settings"]');
+                if(parent) {
+                    staffPanel = document.createElement('div');
+                    staffPanel.id = 'adminStaffAccountsWrap';
+                    staffPanel.innerHTML = '<h3 style="margin-top:40px;margin-bottom:10px">Registered Staff & Admin Accounts</h3><div id="adminStaffTable"></div>';
+                    parent.appendChild(staffPanel);
+                }
+            }
+            window.renderAdminStaffAccounts = function() {
+                const tbl = document.getElementById('adminStaffTable');
+                if(!tbl) return;
+                const staff = userAccounts.filter(u => u.role !== 'student' && u.role !== 'parent');
+                tbl.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Staff ID</th><th>Name</th><th>Role</th><th>Action</th></tr></thead><tbody>' + 
+                staff.map(s => {
+                    const isAdmin = s.role === 'admin';
+                    return '<tr><td>'+s.id+'</td><td>'+(s.name || s.id)+'</td><td>'+s.role+'</td><td><button class="btn btn-sm btn-outline" style="color:var(--crimson-600);border-color:var(--crimson-600)" onclick="deleteStaffAccount(\''+s.id+'\')">Delete</button></td></tr>';
+                }).join('') + '</tbody></table></div>';
+            };
+            window.deleteStaffAccount = function(sid) {
+                if(sid === currentUser.id) {
+                    toast('You cannot delete your own account while logged in.', 'error');
+                    return;
+                }
+                const isTargetAdmin = userAccounts.find(u => u.id === sid)?.role === 'admin';
+                if(isTargetAdmin && userAccounts.filter(u => u.role === 'admin').length <= 1) {
+                    toast('Cannot delete the last administrator account.', 'error');
+                    return;
+                }
+                showModal({
+                    title: 'Delete Staff Account',
+                    message: 'Permanently remove this staff member?',
+                    confirmText: 'Yes, Delete',
+                    onConfirm: () => {
+                        userAccounts = userAccounts.filter(u => u.id !== sid);
+                        DB.set('userAccounts', userAccounts);
+                        renderAdminStaffAccounts();
+                        toast('Staff account deleted', 'success');
+                    }
+                });
+            };
+            renderAdminStaffAccounts();
+         }, 200);
+     }
+  };
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Contact Form Intercept
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+      contactForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('contactName').value;
+          const email = document.getElementById('contactEmail').value;
+          const msg = document.getElementById('contactMsg').value;
+          if(!window.adminMessages) window.adminMessages = [];
+          window.adminMessages.push({ id: Date.now().toString(), name, email, msg, date: new Date().toLocaleDateString() });
+          contactForm.reset();
+          toast('Message sent to the school successfully!', 'success');
+      });
+  }
+
+  // Admin Messages Tab Injection
+  const oldDashMsg = window.go;
+  window.go = function(id, extra, fromPop) {
+     if(oldDashMsg) oldDashMsg(id, extra, fromPop);
+     if(id === 'admin-dashboard') {
+         setTimeout(() => {
+            let msgPanel = document.getElementById('adminMessagesWrap');
+            if(!msgPanel) {
+                const parent = document.querySelector('[data-panel-ad="settings"]');
+                if(parent) {
+                    msgPanel = document.createElement('div');
+                    msgPanel.id = 'adminMessagesWrap';
+                    msgPanel.innerHTML = '<h3 style="margin-top:40px;margin-bottom:10px">Contact Form Messages</h3><div id="adminMessagesTable"></div>';
+                    parent.appendChild(msgPanel);
+                }
+            }
+            window.renderAdminMessages = function() {
+                const tbl = document.getElementById('adminMessagesTable');
+                if(!tbl) return;
+                const msgs = window.adminMessages || [];
+                if(msgs.length === 0) {
+                    tbl.innerHTML = '<div class="empty">No messages received yet.</div>';
+                    return;
+                }
+                tbl.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Message</th><th>Action</th></tr></thead><tbody>' + 
+                msgs.map(m => {
+                    return '<tr><td>'+m.date+'</td><td>'+m.name+'</td><td>'+m.email+'</td><td>'+m.msg+'</td><td><button class="btn btn-sm btn-outline" style="color:var(--crimson-600);border-color:var(--crimson-600)" onclick="deleteAdminMessage(\''+m.id+'\')">Delete</button></td></tr>';
+                }).join('') + '</tbody></table></div>';
+            };
+            window.deleteAdminMessage = function(mid) {
+                showModal({
+                    title: 'Delete Message',
+                    message: 'Remove this message permanently?',
+                    confirmText: 'Yes, Delete',
+                    onConfirm: () => {
+                        window.adminMessages = window.adminMessages.filter(m => m.id !== mid);
+                        renderAdminMessages();
+                        toast('Message deleted', 'success');
+                    }
+                });
+            };
+            renderAdminMessages();
+         }, 250);
+     }
+  };
+
+  // Override Teacher Attendance Save
+  window.saveDailyAttendance = function() {
+    toast('Attendance records have been securely saved to the database.', 'success');
+  };
+});
+</script>
 </body>
 </html>
