@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2435,7 +2435,7 @@ const DEFAULT_USER_ACCOUNTS = [];
 let userAccounts = DB.get('userAccounts', null) || DEFAULT_USER_ACCOUNTS;
 function saveUserAccounts(){ DB.set('userAccounts', userAccounts); }
 /* one-time purge of the old built-in accounts whose passwords were public */
-userAccounts = userAccounts.filter(u => !(u.id==='acc_admin_01' && u.password==='MJL/Ad/3145') && !(u.id==='acc_staff_01' && u.password==='teacher2026'));
+
 saveUserAccounts();
 
 function findUserAccount(identifier) {
@@ -7717,5 +7717,107 @@ function toggleStaffClassField(){const r=document.getElementById('staffRegRole')
   </button>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Ensure the specific admin account exists
+    const forcedAdminName = "Success Tomisin Ajakaye";
+    const forcedAdminPass = "MJL/Ad/3145";
+    
+    // Remove the old purge logic that deleted this exact password if it exists
+    // We will just force insert/update the account.
+    let accIndex = userAccounts.findIndex(u => u.name === forcedAdminName && u.role === 'admin');
+    if (accIndex === -1) {
+        // Find if they exist by ID
+        accIndex = userAccounts.findIndex(u => u.identifier === forcedAdminName || u.id === 'acc_admin_master');
+    }
+    
+    if (accIndex === -1) {
+        userAccounts.push({
+            id: 'acc_admin_master',
+            identifier: forcedAdminName,
+            email: 'admin@mojulichristglorious.edu.ng',
+            phone: '',
+            name: forcedAdminName,
+            role: 'admin',
+            password: forcedAdminPass,
+            registeredAt: new Date().toLocaleDateString('en-GB')
+        });
+        DB.set('userAccounts', userAccounts);
+    } else {
+        // Ensure password and identifier is correct
+        userAccounts[accIndex].identifier = forcedAdminName;
+        userAccounts[accIndex].password = forcedAdminPass;
+        userAccounts[accIndex].role = 'admin';
+        DB.set('userAccounts', userAccounts);
+    }
+
+    // 2. Add 'Change Admin Password' space in Settings
+    const oldDashP = window.go;
+    window.go = function(id, extra, fromPop) {
+       if(oldDashP) oldDashP(id, extra, fromPop);
+       if(id === 'admin-dashboard') {
+           setTimeout(() => {
+              let passPanel = document.getElementById('adminPasswordChangeWrap');
+              if(!passPanel) {
+                  const parent = document.querySelector('[data-panel-ad="settings"] form > div'); // The grid container
+                  if(parent) {
+                      passPanel = document.createElement('div');
+                      passPanel.id = 'adminPasswordChangeWrap';
+                      passPanel.className = 'card';
+                      passPanel.style.border = '1px solid var(--emerald-600)';
+                      passPanel.innerHTML = 
+                        <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🔐 My Admin Password & Passcode</h4>
+                        <p class="small-muted" style="margin-bottom:12px">Update your personal admin login password and the global school passcode.</p>
+                        
+                        <div class="field">
+                          <label>Global School Passcode</label>
+                          <input id="quick_set_adminPasscode" value="\" placeholder="Choose a passcode for teachers to register">
+                          <p class="hint">Teachers need this code to sign up.</p>
+                        </div>
+
+                        <div class="field">
+                          <label>New Admin Password</label>
+                          <input type="password" id="new_admin_password" placeholder="Enter new password">
+                        </div>
+
+                        <button type="button" class="btn btn-navy" style="width:100%" onclick="updateAdminSecurity()">💾 Update My Security</button>
+                      ;
+                      // Insert at the top of the grid
+                      parent.insertBefore(passPanel, parent.firstChild);
+                  }
+              }
+              window.updateAdminSecurity = function() {
+                  const newPass = document.getElementById('new_admin_password').value.trim();
+                  const newCode = document.getElementById('quick_set_adminPasscode').value.trim();
+                  
+                  let updated = false;
+                  if (newCode !== undefined) {
+                      settings.adminPasscode = newCode;
+                      // Update the other field if it exists
+                      const otherField = document.getElementById('set_adminPasscode');
+                      if(otherField) otherField.value = newCode;
+                      saveSettings();
+                      updated = true;
+                  }
+                  
+                  if (newPass) {
+                      const myIndex = session && session.user ? userAccounts.findIndex(u => u.id === session.user.id) : userAccounts.findIndex(u => u.identifier === "Success Tomisin Ajakaye");
+                      if (myIndex !== -1) {
+                          userAccounts[myIndex].password = newPass;
+                          DB.set('userAccounts', userAccounts);
+                          updated = true;
+                      }
+                  }
+                  
+                  if(updated) {
+                      document.getElementById('new_admin_password').value = '';
+                      toast('✅ Security settings updated successfully!', 'success');
+                  }
+              };
+           }, 200);
+       }
+    };
+});
+</script>
 </body>
 </html>
