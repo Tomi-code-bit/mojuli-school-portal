@@ -2704,8 +2704,12 @@ const DEFAULT_SETTINGS = {
   address: "Lane 3, Marina Street, Ilupeju Avenue, Ado-Ekiti, Ekiti State",
   session: "2026/2027",
   term: "First Term",
+  feeCreche: "₦75,000",
+  feeKG: "₦75,000",
   feeNursery: "₦75,000",
   feePrimary: "₦85,000",
+  feeJSS: "₦95,000",
+  feeSS: "₦95,000",
   feeSecondary: "₦95,000",
   nextTerm: "Second Term commences Monday, 11 January 2027. Boarders resume Sunday 10 January.",
   heroHeadline: "A Christian foundation for a lifetime of learning",
@@ -2714,6 +2718,11 @@ const DEFAULT_SETTINGS = {
   productionMode: false
 };
 let settings = Object.assign({}, DEFAULT_SETTINGS, DB.get('settings', null) || {});
+{ /* carry old 3-tier fees over to the new 6-section structure */
+  const _sv = DB.get('settings', null) || {};
+  if(_sv.feeSecondary && !_sv.feeJSS){ settings.feeJSS = _sv.feeSecondary; if(!_sv.feeSS) settings.feeSS = _sv.feeSecondary; }
+  if(_sv.feeNursery && !_sv.feeCreche){ settings.feeCreche = _sv.feeNursery; settings.feeKG = _sv.feeNursery; }
+}
 let gallery = DB.get('gallery', null) || DEFAULT_PHOTOS;
 
 // Sync latest official photos
@@ -3777,7 +3786,7 @@ function promptRemovePupilSubject(pupilId, idx, kind) {
   if (!pupilScoresStore[pupilId]) return;
   const subj = pupilScoresStore[pupilId][idx]?.subject || 'this subject';
   showModal({
-    title: "Remove Subject?",
+    title: "Are you sure?",
     message: `Remove "${subj}" from this pupil's score record?`,
     confirmText: "Remove",
     cancelText: "Keep",
@@ -4066,7 +4075,7 @@ function promptRemovePupilFromRoster(pupilId) {
   const p = classRoster.find(x => x.id === pupilId);
   if (!p) return;
   showModal({
-    title: "Remove Pupil from Roster?",
+    title: "Are you sure?",
     message: `Are you sure you want to remove "${p.name}" (${p.id}) from the Primary 4 class register?`,
     confirmText: "Remove",
     cancelText: "Keep",
@@ -5664,18 +5673,29 @@ registerView('admin-dashboard', ()=>`
               <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">💳 Term Tuition &amp; Fee Structure</h4>
 
               <div class="field">
-                <label>Crèche &amp; Nursery Term Fee</label>
-                <input id="set_feeNursery" value="${escapeHtml(settings.feeNursery || '₦75,000')}" placeholder="e.g. ₦75,000" required>
+                <label>1. Crèche Term Fee</label>
+                <input id="set_feeCreche" value="${escapeHtml(settings.feeCreche || '')}" placeholder="e.g. ₦75,000" required>
               </div>
-
               <div class="field">
-                <label>Primary (Basic 1 - 6) Term Fee</label>
-                <input id="set_feePrimary" value="${escapeHtml(settings.feePrimary || '₦85,000')}" placeholder="e.g. ₦85,000" required>
+                <label>2. KG 1 – KG 2 Term Fee</label>
+                <input id="set_feeKG" value="${escapeHtml(settings.feeKG || '')}" placeholder="e.g. ₦75,000" required>
               </div>
-
+              <div class="field">
+                <label>3. Nursery 1 – Nursery 2 Term Fee</label>
+                <input id="set_feeNursery" value="${escapeHtml(settings.feeNursery || '')}" placeholder="e.g. ₦75,000" required>
+              </div>
+              <div class="field">
+                <label>4. Primary 1 – Primary 5 Term Fee</label>
+                <input id="set_feePrimary" value="${escapeHtml(settings.feePrimary || '')}" placeholder="e.g. ₦75,000" required>
+                <p class="hint">Primary 6 also uses this fee.</p>
+              </div>
+              <div class="field">
+                <label>5. JSS 1 – JSS 3 Term Fee</label>
+                <input id="set_feeJSS" value="${escapeHtml(settings.feeJSS || '')}" placeholder="e.g. ₦75,000" required>
+              </div>
               <div class="field mb0">
-                <label>Junior Secondary (JSS 1 - 3) Term Fee</label>
-                <input id="set_feeSecondary" value="${escapeHtml(settings.feeSecondary || '₦95,000')}" placeholder="e.g. ₦95,000" required>
+                <label>6. SS 1 – SS 3 Term Fee</label>
+                <input id="set_feeSS" value="${escapeHtml(settings.feeSS || '')}" placeholder="e.g. ₦75,000" required>
               </div>
             </div>
 
@@ -5876,6 +5896,7 @@ function renderAdminFees() {
             <th>Pupil ID</th>
             <th>Name</th>
             <th>Class</th>
+            <th>Term Fee</th>
             <th>Current Balance (₦)</th>
             <th>Fee Note / Message</th>
             <th>Action</th>
@@ -5887,6 +5908,7 @@ function renderAdminFees() {
               <td>${escapeHtml(p.id)}</td>
               <td><b>${escapeHtml(p.name)}</b></td>
               <td>${escapeHtml(p.cls)}</td>
+              <td>${escapeHtml(feeForClass(p.cls))}</td>
               <td>
                 <input type="number" id="fee_bal_${p.id}" value="${p.feeBalance || 0}" style="width:120px;padding:6px;border:1px solid #ccc;border-radius:4px;">
               </td>
@@ -6131,7 +6153,7 @@ function submitTeacherNewAssignment() {
 
 function deleteAssignment(idOrIdx) {
   showModal({
-    title: "Delete Assignment?",
+    title: "Are you sure?",
     message: "Are you sure you want to permanently delete this assignment? It will be removed from both teacher and student portals.",
     confirmText: "Yes, Delete",
     cancelText: "Cancel",
@@ -6317,11 +6339,12 @@ function renderAdminAnnouncementList(){
 function deleteAnnouncement(idx) {
   const ann = announcements[idx];
   showModal({
-    title: "Delete Announcement?",
+    title: "Are you sure?",
     message: `Are you sure you want to delete this notice: "${ann?.title || 'Notice'}"?`,
     confirmText: "Yes, Delete",
     cancelText: "Cancel",
     onConfirm: () => {
+      if(ann) tomb(ann.id || (ann.title+'|'+ann.date));
       announcements.splice(idx, 1);
       saveAnnouncements();
       renderAdminAnnouncementList();
@@ -6389,9 +6412,13 @@ function saveVisualSettingsForm() {
   }
 
   settings.nextTerm = getVal('set_nextTerm', settings.nextTerm);
+  settings.feeCreche = getVal('set_feeCreche', settings.feeCreche);
+  settings.feeKG = getVal('set_feeKG', settings.feeKG);
   settings.feeNursery = getVal('set_feeNursery', settings.feeNursery);
   settings.feePrimary = getVal('set_feePrimary', settings.feePrimary);
-  settings.feeSecondary = getVal('set_feeSecondary', settings.feeSecondary);
+  settings.feeJSS = getVal('set_feeJSS', settings.feeJSS);
+  settings.feeSS = getVal('set_feeSS', settings.feeSS);
+  settings.feeSecondary = settings.feeJSS;
   settings.heroHeadline = getVal('set_heroHeadline', settings.heroHeadline);
   settings.heroSubtitle = getVal('set_heroSubtitle', settings.heroSubtitle);
   settings.adminPasscode = getVal('set_adminPasscode', settings.adminPasscode || '');
@@ -6664,13 +6691,13 @@ registerView('parent-portal', ()=>{
           
           <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 14px">
             <h3 style="margin:0">Tuition &amp; Fees Statement</h3>
-            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('First Term 2026/2027', '₦85,000')">💳 Pay Tuition Now</button>
+            <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal('${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}', '${escapeHtml(feeForClass(curr.cls))}')">💳 Pay Tuition Now</button>
           </div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Term Session</th><th>Total Due</th><th>Amount Paid</th><th>Balance</th><th>Status</th><th>Receipt</th></tr></thead>
               <tbody>
-                <tr><td style="font-weight:700">${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}</td><td>—</td><td>—</td><td><b>₦${feeBalance.toLocaleString()}</b></td><td><span class="pill ${feeBalance>0?'pending':'accepted'}">${feeBalance>0?'Outstanding':'Cleared'}</span></td><td>—</td></tr>
+                <tr><td style="font-weight:700">${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}</td><td>${escapeHtml(feeForClass(curr.cls))}</td><td>—</td><td><b>₦${feeBalance.toLocaleString()}</b></td><td><span class="pill ${feeBalance>0?'pending':'accepted'}">${feeBalance>0?'Outstanding':'Cleared'}</span></td><td>—</td></tr>
               </tbody>
             </table>
           </div>
@@ -6783,7 +6810,11 @@ function addComment(e, id){
   }
 }
 function togglePin(id){ const t = threads.find(x=>x.id===id); if(t){ t.pinned = !t.pinned; saveThreads(); renderForumThreads(); } }
-function deleteThread(id){ threads = threads.filter(x=>x.id!==id); saveThreads(); renderForumThreads(); toast('Thread deleted'); }
+function deleteThread(id){
+  const t = threads.find(x=>x.id===id);
+  showModal({title:'Are you sure?',message:`Delete the discussion "${t?t.title:'this thread'}" and all its replies? This cannot be undone.`,confirmText:'Yes, Delete',cancelText:'Cancel',
+    onConfirm:()=>{try{threads = threads.filter(x=>x.id!==id); saveThreads(); renderForumThreads(); toast('Thread deleted successfully','success');}catch(e){console.error(e);toast('Could not delete the thread','error');}}});
+}
 
 registerView('forum', ()=>`
   <section class="pad">
@@ -6896,11 +6927,9 @@ function renderGalleryFull(){
 }
 
 function deletePhoto(id){
-  gallery = gallery.filter(p=>p.id!==id);
-  saveGallery();
-  renderGalleryFull();
-  renderGalleryHome();
-  toast('Photo removed');
+  const p = gallery.find(x=>x.id===id);
+  showModal({title:'Are you sure?',message:`Remove "${p&&p.caption?p.caption:'this photo'}" from the gallery? This cannot be undone.`,confirmText:'Yes, Delete',cancelText:'Cancel',
+    onConfirm:()=>{try{gallery = gallery.filter(x=>x.id!==id); saveGallery(); renderGalleryFull(); renderGalleryHome(); toast('Photo removed successfully','success');}catch(e){console.error(e);toast('Could not remove the photo','error');}}});
 }
 
 let lightboxIndex = 0;
@@ -7302,8 +7331,14 @@ function initDashTabs(prefix){
       document.querySelectorAll(`[data-panel-${prefix}]`).forEach(p=>{
         p.classList.toggle('active', p.getAttribute(`data-panel-${prefix}`)===target);
       });
+      try{ sessionStorage.setItem('mjl_tab_'+prefix, target); }catch(e){}
     });
   });
+  try{ /* reopen the tab that was open before a reload */
+    const saved=sessionStorage.getItem('mjl_tab_'+prefix);
+    const b=saved&&document.querySelector(`[data-tab-${prefix}="${saved}"]`);
+    if(b&&!b.classList.contains('active')){ const sv=Sound.playClick; Sound.playClick=()=>{}; b.click(); Sound.playClick=sv; }
+  }catch(e){}
 }
 
 function downloadHtmlFile(){
@@ -7585,19 +7620,24 @@ async function copySchemaSQL() {
 if (window.SupabaseService) {
   window.SupabaseService.init().then(async () => {
     try {
+      if (!LS.get('mjl_demo_cloud_v3') && window.SupabaseService.isConfigured && window.SupabaseService.isConfigured()) {
+        DEMO_APP_IDS_V3.forEach(id => cloudDelete('deleteAdmission', id));
+        LS.set('mjl_demo_cloud_v3','1');
+      }
       const remoteAnn = await window.SupabaseService.fetchAnnouncements();
       if (remoteAnn && remoteAnn.length) {
-        announcements = remoteAnn;
+        announcements = remoteAnn.filter(a => !isGone(a.id || (a.title+'|'+a.date)));
         saveAnnouncements();
       }
       const remoteApps = await window.SupabaseService.fetchAdmissions();
       if (remoteApps && remoteApps.length) {
-        applications = remoteApps;
+        applications = remoteApps.filter(a => !isGone(a.id) && a.status !== 'Deleted' && !DEMO_APP_IDS_V3.includes(a.id));
         saveApplications();
       }
       const remoteStaff = await window.SupabaseService.fetchStaffApplications();
       if (remoteStaff && remoteStaff.length) {
-        staffApplications = remoteStaff;
+        staffApplications = remoteStaff.filter(a => !isGone(a.id) && a.status !== 'Deleted' && !DEMO_STAFF_V3.includes(a.name));
+        remoteStaff.filter(a => DEMO_STAFF_V3.includes(a.name)).forEach(a => cloudDelete('deleteStaffApplication', a.id));
         saveStaffApplications();
       }
     } catch(e) {
@@ -7612,10 +7652,17 @@ const todayKey=()=>new Date().toISOString().slice(0,10);
 let attendanceStore=DB.get('attendanceStore',{});
 let contactMessages=DB.get('contactMessages',[]);
 const fmtDate=()=>new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-function cloudDelete(m,id){try{const c=window.SupabaseService;if(c&&c.isConfigured&&c.isConfigured()&&typeof c[m]==='function')c[m](id);}catch(e){}}
+function cloudDelete(m,id){try{
+ if(m==='deleteAdmission'||m==='deleteStaffApplication')tomb(id);
+ const c=window.SupabaseService;if(!(c&&c.isConfigured&&c.isConfigured()))return;
+ /* The cloud tables block hard deletes, so mark the record as Deleted (updates are allowed) and hide it everywhere */
+ if(m==='deleteAdmission'&&typeof c.updateAdmissionStatus==='function')c.updateAdmissionStatus(id,'Deleted');
+ else if(m==='deleteStaffApplication'&&typeof c.updateStaffAppStatus==='function')c.updateStaffAppStatus(id,'Deleted');
+ else if(typeof c[m]==='function')c[m](id);
+}catch(e){console.error(e);}}
 function refreshAdminLists(){const f=document.getElementById('adminResultsClassFilter');
  [()=>renderAdminStudentRegistry(),()=>renderAdminFees(),()=>renderAdminResultsTable(f?f.value:'Primary 4'),()=>renderAssignedClassPanel(),()=>renderTeacherResultsPanel('primary'),()=>renderTeacherAttendancePanel(),()=>renderAdminAdmissions(),()=>renderAdminStaffApplications(),()=>renderAdminMessages()].forEach(fn=>{try{fn();}catch(e){}});}
-function confirmDelete(title,message,fn){showModal({title,message,confirmText:'Yes, Delete',cancelText:'Cancel',onConfirm:()=>{try{fn();refreshAdminLists();Sound.playSuccess();toast('Deleted successfully');}catch(e){console.error(e);toast('Delete failed: '+e.message);}}});}
+function confirmDelete(title,message,fn){showModal({title:'Are you sure?',message,confirmText:'Yes, Delete',cancelText:'Cancel',onConfirm:()=>{try{fn();refreshAdminLists();Sound.playSuccess();toast('Deleted successfully');}catch(e){console.error(e);toast('Delete failed: '+e.message);}}});}
 function deleteStudentAccount(id){const p=classRoster.find(x=>x.id===id);if(!p)return;
  confirmDelete('Delete pupil?',`Permanently delete ${p.name} (${p.id}) with all scores, remarks and login? This cannot be undone.`,()=>{
   classRoster=classRoster.filter(x=>x.id!==id);userAccounts=userAccounts.filter(u=>u.id!==id&&u.identifier!==id);
@@ -7724,8 +7771,53 @@ function changeAdminPassword(){try{const u=session&&session.user;
  toast('Admin password changed successfully','success');}catch(e){console.error(e);toast('Could not change the password','error');}}
 const _ar2=afterRender;afterRender=function(id){_ar2(id);
  if(id==='admin-dashboard'&&session&&session.user&&session.user.password==='MJL/Ad/3145')setTimeout(()=>toast('Security: change the default admin password now (Security tab).','error'),700);};
+
+/* ===== Deleted records stay deleted ===== */
+let deletedIds = DB.get('deletedIds', []);
+function tomb(id){ if(id==null) return; id=String(id); if(!deletedIds.includes(id)){ deletedIds.push(id); DB.set('deletedIds', deletedIds); } }
+function isGone(id){ return id!=null && deletedIds.includes(String(id)); }
+const DEMO_APP_IDS_V3 = ['MJL-APP-83921','MJL-APP-54219','MJL-APP-19284'];
+const DEMO_STAFF_V3 = ['Mrs. Bukola Fashola','Mr. Chukwudi Ani'];
+(function purgeSampleRecordsV3(){
+  if(LS.get('mjl_demo_purged_v3')) return;
+  DEMO_APP_IDS_V3.forEach(tomb);
+  applications = applications.filter(a => !DEMO_APP_IDS_V3.includes(a.id)); saveApplications();
+  staffApplications = staffApplications.filter(a => !DEMO_STAFF_V3.includes(a.name)); saveStaffApplications();
+  LS.set('mjl_demo_purged_v3','1');
+})();
+function feeForClass(cls){
+  const c = String(cls||'');
+  if(/cr[eè]che/i.test(c)) return settings.feeCreche || '—';
+  if(/^KG/i.test(c)) return settings.feeKG || '—';
+  if(/^Nursery/i.test(c)) return settings.feeNursery || '—';
+  if(/^Primary/i.test(c)) return settings.feePrimary || '—';
+  if(/^JSS/i.test(c)) return settings.feeJSS || '—';
+  if(/^SS/i.test(c)) return settings.feeSS || '—';
+  return '—';
+}
+/* Stay on the same page after a reload (login kept for this browser tab only) */
+const _goBase=go;
+go=function(id,fromHistory){
+  _goBase(id,fromHistory);
+  try{
+    if(PROTECTED_VIEWS.has(id)&&session&&session.role){
+      const s=JSON.parse(JSON.stringify(session));
+      ['user','student'].forEach(k=>{ if(s[k]){ s[k]={id:s[k].id,_sample:(s[k].id?0:1)}; if(!s[k].id) s[k]=JSON.parse(JSON.stringify(session[k])); } });
+      sessionStorage.setItem('mjl_session',JSON.stringify({view:id,s:s}));
+    } else { sessionStorage.removeItem('mjl_session'); ['ad','td','sd','pd','pp'].forEach(k=>sessionStorage.removeItem('mjl_tab_'+k)); Object.keys(sessionStorage).filter(k=>k.indexOf('mjl_tab_')===0).forEach(k=>sessionStorage.removeItem(k)); }
+  }catch(e){}
+};
+(function restoreSession(){
+  try{
+    const raw=sessionStorage.getItem('mjl_session'); if(!raw) return;
+    const d=JSON.parse(raw), s=d.s; if(!s||!s.role||!views[d.view]) return;
+    for(const k of ['user','student']){ if(s[k]&&s[k].id){ const acc=userAccounts.find(a=>a.id===s[k].id); if(!acc){ sessionStorage.removeItem('mjl_session'); return; } s[k]=acc; } }
+    session=s; window._restoreView=d.view;
+  }catch(e){}
+})();
 // Launch application
-{ const h=(location.hash||'').slice(1); const start=(views[h]&&canView(h))?h:'home';
+{ const h=(window._restoreView&&canView(window._restoreView))?window._restoreView:(location.hash||'').slice(1); const _unused='';
+  const start=(views[h]&&canView(h))?h:'home';
   try{history.replaceState({v:start},'','#'+start);}catch(_){} go(start,true); }
 </script>
 
