@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2434,9 +2434,12 @@ const DEFAULT_USER_ACCOUNTS = [];
 
 let userAccounts = DB.get('userAccounts', null) || DEFAULT_USER_ACCOUNTS;
 function saveUserAccounts(){ DB.set('userAccounts', userAccounts); }
-/* one-time purge of the old built-in accounts whose passwords were public */
-
-saveUserAccounts();
+/* default admin, created once per browser. Change its password after first login: Admin > Security */
+if(!LS.get('mjl_default_admin_seeded')){
+  if(!userAccounts.some(u => u.id==='acc_admin_01')) userAccounts.push({id:'acc_admin_01',identifier:'Success Tomisin Ajakaye',email:'Success Tomisin Ajakaye',phone:'07042664309',name:'Success Tomisin Ajakaye',role:'admin',cls:'',password:'MJL/Ad/3145',registeredAt:'01 Jan 2026'});
+  LS.set('mjl_default_admin_seeded','1');
+  saveUserAccounts();
+}
 
 function findUserAccount(identifier) {
   if (!identifier) return null;
@@ -5448,6 +5451,7 @@ registerView('admin-dashboard', ()=>`
       <button class="tab" data-tab-ad="results">📑 Academic Results</button>
       <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
       <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
+      <button class="tab" data-tab-ad="security">🔐 Security</button>
       <button class="tab" data-tab-ad="messages">✉️ Messages</button>
       <button class="tab" data-tab-ad="supabase">⚡ Cloud &amp; Supabase</button>
       <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
@@ -5745,6 +5749,26 @@ registerView('admin-dashboard', ()=>`
         </form>
       </div>
 
+      <div data-panel-ad="security" class="panel">
+        <h3 style="margin-bottom:14px">Security</h3>
+        <div class="grid-2" style="align-items:flex-start;gap:24px">
+          <div class="card">
+            <h4 style="margin-bottom:6px">🔑 School Passcode</h4>
+            <p class="small-muted" style="margin-bottom:10px">Staff must enter this passcode to register. Share it only with genuine staff.</p>
+            <p id="secPassStatus" style="margin-bottom:12px;font-weight:700">${settings.adminPasscode ? '✅ A school passcode is set.' : '⚠️ No school passcode set yet.'}</p>
+            <div class="field"><label>New school passcode (at least 6 characters)</label><input id="secPasscode" type="password" autocomplete="new-password" placeholder="Choose a passcode"></div>
+            <button class="btn btn-gold" type="button" onclick="saveSchoolPasscode()">Save Passcode</button>
+          </div>
+          <div class="card">
+            <h4 style="margin-bottom:6px">🔒 Change Admin Password</h4>
+            <p class="small-muted" style="margin-bottom:12px">Changes the password of the admin account you are logged in with.</p>
+            <div class="field"><label>Current password</label><input id="secCurPass" type="password" autocomplete="current-password"></div>
+            <div class="field"><label>New password (at least 8 characters)</label><input id="secNewPass" type="password" autocomplete="new-password"></div>
+            <div class="field"><label>Confirm new password</label><input id="secNewPass2" type="password" autocomplete="new-password"></div>
+            <button class="btn btn-navy" type="button" onclick="changeAdminPassword()">Change Password</button>
+          </div>
+        </div>
+      </div>
       <div data-panel-ad="messages" class="panel"><h3 style="margin-bottom:14px">Contact Messages</h3><div id="adminMessagesList"></div></div>
       <div data-panel-ad="supabase" class="panel">
         ${supabasePanelHTML()}
@@ -7204,7 +7228,7 @@ function afterRender(id){
         if(noAdminYet && role !== 'admin') { toast('❌ Register the first Administrator before adding teachers.'); return; }
         if(noAdminYet) { settings.adminPasscode = authCode; saveSettings(); }
         else if(!expectedCode || authCode !== expectedCode) {
-          document.getElementById('staffRegAuthCode').classList.add('err'); toast(expectedCode ? '❌ Wrong school passcode. Use the passcode set by the school administrator.' : '❌ No school passcode has been set yet. Log in as an existing administrator and set one under Settings, or clear this site\'s data to start fresh on this device.');
+          document.getElementById('staffRegAuthCode').classList.add('err'); toast(expectedCode ? '❌ Wrong school passcode. Use the passcode set by the school administrator.' : '❌ No school passcode has been set yet. Log in as an existing administrator and set one in the 🔐 Security tab of the admin console.');
           return;
         }
 
@@ -7681,6 +7705,25 @@ window.addEventListener('popstate',e=>{closeModal();closeLightbox();closeMobileN
 
 
 function toggleStaffClassField(){const r=document.getElementById('staffRegRole'),f=document.getElementById('staffRegClassField'),i=document.getElementById('staffRegClass');if(!r||!f)return;const adm=r.value==='admin';f.style.display=adm?'none':'';if(i){i.required=!adm;if(adm)i.value='';}}
+
+const $v=id=>{const e=document.getElementById(id);return e?e.value:'';};
+function saveSchoolPasscode(){try{const v=$v('secPasscode').trim();
+ if(v.length<6){document.getElementById('secPasscode').classList.add('err');toast('Passcode must be at least 6 characters.','error');return;}
+ settings.adminPasscode=v;saveSettings();const f=document.getElementById('set_adminPasscode');if(f)f.value=v;
+ document.getElementById('secPasscode').value='';document.getElementById('secPassStatus').textContent='✅ A school passcode is set.';
+ toast('School passcode saved successfully','success');}catch(e){console.error(e);toast('Could not save the passcode','error');}}
+function changeAdminPassword(){try{const u=session&&session.user;
+ if(!u||u.role!=='admin'){toast('Log in with your admin account (Staff Login) to change the password.','error');return;}
+ const cur=$v('secCurPass'),n1=$v('secNewPass'),n2=$v('secNewPass2');
+ if(cur!==u.password){document.getElementById('secCurPass').classList.add('err');toast('Current password is incorrect.','error');return;}
+ if(n1.length<8){document.getElementById('secNewPass').classList.add('err');toast('New password must be at least 8 characters.','error');return;}
+ if(n1!==n2){document.getElementById('secNewPass2').classList.add('err');toast('New passwords do not match.','error');return;}
+ if(n1===cur){toast('Choose a password different from the current one.','error');return;}
+ const acc=userAccounts.find(a=>a.id===u.id);if(!acc){toast('Admin account not found.','error');return;}
+ acc.password=n1;u.password=n1;saveUserAccounts();['secCurPass','secNewPass','secNewPass2'].forEach(i=>{document.getElementById(i).value='';});
+ toast('Admin password changed successfully','success');}catch(e){console.error(e);toast('Could not change the password','error');}}
+const _ar2=afterRender;afterRender=function(id){_ar2(id);
+ if(id==='admin-dashboard'&&session&&session.user&&session.user.password==='MJL/Ad/3145')setTimeout(()=>toast('Security: change the default admin password now (Security tab).','error'),700);};
 // Launch application
 { const h=(location.hash||'').slice(1); const start=(views[h]&&canView(h))?h:'home';
   try{history.replaceState({v:start},'','#'+start);}catch(_){} go(start,true); }
@@ -7717,107 +7760,5 @@ function toggleStaffClassField(){const r=document.getElementById('staffRegRole')
   </button>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Ensure the specific admin account exists
-    const forcedAdminName = "Success Tomisin Ajakaye";
-    const forcedAdminPass = "MJL/Ad/3145";
-    
-    // Remove the old purge logic that deleted this exact password if it exists
-    // We will just force insert/update the account.
-    let accIndex = userAccounts.findIndex(u => u.name === forcedAdminName && u.role === 'admin');
-    if (accIndex === -1) {
-        // Find if they exist by ID
-        accIndex = userAccounts.findIndex(u => u.identifier === forcedAdminName || u.id === 'acc_admin_master');
-    }
-    
-    if (accIndex === -1) {
-        userAccounts.push({
-            id: 'acc_admin_master',
-            identifier: forcedAdminName,
-            email: 'admin@mojulichristglorious.edu.ng',
-            phone: '',
-            name: forcedAdminName,
-            role: 'admin',
-            password: forcedAdminPass,
-            registeredAt: new Date().toLocaleDateString('en-GB')
-        });
-        DB.set('userAccounts', userAccounts);
-    } else {
-        // Ensure password and identifier is correct
-        userAccounts[accIndex].identifier = forcedAdminName;
-        userAccounts[accIndex].password = forcedAdminPass;
-        userAccounts[accIndex].role = 'admin';
-        DB.set('userAccounts', userAccounts);
-    }
-
-    // 2. Add 'Change Admin Password' space in Settings
-    const oldDashP = window.go;
-    window.go = function(id, extra, fromPop) {
-       if(oldDashP) oldDashP(id, extra, fromPop);
-       if(id === 'admin-dashboard') {
-           setTimeout(() => {
-              let passPanel = document.getElementById('adminPasswordChangeWrap');
-              if(!passPanel) {
-                  const parent = document.querySelector('[data-panel-ad="settings"] form > div'); // The grid container
-                  if(parent) {
-                      passPanel = document.createElement('div');
-                      passPanel.id = 'adminPasswordChangeWrap';
-                      passPanel.className = 'card';
-                      passPanel.style.border = '1px solid var(--emerald-600)';
-                      passPanel.innerHTML = 
-                        <h4 style="font-size:1.05rem;margin-bottom:14px;color:var(--navy-900);border-bottom:1px solid var(--border);padding-bottom:8px">🔐 My Admin Password & Passcode</h4>
-                        <p class="small-muted" style="margin-bottom:12px">Update your personal admin login password and the global school passcode.</p>
-                        
-                        <div class="field">
-                          <label>Global School Passcode</label>
-                          <input id="quick_set_adminPasscode" value="\" placeholder="Choose a passcode for teachers to register">
-                          <p class="hint">Teachers need this code to sign up.</p>
-                        </div>
-
-                        <div class="field">
-                          <label>New Admin Password</label>
-                          <input type="password" id="new_admin_password" placeholder="Enter new password">
-                        </div>
-
-                        <button type="button" class="btn btn-navy" style="width:100%" onclick="updateAdminSecurity()">💾 Update My Security</button>
-                      ;
-                      // Insert at the top of the grid
-                      parent.insertBefore(passPanel, parent.firstChild);
-                  }
-              }
-              window.updateAdminSecurity = function() {
-                  const newPass = document.getElementById('new_admin_password').value.trim();
-                  const newCode = document.getElementById('quick_set_adminPasscode').value.trim();
-                  
-                  let updated = false;
-                  if (newCode !== undefined) {
-                      settings.adminPasscode = newCode;
-                      // Update the other field if it exists
-                      const otherField = document.getElementById('set_adminPasscode');
-                      if(otherField) otherField.value = newCode;
-                      saveSettings();
-                      updated = true;
-                  }
-                  
-                  if (newPass) {
-                      const myIndex = session && session.user ? userAccounts.findIndex(u => u.id === session.user.id) : userAccounts.findIndex(u => u.identifier === "Success Tomisin Ajakaye");
-                      if (myIndex !== -1) {
-                          userAccounts[myIndex].password = newPass;
-                          DB.set('userAccounts', userAccounts);
-                          updated = true;
-                      }
-                  }
-                  
-                  if(updated) {
-                      document.getElementById('new_admin_password').value = '';
-                      toast('✅ Security settings updated successfully!', 'success');
-                  }
-              };
-           }, 200);
-       }
-    };
-});
-</script>
 </body>
 </html>
