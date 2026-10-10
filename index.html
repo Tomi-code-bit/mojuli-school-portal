@@ -2533,6 +2533,10 @@ function verifyUserLogin(identifier, password, requiredRole) {
 
   const acc = findUserAccount(cleanId);
   if (!acc) {
+    const _q = cleanId.toLowerCase();
+    const reg = (typeof staffRegistrations!=='undefined') && staffRegistrations.find(r => r.status!=='Approved' && (r.email.toLowerCase()===_q || (r.phone && r.phone===cleanId)));
+    if (reg && reg.status==='Pending') return { success:false, reason:'Your registration is still waiting for the school administrator to approve it.' };
+    if (reg && reg.status==='Denied') return { success:false, reason:'Your registration was not approved. Please contact the school administrator.' };
     // Demo fallback removed for production purity
     if (isStudentAuth) {
       return { 
@@ -5507,6 +5511,10 @@ registerView('admin-dashboard', ()=>`
             <input id="adminStaffSearch" placeholder="Search educator, class..." oninput="filterAdminStaff()">
           </div>
         </div>
+        <h3 style="margin:4px 0 6px">🔔 Staff Registrations — Approve or Deny</h3>
+        <p class="small-muted" style="margin-bottom:10px">Teachers who register with the school passcode appear here. Approve to let them log in with the email and password they chose.</p>
+        <div id="adminStaffRegsTable" style="margin-bottom:26px"></div>
+        <h3 style="margin:4px 0 10px">Recruitment Assessments</h3>
         <div id="adminStaffApplicationsTable"></div>
 <h3 style="margin:28px 0 12px">Staff Accounts</h3>
 <div id="adminStaffAccountsTable"></div>
@@ -6204,7 +6212,8 @@ function renderAdminAdmissions(){
             <option ${a.status==='Under Review'?'selected':''}>Under Review</option>
             <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
-          </select> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteAdmission('${a.id}')">🗑 Delete</button>
+          </select> ${a.enrolledId ? `<button class="btn btn-sm btn-ghost" style="color:var(--green-700,#047857)" onclick="showEnrolledLogin('${a.id}')">🔑 View Login</button>` : (a.status==='Rejected' ? '' : `<button class="btn btn-sm btn-gold" onclick="enrollApplicant('${a.id}')">🎓 Enroll &amp; Create Login</button>`)}
+          <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteAdmission('${a.id}')">🗑 Delete</button>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
 }
@@ -7266,6 +7275,23 @@ function afterRender(id){
           return;
         }
 
+        if(!noAdminYet){
+          try{
+            const dup = findUserAccount(email) || findUserAccount(phone) ||
+              staffRegistrations.find(r => r.status==='Pending' && (r.email.toLowerCase()===email.toLowerCase()));
+            if(dup) throw new Error(findUserAccount(email)||findUserAccount(phone) ? `An account is already registered with "${email}". Please sign in instead, or use a different email.` : 'A registration with this email is already waiting for admin approval.');
+            if(!pass || pass.length < 3) throw new Error('Password must be at least 3 characters.');
+            staffRegistrations.unshift({ id:'reg_'+genId(), name, email, phone, role, cls, password:pass, photoUrl: window._tempStaffRegPhotoUrl || '',
+              date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), status:'Pending' });
+            saveStaffRegistrations();
+            window._tempStaffRegPhotoUrl = null;
+            Sound.playSuccess();
+            staffReg.reset();
+            toast('✅ Registration sent! You can log in once the school administrator approves it.','success');
+            go('staff-login');
+          }catch(err){ toast('❌ ' + err.message); }
+          return;
+        }
         try {
           const photoUrl = window._tempStaffRegPhotoUrl || '';
           const newAcc = registerUserAccount({
@@ -7795,6 +7821,242 @@ function feeForClass(cls){
   if(/^SS/i.test(c)) return settings.feeSS || '—';
   return '—';
 }
+/* ===== Staff registrations: admin approves or denies ===== */
+let staffRegistrations = DB.get('staffRegistrations', []);
+function saveStaffRegistrations(){ DB.set('staffRegistrations', staffRegistrations); }
+function renderStaffRegistrations(){
+  const el=document.getElementById('adminStaffRegsTable'); if(!el) return;
+  if(!staffRegistrations.length){ el.innerHTML='<div class="empty">No staff registrations yet.</div>'; return; }
+  const cls={Pending:'pending',Approved:'accepted',Denied:'rejected'};
+  el.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email / Phone</th><th>Role</th><th>Class</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody>${staffRegistrations.map(r=>`<tr>
+    <td><b>${escapeHtml(r.name)}</b></td><td>${escapeHtml(r.email)}<br><span class="small-muted">${escapeHtml(r.phone||'')}</span></td>
+    <td><span class="badge ${r.role==='admin'?'gold':'live'}">${escapeHtml(r.role)}</span></td><td>${escapeHtml(r.cls||'-')}</td><td>${escapeHtml(r.date)}</td>
+    <td><span class="pill ${cls[r.status]||'pending'}">${r.status}</span></td>
+    <td>${r.status==='Pending'?`<button class="btn btn-sm btn-gold" onclick="approveStaffReg('${r.id}')">✅ Approve</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="denyStaffReg('${r.id}')">⛔ Deny</button>`:''}
+    ${r.status==='Denied'?`<button class="btn btn-sm btn-ghost" onclick="approveStaffReg('${r.id}')">Approve instead</button>`:''}
+    <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStaffReg('${r.id}')">🗑</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function approveStaffReg(id){const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  showModal({title:'Are you sure?',message:`Approve ${r.name} as ${r.role==='admin'?'an administrator':'a teacher'}? They will be able to log in with the email and password they registered.`,confirmText:'Yes, Approve',cancelText:'Cancel',onConfirm:()=>{
+    try{
+      const acc=registerUserAccount({identifier:r.email,email:r.email,phone:r.phone,name:r.name,role:r.role,cls:r.cls,password:r.password});
+      acc.photoUrl=r.photoUrl||''; saveUserAccounts();
+      r.status='Approved'; r.password=''; r.photoUrl=''; saveStaffRegistrations();
+      Sound.playSuccess(); toast(`✅ ${r.name} approved. They can now log in.`,'success');
+    }catch(e){ toast('❌ '+e.message,'error'); }
+    refreshAdminLists();
+  }});}
+function denyStaffReg(id){const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  showModal({title:'Are you sure?',message:`Deny ${r.name}'s registration? They will not be able to log in.`,confirmText:'Yes, Deny',cancelText:'Cancel',onConfirm:()=>{
+    r.status='Denied'; r.password=''; saveStaffRegistrations(); toast(`${r.name}'s registration was denied.`,'success'); refreshAdminLists();}});}
+function deleteStaffReg(id){const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  confirmDelete('Delete registration?',`Remove ${r.name}'s registration record?`,()=>{ staffRegistrations=staffRegistrations.filter(x=>x.id!==id); saveStaffRegistrations(); });}
+const _rsa2=renderAdminStaffApplications; renderAdminStaffApplications=function(){ _rsa2(); renderStaffRegistrations(); };
+const _ar3=afterRender; afterRender=function(id){ _ar3(id);
+  if(id==='admin-dashboard'){ const n=staffRegistrations.filter(r=>r.status==='Pending').length; if(n) setTimeout(()=>toast(`🔔 ${n} staff registration${n>1?'s':''} waiting for your approval (Staff & Recruitment tab).`),1200); } };
+
+/* ===== Admissions: enroll an applicant and create their login ===== */
+function makeAutoPassword(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<8;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
+function enrollApplicant(id){
+  const a=applications.find(x=>x.id===id); if(!a) return;
+  if(a.enrolledId){ showEnrolledLogin(id); return; }
+  showModal({title:'Are you sure?',message:`Enroll ${a.name} into ${a.cls} and create their student login?`,confirmText:'Yes, Enroll',cancelText:'Cancel',onConfirm:()=>{
+    try{
+      const sid=generateNextStudentId(), pw=makeAutoPassword();
+      classRoster.push({id:sid,name:a.name,cls:a.cls,gender:a.gender||'Pupil',parent:a.parent||'',phone:a.phone||'',dob:a.dob||'',address:a.address||'Ado-Ekiti',status:'Enrolled',admissionType:'Online Admission ('+a.id+')',photoUrl:''});
+      saveClassRoster();
+      userAccounts.push({id:sid,identifier:sid,email:a.email||'',phone:a.phone||'',name:a.name,role:kindForClass(a.cls)==='secondary'?'student-secondary':'student-primary',cls:a.cls,gender:a.gender||'Female',password:pw,registeredAt:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})});
+      saveUserAccounts();
+      a.status='Accepted'; a.enrolledId=sid; saveApplications();
+      if(window.SupabaseService) try{ window.SupabaseService.updateAdmissionStatus(a.id,'Accepted'); }catch(e){}
+      Sound.playSuccess(); renderAdminAdmissions(); try{renderAdminStudentRegistry();}catch(e){}
+      showEnrolledLogin(id);
+    }catch(e){ console.error(e); toast('❌ Could not enroll: '+e.message,'error'); }
+  }});
+}
+function showEnrolledLogin(id){
+  const a=applications.find(x=>x.id===id); if(!a||!a.enrolledId) return;
+  const acc=userAccounts.find(u=>u.id===a.enrolledId); const sid=a.enrolledId, pw=acc?acc.password:'(changed by pupil)';
+  const overlay=document.getElementById('genericModalOverlay'), card=document.getElementById('genericModalCard');
+  card.innerHTML=`<h3>🎓 ${escapeHtml(a.name)} is enrolled</h3><p>Give these login details to the parent. The pupil signs in under <b>Student Login</b>.</p>
+    <div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Class:</b> ${escapeHtml(a.cls)}<br><b>Student ID (username):</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> <code>${escapeHtml(pw)}</code></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="modalCancelBtn">Close</button><button class="btn btn-navy btn-sm" id="modalConfirmBtn">📋 Copy login</button></div>`;
+  overlay.classList.add('open');
+  document.getElementById('modalCancelBtn').onclick=()=>overlay.classList.remove('open');
+  document.getElementById('modalConfirmBtn').onclick=()=>{ const txt=`Mojuli Christ Glorious School\n${a.name} (${a.cls})\nStudent ID: ${sid}\nPassword: ${pw}`;
+    try{ navigator.clipboard.writeText(txt); toast('Login details copied','success'); }catch(e){ toast('Copy not supported, write the details down.'); } };
+}
+
+/* ===== Shared online accounts (Supabase). Active when a URL and key are set. ===== */
+/* Paste your Supabase Project URL and anon/public key between the quotes (Project Settings > API). */
+const MOJULI_CLOUD = { url: '', key: '' };
+let cloudStaff = [];
+const Cloud = {
+  token: (function(){ try{ return sessionStorage.getItem('mjl_cloud_token')||''; }catch(e){ return ''; } })(),
+  weak: false,
+  cfg(){ let c={url:MOJULI_CLOUD.url,key:MOJULI_CLOUD.key};
+    if((!c.url||!c.key)&&window.SupabaseService){ try{ const g=window.SupabaseService.getConfig(); if(g&&g.url&&g.key) c={url:g.url,key:g.key}; }catch(e){} }
+    return c; },
+  active(){ const c=this.cfg(); return !!(c.url&&c.key); },
+  setToken(tk){ this.token=tk||''; try{ if(tk) sessionStorage.setItem('mjl_cloud_token',tk); else sessionStorage.removeItem('mjl_cloud_token'); }catch(e){} },
+  async rpc(name,params){
+    const c=this.cfg(); let r;
+    try{ r=await fetch(c.url.replace(/\/+$/,'')+'/rest/v1/rpc/'+name,{method:'POST',headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Content-Type':'application/json'},body:JSON.stringify(params||{})}); }
+    catch(e){ throw new Error('Cannot reach the school server. Check your internet connection and try again.'); }
+    let j=null; try{ j=await r.json(); }catch(e){}
+    if(!r.ok){ const m=(j&&(j.message||j.hint||j.details))||('Server error '+r.status);
+      if(/Could not find the function|does not exist/i.test(m)) throw new Error('The school database is not set up yet. Run supabase_accounts.sql in Supabase first.');
+      if(/Admin login required/i.test(m)) throw new Error('Please log in again as an administrator.');
+      throw new Error(m); }
+    return j; },
+  async syncRoster(){
+    if(!this.token) return false;
+    try{ const list=await this.rpc('portal_get_roster',{p_token:this.token}); let changed=false;
+      (list||[]).forEach(p=>{ const i=classRoster.findIndex(x=>x.id===p.id);
+        if(i<0){ classRoster.push(Object.assign({gender:'Pupil',photoUrl:''},p)); changed=true; }
+        else { const next=Object.assign({},classRoster[i],p); if(JSON.stringify(next)!==JSON.stringify(classRoster[i])){ classRoster[i]=next; changed=true; } } });
+      if(changed) saveClassRoster(); return changed; }catch(e){ return false; } },
+  async refreshAdmin(){
+    if(!this.token) return;
+    try{ const r=await Promise.all([this.rpc('portal_list_staff_regs',{p_token:this.token}),this.rpc('portal_list_staff',{p_token:this.token})]);
+      staffRegistrations=r[0]||[]; cloudStaff=r[1]||[]; }catch(e){ console.warn(e); }
+    try{ renderAdminStaffApplications(); }catch(e){} },
+  async logout(){ const tk=this.token; this.setToken(''); this.weak=false; if(tk&&this.active()){ try{ await this.rpc('portal_logout',{p_token:tk}); }catch(e){} } }
+};
+async function cloudLogin(ident,pass,okRole,form){
+  const res=await Cloud.rpc('portal_login',{p_identifier:ident,p_password:pass});
+  if(!res.ok){ Sound.playClick(); fail(res.reason,form); return null; }
+  if(!okRole(res.account.role)){ try{ await Cloud.rpc('portal_logout',{p_token:res.token}); }catch(e){} Sound.playClick(); fail('This account belongs to a different login page. Please use the correct one.',form); return null; }
+  Cloud.setToken(res.token); Cloud.weak=!!res.weak; await Cloud.syncRoster(); return res.account;
+}
+document.addEventListener('submit', async function(e){
+  if(!Cloud.active()) return;
+  const f=e.target, fid=f&&f.id; if(!fid) return;
+  const val=id=>((document.getElementById(id)||{}).value||'');
+  const handlers={
+    'loginForm-staff': async ()=>{
+      const a=await cloudLogin(val('staffEmailInput').trim(),val('staffPassInput').trim(),r=>r==='admin'||r==='teacher',f); if(!a) return;
+      session={role:'staff-'+a.role,name:a.name,user:a}; Sound.playSuccess(); toast(`Access granted. Welcome, ${a.name}!`,'success'); go(a.role==='teacher'?'teacher-dashboard':'admin-dashboard'); },
+    'loginForm-primary-dashboard': ()=>studentLogin('primary-dashboard',f),
+    'loginForm-secondary-dashboard': ()=>studentLogin('secondary-dashboard',f),
+    'loginForm-parent-portal': async ()=>{
+      const a=await cloudLogin(val('loginId-parent-portal').trim(),val('loginPass-parent-portal').trim(),r=>r==='parent',f); if(!a) return;
+      session={role:'parent',name:a.name,user:a,childId:a.childId}; Sound.playSuccess(); toast(`Welcome to Parent Portal, ${a.name}!`,'success'); go('parent-portal'); },
+    'registerForm-primary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Student ID and password the school office gave you.','error'); },
+    'registerForm-secondary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Student ID and password the school office gave you.','error'); },
+    'registerForm-parent-portal': async ()=>{
+      if(val('regPass-parent-portal')!==val('regPassConfirm-parent-portal')){ toast('❌ Passwords do not match! Please check again.','error'); return; }
+      const email=val('regEmail-parent-portal').trim(), phone=val('regPhone-parent-portal').trim();
+      const res=await Cloud.rpc('portal_register_parent',{p_name:val('regName-parent-portal').trim(),p_email:email||phone,p_phone:phone,p_child_id:val('regChildId-parent-portal').trim(),p_password:val('regPass-parent-portal')});
+      if(!res.ok){ toast('❌ '+res.reason,'error'); return; }
+      Cloud.setToken(res.token); await Cloud.syncRoster(); const a=res.account;
+      session={role:'parent',name:a.name,user:a,childId:a.childId}; Sound.playSuccess(); toast(`🎉 Parent account registered! Welcome, ${a.name}!`,'success'); go('parent-portal'); },
+    'staffRegisterForm': async ()=>{
+      const role=val('staffRegRole')||'teacher';
+      if(val('staffRegPass')!==val('staffRegPassConfirm')){ toast('❌ Passwords do not match!','error'); return; }
+      const res=await Cloud.rpc('portal_register_staff',{p_name:val('staffRegName').trim(),p_email:val('staffRegEmail').trim(),p_phone:val('staffRegPhone').trim(),p_role:role,
+        p_cls:role==='admin'?'':val('staffRegClass').trim(),p_password:val('staffRegPass'),p_photo:window._tempStaffRegPhotoUrl||'',p_passcode:val('staffRegAuthCode').trim()});
+      if(!res.ok){ const pc=document.getElementById('staffRegAuthCode'); if(pc&&/passcode/i.test(res.reason)) pc.classList.add('err'); toast('❌ '+res.reason,'error'); return; }
+      window._tempStaffRegPhotoUrl=null; Sound.playSuccess();
+      if(res.status==='created'){ Cloud.setToken(res.token); const a=res.account; session={role:'staff-admin',name:a.name,user:a}; toast(`🎉 Administrator account created! Welcome, ${a.name}!`,'success'); go('admin-dashboard'); }
+      else { f.reset(); toast('✅ Registration sent! You can log in once the school administrator approves it.','success'); go('staff-login'); } }
+  };
+  async function studentLogin(target,form){
+    const k=target; const a=await cloudLogin(val('loginId-'+k).trim(),val('loginPass-'+k).trim(),r=>r==='student-primary'||r==='student-secondary',form); if(!a) return;
+    session={role:a.role,student:a,name:a.name}; Sound.playSuccess(); toast(`🎉 Welcome back, ${a.name}!`,'success'); go(a.role==='student-secondary'?'secondary-dashboard':'primary-dashboard'); }
+  const h=handlers[fid]; if(!h) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const btn=e.submitter||f.querySelector('button[type=submit]'); const old=btn?btn.innerHTML:''; if(btn){ btn.disabled=true; btn.textContent='Please wait…'; }
+  try{ await h(); }catch(err){ console.error(err); toast('❌ '+err.message,'error'); }
+  finally{ if(btn){ btn.disabled=false; btn.innerHTML=old; } }
+}, true);
+
+/* --- admin screens use the shared database when connected --- */
+const _rsr=renderStaffRegistrations;
+renderStaffRegistrations=function(){ _rsr();
+  const el=document.getElementById('adminStaffRegsTable'); if(!el) return;
+  const on=Cloud.active()&&Cloud.token;
+  el.insertAdjacentHTML('afterbegin',`<p class="small-muted" style="margin-bottom:8px">${on?'☁️ Connected to the school server — registrations from any device appear here.':'💾 Not connected to the school server — only registrations made on this device appear here.'}</p>`); };
+const _asr=approveStaffReg;
+approveStaffReg=function(id){ if(!Cloud.active()) return _asr(id); const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  showModal({title:'Are you sure?',message:`Approve ${r.name} as ${r.role==='admin'?'an administrator':'a teacher'}? They will be able to log in with the email and password they registered.`,confirmText:'Yes, Approve',cancelText:'Cancel',onConfirm:async()=>{
+    try{ const res=await Cloud.rpc('portal_decide_staff_reg',{p_token:Cloud.token,p_id:id,p_approve:true}); if(!res.ok){ toast('❌ '+res.reason,'error'); return; }
+      Sound.playSuccess(); toast(`✅ ${r.name} approved. They can now log in.`,'success'); }catch(e){ toast('❌ '+e.message,'error'); }
+    await Cloud.refreshAdmin(); }}); };
+const _dsr=denyStaffReg;
+denyStaffReg=function(id){ if(!Cloud.active()) return _dsr(id); const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  showModal({title:'Are you sure?',message:`Deny ${r.name}'s registration? They will not be able to log in.`,confirmText:'Yes, Deny',cancelText:'Cancel',onConfirm:async()=>{
+    try{ await Cloud.rpc('portal_decide_staff_reg',{p_token:Cloud.token,p_id:id,p_approve:false}); toast(`${r.name}'s registration was denied.`,'success'); }catch(e){ toast('❌ '+e.message,'error'); }
+    await Cloud.refreshAdmin(); }}); };
+const _dlr=deleteStaffReg;
+deleteStaffReg=function(id){ if(!Cloud.active()) return _dlr(id); const r=staffRegistrations.find(x=>x.id===id); if(!r) return;
+  showModal({title:'Are you sure?',message:`Remove ${r.name}'s registration record?`,confirmText:'Yes, Delete',cancelText:'Cancel',onConfirm:async()=>{
+    try{ await Cloud.rpc('portal_delete_staff_reg',{p_token:Cloud.token,p_id:id}); toast('Deleted successfully','success'); }catch(e){ toast('❌ '+e.message,'error'); }
+    await Cloud.refreshAdmin(); }}); };
+const _rsac=renderAdminStaffAccounts;
+renderAdminStaffAccounts=function(){ if(!(Cloud.active()&&Cloud.token)) return _rsac();
+  const el=document.getElementById('adminStaffAccountsTable'); if(!el) return; const l=cloudStaff;
+  el.innerHTML=l.length?`<div class="table-wrap"><table><thead><tr><th>Name</th><th>Login (email)</th><th>Role</th><th>Class</th><th>Registered</th><th>Action</th></tr></thead><tbody>${l.map(u=>`<tr><td><b>${escapeHtml(u.name)}</b></td><td>${escapeHtml(u.identifier)}</td><td><span class="badge ${u.role==='admin'?'gold':'live'}">${u.role}</span></td><td>${escapeHtml(u.cls||'-')}</td><td>${escapeHtml(u.registeredAt||'-')}</td><td><button class="btn btn-sm btn-ghost" onclick="resetAccountPassword('${u.id}')">🔑 New password</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStaffAccount('${u.id}')">🗑 Delete</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No staff accounts yet.</div>'; };
+const _dsa2=deleteStaffAccount;
+deleteStaffAccount=function(id){ if(!(Cloud.active()&&Cloud.token)) return _dsa2(id); const u=cloudStaff.find(x=>x.id===id); if(!u) return;
+  if(session&&session.user&&session.user.id===id){ toast('You cannot delete the account you are logged in as','error'); return; }
+  showModal({title:'Are you sure?',message:`Delete ${u.name} (${u.identifier})? They will no longer be able to log in.`,confirmText:'Yes, Delete',cancelText:'Cancel',onConfirm:async()=>{
+    try{ const res=await Cloud.rpc('portal_delete_account',{p_token:Cloud.token,p_id:id}); if(!res.ok){ toast('❌ '+res.reason,'error'); return; } toast('Deleted successfully','success'); }catch(e){ toast('❌ '+e.message,'error'); }
+    await Cloud.refreshAdmin(); }}); };
+function cloudLoginCard(title,intro,sid,pw,onNew){
+  const overlay=document.getElementById('genericModalOverlay'), card=document.getElementById('genericModalCard');
+  card.innerHTML=`<h3>${title}</h3><p>${intro}</p><div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Login ID:</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> ${pw?`<code>${escapeHtml(pw)}</code>`:'<span class="small-muted">hidden for security — press “New password” to make one</span>'}</div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="modalCancelBtn">Close</button><button class="btn btn-ghost btn-sm" id="modalNewBtn">🔑 New password</button>${pw?'<button class="btn btn-navy btn-sm" id="modalConfirmBtn">📋 Copy login</button>':''}</div>`;
+  overlay.classList.add('open');
+  document.getElementById('modalCancelBtn').onclick=()=>overlay.classList.remove('open');
+  document.getElementById('modalNewBtn').onclick=onNew;
+  const c=document.getElementById('modalConfirmBtn'); if(c) c.onclick=()=>{ try{ navigator.clipboard.writeText(`Mojuli Christ Glorious School\nLogin ID: ${sid}\nPassword: ${pw}`); toast('Login details copied','success'); }catch(e){ toast('Copy not supported, write the details down.'); } };
+}
+async function cloudNewPassword(id,name,label){
+  try{ const res=await Cloud.rpc('portal_reset_password',{p_token:Cloud.token,p_account_id:id}); if(!res.ok){ toast('❌ '+res.reason,'error'); return; }
+    Sound.playSuccess(); cloudLoginCard(`🔑 New password for ${escapeHtml(name)}`,'The old password no longer works. Give this to the user.',label||id,res.password,()=>resetAccountPassword(id,name,label)); }
+  catch(e){ toast('❌ '+e.message,'error'); } }
+function resetAccountPassword(id,name,label){
+  const u=cloudStaff.find(x=>x.id===id); name=name||(u&&u.name)||'this user'; label=label||(u&&u.identifier)||id;
+  showModal({title:'Are you sure?',message:`Create a new password for ${name}? Their old password will stop working.`,confirmText:'Yes, create',cancelText:'Cancel',onConfirm:()=>cloudNewPassword(id,name,label)}); }
+const _ea=enrollApplicant;
+enrollApplicant=function(id){ if(!(Cloud.active()&&Cloud.token)) return _ea(id);
+  const a=applications.find(x=>x.id===id); if(!a) return; if(a.enrolledId){ showEnrolledLogin(id); return; }
+  showModal({title:'Are you sure?',message:`Enroll ${a.name} into ${a.cls} and create their student login?`,confirmText:'Yes, Enroll',cancelText:'Cancel',onConfirm:async()=>{
+    try{ const res=await Cloud.rpc('portal_enroll_student',{p_token:Cloud.token,p_year:String((settings.session||'2026/2027')).slice(2,4),
+        p_pupil:{name:a.name,cls:a.cls,gender:a.gender||'',parent:a.parent||'',phone:a.phone||'',email:a.email||'',dob:a.dob||'',address:a.address||'',appId:a.id,admissionType:'Online Admission ('+a.id+')'}});
+      if(!res.ok){ if(res.id){ a.enrolledId=res.id; saveApplications(); renderAdminAdmissions(); } toast('❌ '+res.reason,'error'); return; }
+      a.status='Accepted'; a.enrolledId=res.id; saveApplications();
+      if(window.SupabaseService) try{ window.SupabaseService.updateAdmissionStatus(a.id,'Accepted'); }catch(e){}
+      await Cloud.syncRoster(); Sound.playSuccess(); renderAdminAdmissions(); try{ renderAdminStudentRegistry(); }catch(e){}
+      cloudLoginCard(`🎓 ${escapeHtml(a.name)} is enrolled`,`Give these details to the parent. The pupil signs in under <b>Student Login</b> (${escapeHtml(a.cls)}).`,res.id,res.password,()=>resetAccountPassword(res.id,a.name,res.id));
+    }catch(e){ toast('❌ '+e.message,'error'); } }}); };
+const _sel=showEnrolledLogin;
+showEnrolledLogin=function(id){ if(!(Cloud.active()&&Cloud.token)) return _sel(id);
+  const a=applications.find(x=>x.id===id); if(!a||!a.enrolledId) return;
+  cloudLoginCard(`🎓 ${escapeHtml(a.name)} is enrolled`,`The pupil signs in under <b>Student Login</b> (${escapeHtml(a.cls)}).`,a.enrolledId,null,()=>resetAccountPassword(a.enrolledId,a.name,a.enrolledId)); };
+const _cd2=cloudDelete;
+cloudDelete=function(m,id){ _cd2(m,id); if(Cloud.active()&&Cloud.token&&m==='deleteStudent') Cloud.rpc('portal_delete_account',{p_token:Cloud.token,p_id:id}).catch(()=>{}); };
+const _ssp=saveSchoolPasscode;
+saveSchoolPasscode=async function(){ if(!(Cloud.active()&&Cloud.token)) return _ssp();
+  const v=$v('secPasscode').trim(); if(v.length<6){ document.getElementById('secPasscode').classList.add('err'); toast('Passcode must be at least 6 characters.','error'); return; }
+  try{ const res=await Cloud.rpc('portal_set_passcode',{p_token:Cloud.token,p_passcode:v}); if(!res.ok){ toast('❌ '+res.reason,'error'); return; }
+    document.getElementById('secPasscode').value=''; const s=document.getElementById('secPassStatus'); if(s) s.textContent='✅ A school passcode is set (shared online).'; toast('School passcode saved successfully','success'); }
+  catch(e){ toast('❌ '+e.message,'error'); } };
+const _cap=changeAdminPassword;
+changeAdminPassword=async function(){ if(!(Cloud.active()&&Cloud.token)) return _cap();
+  const cur=$v('secCurPass'),n1=$v('secNewPass'),n2=$v('secNewPass2');
+  if(n1.length<8){ document.getElementById('secNewPass').classList.add('err'); toast('New password must be at least 8 characters.','error'); return; }
+  if(n1!==n2){ document.getElementById('secNewPass2').classList.add('err'); toast('New passwords do not match.','error'); return; }
+  try{ const res=await Cloud.rpc('portal_change_password',{p_token:Cloud.token,p_current:cur,p_new:n1}); if(!res.ok){ document.getElementById('secCurPass').classList.add('err'); toast('❌ '+res.reason,'error'); return; }
+    Cloud.weak=false; ['secCurPass','secNewPass','secNewPass2'].forEach(i=>{ const e=document.getElementById(i); if(e) e.value=''; }); toast('Admin password changed successfully','success'); }
+  catch(e){ toast('❌ '+e.message,'error'); } };
+const _ar4=afterRender;
+afterRender=function(id){ _ar4(id); if(!(Cloud.active()&&Cloud.token)) return;
+  if(id==='admin-dashboard'){ Cloud.refreshAdmin(); if(Cloud.weak) setTimeout(()=>toast('Security: change the default admin password now (Security tab).','error'),900); }
+  if(['admin-dashboard','teacher-dashboard','primary-dashboard','secondary-dashboard','parent-portal'].includes(id))
+    Cloud.syncRoster().then(ch=>{ if(!ch) return; if(id==='admin-dashboard'||id==='teacher-dashboard') refreshAdminLists(); else go(id,true); }); };
+
 /* Stay on the same page after a reload (login kept for this browser tab only) */
 const _goBase=go;
 go=function(id,fromHistory){
@@ -7802,16 +8064,17 @@ go=function(id,fromHistory){
   try{
     if(PROTECTED_VIEWS.has(id)&&session&&session.role){
       const s=JSON.parse(JSON.stringify(session));
-      ['user','student'].forEach(k=>{ if(s[k]){ s[k]={id:s[k].id,_sample:(s[k].id?0:1)}; if(!s[k].id) s[k]=JSON.parse(JSON.stringify(session[k])); } });
+      if(!Cloud.active()) ['user','student'].forEach(k=>{ if(s[k]){ s[k]={id:s[k].id,_sample:(s[k].id?0:1)}; if(!s[k].id) s[k]=JSON.parse(JSON.stringify(session[k])); } });
       sessionStorage.setItem('mjl_session',JSON.stringify({view:id,s:s}));
-    } else { sessionStorage.removeItem('mjl_session'); ['ad','td','sd','pd','pp'].forEach(k=>sessionStorage.removeItem('mjl_tab_'+k)); Object.keys(sessionStorage).filter(k=>k.indexOf('mjl_tab_')===0).forEach(k=>sessionStorage.removeItem(k)); }
+    } else { if(Cloud.token) Cloud.logout(); sessionStorage.removeItem('mjl_session'); ['ad','td','sd','pd','pp'].forEach(k=>sessionStorage.removeItem('mjl_tab_'+k)); Object.keys(sessionStorage).filter(k=>k.indexOf('mjl_tab_')===0).forEach(k=>sessionStorage.removeItem(k)); }
   }catch(e){}
 };
 (function restoreSession(){
   try{
     const raw=sessionStorage.getItem('mjl_session'); if(!raw) return;
     const d=JSON.parse(raw), s=d.s; if(!s||!s.role||!views[d.view]) return;
-    for(const k of ['user','student']){ if(s[k]&&s[k].id){ const acc=userAccounts.find(a=>a.id===s[k].id); if(!acc){ sessionStorage.removeItem('mjl_session'); return; } s[k]=acc; } }
+    if(Cloud.active()&&!Cloud.token) return;
+    if(!Cloud.active()) for(const k of ['user','student']){ if(s[k]&&s[k].id){ const acc=userAccounts.find(a=>a.id===s[k].id); if(!acc){ sessionStorage.removeItem('mjl_session'); return; } s[k]=acc; } }
     session=s; window._restoreView=d.view;
   }catch(e){}
 })();
@@ -7819,6 +8082,9 @@ go=function(id,fromHistory){
 { const h=(window._restoreView&&canView(window._restoreView))?window._restoreView:(location.hash||'').slice(1); const _unused='';
   const start=(views[h]&&canView(h))?h:'home';
   try{history.replaceState({v:start},'','#'+start);}catch(_){} go(start,true); }
+if(Cloud.active() && Cloud.token && window._restoreView){
+  Cloud.rpc('portal_me',{p_token:Cloud.token}).then(r=>{ if(!r||!r.ok){ Cloud.setToken(''); session={role:null,name:null,meta:null}; try{sessionStorage.removeItem('mjl_session');}catch(e){} toast('Your session expired. Please log in again.','error'); go('home'); } }).catch(()=>{});
+}
 </script>
 
 <!-- Floating WhatsApp Direct Chat Widget -->
