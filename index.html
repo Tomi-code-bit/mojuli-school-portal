@@ -90,6 +90,7 @@ html {
 }
 html, body {
   overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
 }
 body {
@@ -100,6 +101,7 @@ body {
   line-height: 1.6;
   transition: background-color var(--transition-smooth), color var(--transition-smooth);
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -1370,6 +1372,10 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s ease;
+  overflow-y: auto;
+  align-items: flex-start;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .modal-overlay.open { opacity: 1; pointer-events: auto; }
 .modal-card {
@@ -1379,6 +1385,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.02); }
   padding: 32px;
   max-width: 480px;
   width: 100%;
+  margin: auto;
   box-shadow: var(--shadow-xl);
   transform: translateY(12px) scale(0.97);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1901,6 +1908,27 @@ footer.footer .bottom {
 input.err,select.err,textarea.err{border-color:var(--crimson-500)!important;box-shadow:0 0 0 3px rgba(239,68,68,.18)!important}
 
 .empty { padding: 28px 20px; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+/* ===== Round 3 ===== */
+body:has(.modal-overlay.open){ overflow: hidden; }
+.modal-overlay{ padding: 16px; }
+.modal-card{ max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
+.modal-card:has(#pupilEnrollModalForm), .modal-card:has(#addStudentDirectForm){ max-width: 640px; }
+.modal-card .modal-actions{ position: sticky; bottom: -32px; background: var(--surface); padding: 12px 0 6px; margin-bottom: -10px; border-top: 1px solid var(--border); z-index: 2; }
+@media (max-width: 600px){ .modal-card{ padding: 20px; } .modal-card .modal-actions{ bottom: -20px; } .modal-overlay{ padding: 10px; } }
+.rc-page{ position: relative; overflow: hidden; }
+.rc-page > *:not(.rc-watermark){ position: relative; z-index: 1; }
+.rc-watermark{ position: absolute !important; inset: 0; z-index: 0 !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; pointer-events: none; opacity: .09; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.rc-watermark img{ width: 55%; max-width: 420px; object-fit: contain; }
+.rc-watermark span{ font-weight: 800; font-size: 1.7rem; letter-spacing: .08em; text-align: center; color: #0B2A5B; transform: rotate(-24deg); white-space: nowrap; }
+.rc-pass{ font-weight: 800; padding: 1px 8px; border-radius: 4px; border: 1px solid currentColor; }
+.rc-pass.ok{ color: #047857; } .rc-pass.weak{ color: #C62828; }
+.af-photo{ width: 104px; height: 124px; border: 1.5px dashed #64748B; display: flex; align-items: center; justify-content: center; text-align: center; font-size: .66rem; color: #64748B; padding: 6px; }
+.af-banner{ background: #ECFDF5; border: 1px solid #10B981; color: #065F46; padding: 8px 12px; border-radius: 6px; font-size: .82rem; margin-bottom: 8px; text-align: center; }
+.af-table{ width: 100%; border-collapse: collapse; margin: 6px 0 12px; }
+.af-table td{ border: 1px solid #94A3B8; padding: 8px 10px; font-size: .84rem; }
+.af-l{ width: 36%; background: #F1F5F9; font-weight: 700; }
+.af-fee{ border: 2px solid #C62828; background: #FEF2F2; color: #7F1D1D; padding: 12px 14px; border-radius: 6px; margin: 12px 0 14px; font-size: .88rem; line-height: 1.6; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@media print{ .rc-page{ box-shadow: none; } .rc-watermark{ opacity: .09 !important; } }
 </style>
 </head>
 <body>
@@ -1923,7 +1951,7 @@ input.err,select.err,textarea.err{border-color:var(--crimson-500)!important;box-
       <button data-go="about">About</button>
       <button data-go="admission">Admissions</button>
       <button data-go="gallery">Gallery</button>
-      <button data-go="student-login">Student Login</button>
+      <button data-go="student-login">Pupil / Student Login</button>
       <button data-go="staff-login">Staff Login</button>
       <button data-go="forum">Parents Forum</button>
       <button data-go="contact">Contact</button>
@@ -1950,7 +1978,7 @@ input.err,select.err,textarea.err{border-color:var(--crimson-500)!important;box-
       <button data-go="about">About</button>
       <button data-go="admission">Admissions</button>
       <button data-go="gallery">Gallery</button>
-      <button data-go="student-login">Student Login</button>
+      <button data-go="student-login">Pupil / Student Login</button>
       <button data-go="staff-login">Staff Login</button>
       <button data-go="parent-login">Parent Portal</button>
       <button data-go="forum">Parents Forum</button>
@@ -1993,23 +2021,23 @@ input.err,select.err,textarea.err{border-color:var(--crimson-500)!important;box-
     </div>
     <div>
       <h5>School Portals</h5>
-      <a data-go="student-login-primary" href="#">Primary Student Login</a>
-      <a data-go="student-login-secondary" href="#">Secondary Student Login</a>
+      <a data-go="student-login-primary" href="#">Pupil Login (Crèche – Primary 5)</a>
+      <a data-go="student-login-secondary" href="#">Student Login (JSS 1 – SS 3)</a>
       <a data-go="parent-login" href="#">Parent Portal</a>
       <a data-go="staff-login" href="#">Staff &amp; Teacher Portal</a>
       <a data-go="staff-signup" href="#">Apply to Teach</a>
     </div>
     <div>
       <h5>Campus &amp; Office</h5>
-      <span style="font-size:0.86rem;display:block;padding:4px 0">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</span>
+      <span class="school-brand-address" style="font-size:0.86rem;display:block;padding:4px 0">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</span>
       <div style="margin:6px 0">
-        <a href="tel:07042664309" style="font-size:0.9rem;display:block;color:#fff;font-weight:700">📞 07042664309</a>
-        <a href="tel:0803779632" style="font-size:0.9rem;display:block;color:#fff;font-weight:700;margin-top:2px">📞 0803779632</a>
+        <a href="tel:07042664309" class="school-brand-phone1" style="font-size:0.9rem;display:block;color:#fff;font-weight:700">📞 07042664309</a>
+        <a href="tel:0803779632" class="school-brand-phone2" style="font-size:0.9rem;display:block;color:#fff;font-weight:700;margin-top:2px">📞 0803779632</a>
       </div>
       <div style="margin-top:8px">
         <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;display:inline-flex;align-items:center;gap:6px"><span>💬</span> WhatsApp Direct Message</a>
       </div>
-      <span style="font-size:0.86rem;display:block;padding:4px 0">info@mojulichristglorious.edu.ng</span>
+      <span class="school-brand-email" style="font-size:0.86rem;display:block;padding:4px 0">info@mojulichristglorious.edu.ng</span>
       <div style="margin-top:12px">
         <span class="badge live"><span class="dot"></span> 2026/27 Session Open</span>
       </div>
@@ -2145,7 +2173,7 @@ function toggleSound() {
 /* ---------------------------------------------------------------------
    1. SEED DATA & ASSETS
    --------------------------------------------------------------------- */
-const PRIMARY_CLASSES = ["KG 1", "KG 2", "Nursery 1", "Nursery 2", "Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5", "Primary 6"];
+const PRIMARY_CLASSES = ["Creche", "KG 1", "KG 2", "Nursery 1", "Nursery 2", "Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5"];
 const SECONDARY_CLASSES = ["JSS 1", "JSS 2", "JSS 3", "SS 1", "SS 2", "SS 3"];
 
 const DEFAULT_PHOTOS = [
@@ -2269,7 +2297,7 @@ let classRoster = DB.get('classRoster', null) || DEFAULT_CLASS_ROSTER;
 
 // Sanitize and normalize roster
 classRoster.forEach((p, idx) => {
-  if (!p.id || !p.id.startsWith('MJL/')) {
+  if (!p.id || !/^MJLS?\//.test(p.id)) {
     p.id = `MJL/26/${String(idx + 1).padStart(4, '0')}`;
   }
   if (!p.gender) p.gender = 'Pupil';
@@ -2280,23 +2308,18 @@ classRoster.forEach((p, idx) => {
 });
 function saveClassRoster(){ DB.set('classRoster', classRoster); }
 
-function generateNextStudentId() {
-  const yr = (window.settings && window.settings.session) ? window.settings.session.slice(2, 4) : "26";
+function generateNextStudentId(cls) {
+  /* Primary side (Creche - Primary 5): MJL/yy/0001.  Secondary side (JSS/SS): MJLS/yy/0001.  yy = current year. */
+  const pre = /^(JSS|SS)/i.test(cls || '') ? 'MJLS' : 'MJL';
+  const yy = String(new Date().getFullYear()).slice(-2);
+  const re = new RegExp('^' + pre + '/' + yy + '/(\\d+)$', 'i');
   let maxNum = 0;
-  const ids = [
-    ...classRoster.map(p => p.id),
-    ...((window.userAccounts||[]).filter(u => u.role && u.role.startsWith('student')).map(u => u.identifier))
-  ];
-  ids.forEach(id => {
-    if (!id) return;
-    const m = id.match(/MJL\/(?:\d{2}|PRY|SEC)\/(\d+)/i) || id.match(/MJL\/(\d{2})\/(\d+)/i) || id.match(/(\d{4})$/);
-    if (m) {
-      const n = parseInt(m[m.length - 1], 10);
-      if (!isNaN(n) && n > maxNum && n < 10000) maxNum = n;
-    }
+  [ ...classRoster.map(p => p.id),
+    ...((window.userAccounts||[]).filter(u => u.role && u.role.startsWith('student')).map(u => u.identifier)) ].forEach(id => {
+    const m = String(id || '').match(re);
+    if (m) { const n = parseInt(m[1], 10); if (!isNaN(n) && n > maxNum && n < 100000) maxNum = n; }
   });
-  const nextNum = maxNum + 1;
-  return `MJL/${yr}/${String(nextNum).padStart(4, '0')}`;
+  return `${pre}/${yy}/${String(maxNum + 1).padStart(4, '0')}`;
 }
 
 let activePupilId = (classRoster[0] && classRoster[0].id) || "";
@@ -2510,7 +2533,7 @@ function verifyUserLogin(identifier, password, requiredRole) {
     (p.name && p.name.toLowerCase() === cleanId.toLowerCase())
   );
   if (rosterPupil) {
-    // Password can be exact Student ID (e.g. MJL/26/0001), or custom
+    // Password can be the exact Registration ID, or custom
     const expectedId = rosterPupil.id.toUpperCase();
     const acc = findUserAccount(rosterPupil.id) || findUserAccount(cleanId);
     if (cleanPass.toUpperCase() === expectedId || (acc && acc.password === cleanPass)) {
@@ -3132,6 +3155,7 @@ function buildReportCardHTML(student, kind, pupilId){
   const subjectCount = results.length || 1;
   const totalScore = results.reduce((s,r)=>s+r.total,0);
   const pct = Math.round(totalScore/(subjectCount*100)*100);
+  const _att = attendanceSummary(effectivePupilId || student.id);
   const affectiveRows = [];
   for(let i=0;i<affective.length;i+=4){
     affectiveRows.push(affective.slice(i,i+4));
@@ -3147,6 +3171,7 @@ function buildReportCardHTML(student, kind, pupilId){
 
   return `
     <div class="rc-page">
+      <div class="rc-watermark"><img src="${logo}" alt=""><span>${escapeHtml(schoolName)}</span></div>
       <div class="rc-top">
         <img class="rc-logo" src="${logo}" alt="School logo">
         <div class="rc-schoolinfo">
@@ -3154,7 +3179,7 @@ function buildReportCardHTML(student, kind, pupilId){
           <div class="rc-motto">"${escapeHtml(schoolMotto)}"</div>
           <div class="rc-addr">${escapeHtml(schoolAddr)}<br>Hotlines: ${escapeHtml(phoneLine)}</div>
           <div class="rc-report-title">Term Performance Evaluation Report — ${student.session || settings.session || '2026/2027'}</div>
-          <div>Student ID: <span class="rc-sid">${student.id}</span></div>
+          <div>Registration ID: <span class="rc-sid">${student.id}</span></div>
         </div>
         <div class="rc-photo" style="overflow:hidden;padding:0;display:flex;align-items:center;justify-content:center">
           ${pupilPhoto ? `<img src="${pupilPhoto}" alt="${escapeHtml(student.name)}" style="width:100%;height:100%;object-fit:cover">` : initialsFor(student.name)}
@@ -3170,7 +3195,8 @@ function buildReportCardHTML(student, kind, pupilId){
         <div>Pupil's Full Name:<span class="rc-name">${student.name}</span></div>
         <div><b>Gender:</b> ${pupilGender}</div>
         <div><b>Aggregate Score:</b> ${totalScore} / ${subjectCount*100}</div>
-        <div><b>Percentage:</b> ${pct}% &bull; <b>Academic Standing:</b> ${overallRemarkFor(pct)}</div>
+        <div><b>Percentage:</b> ${pct}% &nbsp;<span class="rc-pass ${pct>=50?'ok':'weak'}">${passRemark(pct)}</span> &bull; <b>Academic Standing:</b> ${overallRemarkFor(pct)}</div>
+        <div><b>Days Present:</b> ${_att.total ? `${_att.days} out of ${_att.total} school days` : 'No attendance recorded yet'}</div>
       </div>
 
       <div class="rc-section-title">Cognitive Domain Assessment</div>
@@ -3184,7 +3210,7 @@ function buildReportCardHTML(student, kind, pupilId){
         </thead>
         <tbody>${rows}</tbody>
       </table>
-      <div class="rc-hints"><b>Grading Benchmark:</b> A = 75–100% (Distinction) &nbsp;|&nbsp; B = 60–74% (Very Good) &nbsp;|&nbsp; C = 50–59% (Credit) &nbsp;|&nbsp; D = 40–49% (Pass) &nbsp;|&nbsp; F = 0–39% (Fail)</div>
+      <div class="rc-hints"><b>Result Remark:</b> 50% – 100% = PASSED &nbsp;|&nbsp; 49% and below = WEAK<br><b>Grading Benchmark:</b> A = 75–100% (Distinction) &nbsp;|&nbsp; B = 60–74% (Very Good) &nbsp;|&nbsp; C = 50–59% (Credit) &nbsp;|&nbsp; D = 40–49% (Pass) &nbsp;|&nbsp; F = 0–39% (Fail)</div>
 
       <div class="rc-section-title">Affective &amp; Psychomotor Development</div>
       <table class="rc-affective">
@@ -3280,7 +3306,7 @@ function masterClassBroadsheetHTML(kind) {
             <tr>
               <th style="min-width:50px">Rank</th>
               <th style="min-width:160px">Pupil Name</th>
-              <th style="min-width:130px">Student ID</th>
+              <th style="min-width:130px">Registration ID</th>
               <th style="min-width:70px">Gender</th>
               <th style="min-width:70px">Subjects</th>
               <th style="min-width:110px">Total Marks</th>
@@ -3592,7 +3618,7 @@ function previewStaffRegPhoto(input) {
 function showPupilEnrollmentModal(kind) {
   const overlay = document.getElementById('genericModalOverlay');
   const card = document.getElementById('genericModalCard');
-  const suggestedId = generateNextStudentId();
+  const suggestedId = generateNextStudentId('Primary 4');
   window._tempModalPhotoUrl = null;
 
   card.innerHTML = `
@@ -3637,7 +3663,7 @@ function showPupilEnrollmentModal(kind) {
           </select>
         </div>
         <div class="field">
-          <label>Student Registration ID *</label>
+          <label>Registration ID *</label>
           <input required id="modal_pupilId" value="${suggestedId}">
           <p class="hint">Automatic sequential ID. Initial login password is identical to this ID.</p>
         </div>
@@ -3710,7 +3736,7 @@ function submitPupilEnrollModal(kind) {
   if (!id) { toast('Please enter student registration ID'); return; }
 
   if (classRoster.some(p => p.id === id)) {
-    toast('Student ID already exists! Please use a unique ID.');
+    toast('Registration ID already exists! Please use a unique ID.');
     return;
   }
 
@@ -3732,7 +3758,7 @@ function submitPupilEnrollModal(kind) {
   saveClassRoster();
   activePupilId = id;
 
-  // Auto-generate login account for pupil with password matching Student ID
+  // Auto-generate login account for pupil with password matching Registration ID
   try {
     registerUserAccount({
       identifier: id,
@@ -3742,7 +3768,7 @@ function submitPupilEnrollModal(kind) {
       role: kindForClass(cls) === 'secondary' ? 'student-secondary' : 'student-primary',
       cls: cls,
       gender: gender,
-      password: id // Password is identical to Student ID!
+      password: id // Password is identical to Registration ID!
     });
   } catch(e) {
     console.log("Account already existed or synced", e);
@@ -3808,14 +3834,14 @@ function renderAssignedClassPanel() {
   if (!el) return;
   const boysCount = classRoster.filter(p => p.gender === 'Male').length;
   const girlsCount = classRoster.filter(p => p.gender === 'Female').length;
-  const suggestedId = generateNextStudentId();
+  const suggestedId = generateNextStudentId('Primary 4');
   window._tempInlinePhotoUrl = null;
 
   el.innerHTML = `
     <!-- Top Classroom Header -->
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px">
       <div>
-        <h2 style="margin-bottom:4px">Primary 4 Classroom &amp; Student Registry</h2>
+        <h2 style="margin-bottom:4px">Primary 4 Classroom &amp; Pupil Registry</h2>
         <p class="small-muted">Class Teacher: ${SAMPLE_TEACHER.name} &bull; Academic Session: ${settings.session || '2026/2027'} (${settings.term || 'First Term'})</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -3862,7 +3888,7 @@ function renderAssignedClassPanel() {
               <th style="min-width:40px">SN</th>
               <th style="min-width:55px">Photo</th>
               <th style="min-width:180px">Pupil Full Name</th>
-              <th style="min-width:140px">Student ID</th>
+              <th style="min-width:140px">Registration ID</th>
               <th style="min-width:90px">Gender</th>
               <th style="min-width:180px">Parent / Contact</th>
               <th style="min-width:150px">Admission Type</th>
@@ -3962,9 +3988,9 @@ function renderAssignedClassPanel() {
           </div>
 
           <div class="field">
-            <label>Student Registration ID *</label>
+            <label>Registration ID *</label>
             <input required id="inline_id" value="${suggestedId}">
-            <p class="hint">Initial password equals this Student ID</p>
+            <p class="hint">Initial password equals this Registration ID</p>
           </div>
 
           <div class="field">
@@ -4024,7 +4050,7 @@ function submitInlinePupilEnrollment() {
   }
 
   if (classRoster.some(p => p.id === id)) {
-    toast('Student ID already exists! Please adjust.');
+    toast('Registration ID already exists! Please adjust.');
     return;
   }
 
@@ -4046,7 +4072,7 @@ function submitInlinePupilEnrollment() {
   saveClassRoster();
   activePupilId = id;
 
-  // Auto-generate login account for pupil with password matching Student ID
+  // Auto-generate login account for pupil with password matching Registration ID
   try {
     registerUserAccount({
       identifier: id,
@@ -4056,7 +4082,7 @@ function submitInlinePupilEnrollment() {
       role: 'student-primary',
       cls: 'Primary 4',
       gender: gender,
-      password: id // Password is identical to Student ID!
+      password: id // Password is identical to Registration ID!
     });
   } catch(e) {
     console.log("Account already existed or synced", e);
@@ -4119,7 +4145,7 @@ function renderTeacherAttendancePanel() {
           <tr>
             <th style="min-width:40px">SN</th>
             <th style="min-width:180px">Pupil Full Name</th>
-            <th style="min-width:120px">Student ID</th>
+            <th style="min-width:120px">Registration ID</th>
             <th style="min-width:80px">Gender</th>
             <th style="min-width:90px;text-align:center">Present</th>
             <th style="min-width:90px;text-align:center">Absent</th>
@@ -4252,7 +4278,7 @@ registerView('home', ()=>{
           <h3>Nursery &amp; Kindergarten</h3>
           <p>A joyful, safe, and warm introduction to school life — developing phonemic literacy, early mathematics, and social interaction.</p>
           <ul>
-            <li>KG 1, KG 2, KG 3</li>
+            <li>Crèche, KG 1 – KG 2, Nursery 1 – Nursery 2</li>
             <li>Phonics, rhymes &amp; interactive sensory play</li>
             <li>Small teacher-pupil ratio with dedicated care</li>
           </ul>
@@ -4262,7 +4288,7 @@ registerView('home', ()=>{
           <h3>Primary School</h3>
           <p>A comprehensive academic foundation empowering pupils in STEM, English Language, ICT, and Christian Religious Studies.</p>
           <ul>
-            <li>Primary 1 through Primary 6</li>
+            <li>Primary 1 through Primary 5</li>
             <li>Systematic continuous assessment tracking</li>
             <li>Debating, Arts, Music &amp; Athletics clubs</li>
           </ul>
@@ -4470,7 +4496,7 @@ registerView('admission', ()=>`
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
           <div>
             <h3 style="font-size:1.15rem;margin-bottom:4px">Track Your Application Status</h3>
-            <p class="small-muted">Enter your application reference code or applicant name to check admission progress.</p>
+            <p class="small-muted">Enter your application reference ID to check admission progress. Once admission is given you can print your admission form here.</p>
           </div>
           <div style="display:flex;gap:8px">
             <!-- Demo buttons removed for production -->
@@ -4478,7 +4504,7 @@ registerView('admission', ()=>`
         </div>
         
         <div style="display:flex;gap:10px;margin-top:16px">
-          <input id="trackerSearchInput" placeholder="Enter Application ID (e.g. MJL-APP-83921) or Applicant Full Name..." style="flex:1">
+          <input id="trackerSearchInput" placeholder="Enter your Application Reference ID (e.g. MJL-APP-123456)" style="flex:1">
           <button class="btn btn-navy" onclick="searchApplicationStatus()">Check Status</button>
         </div>
         
@@ -4488,7 +4514,7 @@ registerView('admission', ()=>`
       <div class="grid-3" style="margin-bottom:44px">
         <div class="card">
           <h3>Enrolling Classes</h3>
-          <p class="small-muted" style="margin-top:8px">KG 1 – KG 3, Primary 1 – Primary 6, JSS 1 – JSS 3, SS 1 – SS 3.</p>
+          <p class="small-muted" style="margin-top:8px">Crèche, KG 1 – KG 2, Nursery 1 – Nursery 2, Primary 1 – Primary 5 (pupils); JSS 1 – JSS 3, SS 1 – SS 3 (students).</p>
         </div>
         <div class="card">
           <h3>Admission Checklist</h3>
@@ -4717,20 +4743,20 @@ registerView('student-login', ()=>`
   <section class="pad">
     <div class="wrap" style="max-width:760px">
       <div class="section-head center">
-        <span class="badge">Student Access</span>
-        <h2 class="mt24">Student Portal Authentication</h2>
+        <span class="badge">Pupil &amp; Student Access</span>
+        <h2 class="mt24">Pupil &amp; Student Portal Login</h2>
         <p>Please select your academic division to access your results, timetable, and assignments.</p>
       </div>
       <div class="level-choice">
         <button class="level-btn" data-go="student-login-primary">
           <div class="ico">🧒</div>
-          <h3>Primary School</h3>
-          <p>KG 1 – Primary 6 Portal</p>
+          <h3>Pupils</h3>
+          <p>Crèche – Primary 5 · Pupils</p>
         </button>
         <button class="level-btn" data-go="student-login-secondary">
           <div class="ico">🎓</div>
-          <h3>Secondary School</h3>
-          <p>JSS 1 – SS 3 Portal</p>
+          <h3>Students</h3>
+          <p>JSS 1 – SS 3 · Students</p>
         </button>
       </div>
     </div>
@@ -4765,7 +4791,7 @@ function loginFormView(kind, title, idLabel, afterGo){
         </div>
         
         <h2 style="font-size:1.55rem;margin:12px 0 6px">${title}</h2>
-        <p class="small-muted" style="margin-bottom:16px">${isParent ? 'Sign in to your account or register new credentials. Data is saved in the local database.' : 'Enter your assigned Student Registration ID and password to access your dashboard.'}</p>
+        <p class="small-muted" style="margin-bottom:16px">${isParent ? 'Sign in to your account or register new credentials. Data is saved in the local database.' : 'Enter your assigned Registration ID and password to access your dashboard.'}</p>
 
         ${isParent ? `
         <!-- Auth Tabs (Sign In vs Register for Parents) -->
@@ -4778,7 +4804,7 @@ function loginFormView(kind, title, idLabel, afterGo){
         <div class="note-box" style="margin-bottom:16px;background:rgba(27,54,93,0.06);border-left:4px solid var(--navy-800);padding:10px 14px;border-radius:6px">
           <span style="font-size:1.1rem">ℹ️</span>
           <div style="font-size:0.84rem;color:var(--text-main);line-height:1.5">
-            <b>Student Access Notice:</b> Students cannot self-register online. Accounts are provisioned exclusively by school administration and class teachers. Your initial password is identical to your <b>Student ID</b> (e.g. <code>MJL/26/0001</code>).
+            <b>Student Access Notice:</b> Students cannot self-register online. Accounts are provisioned exclusively by school administration and class teachers. Your initial password is identical to your <b>Registration ID</b> (like <code>${isSecondary ? 'MJLS/../....' : 'MJL/../....'}</code>).
           </div>
         </div>
         `}
@@ -4788,7 +4814,7 @@ function loginFormView(kind, title, idLabel, afterGo){
           <form id="loginForm-${afterGo}">
             <div class="field">
               <label>${idLabel} *</label>
-              <input required id="loginId-${afterGo}" placeholder="e.g. ${defaultDemoId}">
+              <input required id="loginId-${afterGo}" placeholder="${isParent ? 'Email or phone you registered with' : isSecondary ? 'MJLS/../....' : 'MJL/../....'}">
             </div>
             
             <div class="field">
@@ -4797,7 +4823,7 @@ function loginFormView(kind, title, idLabel, afterGo){
                 <input required type="password" id="loginPass-${afterGo}" placeholder="••••••••">
                 <button type="button" class="btn-ghost" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:4px 8px;font-size:0.78rem" onclick="togglePassVisibility('loginPass-${afterGo}', this)">Show</button>
               </div>
-              <p class="hint">${!isParent ? 'Default student password is your Student ID' : 'Your secret account password'}</p>
+              <p class="hint">${!isParent ? 'Default student password is your Registration ID' : 'Your secret account password'}</p>
             </div>
 
             <div class="field mb0" style="margin-bottom:16px">
@@ -4816,7 +4842,7 @@ function loginFormView(kind, title, idLabel, afterGo){
           </p>
           ` : `
           <p class="small-muted" style="text-align:center;margin-top:18px">
-            Lost your Student ID? Please contact your class teacher or the school administrative office.
+            Lost your Registration ID? Please contact your class teacher or the school administrative office.
           </p>
           `}
         </div>
@@ -4842,8 +4868,8 @@ function loginFormView(kind, title, idLabel, afterGo){
             </div>
 
             <div class="field">
-              <label>Child / Ward's Student ID *</label>
-              <input required id="regChildId-${afterGo}" placeholder="e.g. MJL/26/0001">
+              <label>Child / Ward's Registration ID *</label>
+              <input required id="regChildId-${afterGo}" placeholder="MJL/../.... or MJLS/../....">
               <p class="hint">Directly links your child's continuous assessments, term results, and tuition fees statement.</p>
             </div>
 
@@ -4871,8 +4897,8 @@ function loginFormView(kind, title, idLabel, afterGo){
   </section>`;
 }
 
-registerView('student-login-primary', ()=>loginFormView('student','Primary Student Login','Student Registration ID','primary-dashboard'));
-registerView('student-login-secondary', ()=>loginFormView('student','Secondary Student Login','Student Registration ID','secondary-dashboard'));
+registerView('student-login-primary', ()=>loginFormView('student','Pupil Login (Crèche – Primary 5)','Registration ID','primary-dashboard'));
+registerView('student-login-secondary', ()=>loginFormView('student','Student Login (JSS 1 – SS 3)','Registration ID','secondary-dashboard'));
 registerView('parent-login', ()=>loginFormView('parent','Parent Portal Authentication','Registered Phone or Email','parent-portal'));
 
 registerView('staff-login', ()=>`
@@ -4898,7 +4924,7 @@ registerView('staff-login', ()=>`
           <form id="loginForm-staff">
             <div class="field">
               <label>Staff Identifier / Official Username *</label>
-              <input required id="staffEmailInput" placeholder="e.g. MJL/st/26/001 or Admin">
+              <input required id="staffEmailInput" placeholder="Your email or Staff ID">
             </div>
             <div class="field">
               <label>Password *</label>
@@ -5358,7 +5384,7 @@ function studentDashboard(kind){
             <p style="margin:4px 0"><b style="color:var(--text-main)">Registration ID:</b> <span class="badge gold">${escapeHtml(s.id)}</span></p>
             <p style="margin:4px 0"><b style="color:var(--text-main)">Class Level:</b> ${escapeHtml(s.cls)}</p>
             <p style="margin:4px 0"><b style="color:var(--text-main)">Academic Session:</b> ${escapeHtml(s.session)} (${escapeHtml(s.term)})</p>
-            <p style="margin:4px 0"><b style="color:var(--text-main)">Portal Password:</b> <span class="small-muted">(Default matches Student ID)</span></p>
+            <p style="margin:4px 0"><b style="color:var(--text-main)">Portal Password:</b> <span class="small-muted">(Default matches Registration ID)</span></p>
             <div style="margin-top:14px">
               <button class="btn btn-navy btn-sm" onclick="printReportCard('${kind}')">🖨 Print Term Report Card</button>
             </div>
@@ -5459,12 +5485,14 @@ registerView('admin-dashboard', ()=>`
       </div>
       <button class="tab active" data-tab-ad="admissions">📋 Admissions Pipeline</button>
       <button class="tab" data-tab-ad="staff">👨‍🏫 Staff &amp; Recruitment</button>
-      <button class="tab" data-tab-ad="students">👥 Student Registry</button>
+      <button class="tab" data-tab-ad="students">👥 Pupils &amp; Students</button>
       <button class="tab" data-tab-ad="fees">💰 Fees Management</button>
       <button class="tab" data-tab-ad="results">📑 Academic Results</button>
       <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
       <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
       <button class="tab" data-tab-ad="security">🔐 Security</button>
+      <button class="tab" data-tab-ad="website">🌐 Website Pages</button>
+      <button class="tab" data-tab-ad="gallery">🖼 Gallery</button>
       <button class="tab" data-tab-ad="messages">✉️ Messages</button>
       <button class="tab" data-tab-ad="supabase">⚡ Cloud &amp; Supabase</button>
       <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
@@ -5484,6 +5512,7 @@ registerView('admin-dashboard', ()=>`
           <div>
             <h3 style="margin-bottom:4px">Prospective Student Applications</h3>
             <p class="small-muted">Real-time submissions from the public admissions portal.</p>
+            <button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="showAddStudentDirect()">➕ Add Student Directly (auto ID &amp; password)</button>
           </div>
           <div class="search-input-wrap">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -5695,7 +5724,7 @@ registerView('admin-dashboard', ()=>`
               <div class="field">
                 <label>4. Primary 1 – Primary 5 Term Fee</label>
                 <input id="set_feePrimary" value="${escapeHtml(settings.feePrimary || '')}" placeholder="e.g. ₦75,000" required>
-                <p class="hint">Primary 6 also uses this fee.</p>
+                <p class="hint">Applies to Primary 1 – Primary 5 pupils.</p>
               </div>
               <div class="field">
                 <label>5. JSS 1 – JSS 3 Term Fee</label>
@@ -5798,6 +5827,8 @@ registerView('admin-dashboard', ()=>`
         </div>
       </div>
       <div data-panel-ad="messages" class="panel"><h3 style="margin-bottom:14px">Contact Messages</h3><div id="adminMessagesList"></div></div>
+      <div data-panel-ad="website" class="panel"><div id="adminWebsitePanel"></div></div>
+      <div data-panel-ad="gallery" class="panel"><div id="adminGalleryPanel"></div></div>
       <div data-panel-ad="supabase" class="panel">
         ${supabasePanelHTML()}
       </div>
@@ -5847,7 +5878,7 @@ function renderAdminStudentRegistry() {
             <th style="min-width:55px">Photo</th>
             <th>Full Name</th>
             <th>Class</th>
-            <th>Student Registration ID</th>
+            <th>Registration ID</th>
             <th>Gender</th>
             <th>Parent / Guardian</th>
             <th>Actions</th>
@@ -5868,7 +5899,7 @@ function renderAdminStudentRegistry() {
               <td>${escapeHtml(p.gender || 'Pupil')}</td>
               <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(📞 ${escapeHtml(p.phone || '')})</span></td>
               <td>
-                <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStudentAccount('${p.id}')">🗑 Delete</button>
+                <button class="btn btn-sm btn-gold" onclick="showStudentLogin('${p.id}')">🔑 Login</button> <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStudentAccount('${p.id}')">🗑 Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -6213,6 +6244,7 @@ function renderAdminAdmissions(){
             <option ${a.status==='Accepted'?'selected':''}>Accepted</option>
             <option ${a.status==='Rejected'?'selected':''}>Rejected</option>
           </select> ${a.enrolledId ? `<button class="btn btn-sm btn-ghost" style="color:var(--green-700,#047857)" onclick="showEnrolledLogin('${a.id}')">🔑 View Login</button>` : (a.status==='Rejected' ? '' : `<button class="btn btn-sm btn-gold" onclick="enrollApplicant('${a.id}')">🎓 Enroll &amp; Create Login</button>`)}
+          ${a.status==='Accepted'?`<button class="btn btn-sm btn-navy" onclick="printAdmissionFormById('${a.id}')">🖨 Print Form</button>`:''}
           <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteAdmission('${a.id}')">🗑 Delete</button>
         </td>
       </tr>`).join('')}</tbody></table></div>`;
@@ -6615,11 +6647,11 @@ registerView('parent-portal', ()=>{
             <div style="font-size:3rem;margin-bottom:12px">👨‍👩‍👧</div>
             <h3 style="margin-bottom:8px">No Enrolled Child Linked Yet</h3>
             <p class="small-muted" style="max-width:480px;margin:0 auto 20px">
-              Your parent profile is active, but no student has been registered in the school system yet. When your child is enrolled by the school or linked with their Student ID, their live continuous assessment scores, homework, and tuition balance will appear here.
+              Your parent profile is active, but no student has been registered in the school system yet. When your child is enrolled by the school or linked with their Registration ID, their live continuous assessment scores, homework, and tuition balance will appear here.
             </p>
             <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
               <button class="btn btn-navy" data-go="home">Return to Homepage</button>
-              <button class="btn btn-gold" data-go="parent-login">Link Child's Student ID</button>
+              <button class="btn btn-gold" data-go="parent-login">Link Child's Registration ID</button>
             </div>
           </div>
         </div>
@@ -7015,18 +7047,18 @@ registerView('contact', ()=>`
         <div>
           <div class="card" style="margin-bottom:18px">
             <h4 style="font-size:1.05rem;margin-bottom:8px">📍 Campus Address</h4>
-            <p style="font-size:0.92rem;line-height:1.7">Lane 3, Marina Street,<br>Ilupeju Avenue, Ado-Ekiti,<br>Ekiti State, Nigeria</p>
+            <p style="font-size:0.92rem;line-height:1.7">${escapeHtml(settings.address||'')}</p>
           </div>
           <div class="card" style="margin-bottom:18px;border-left:4px solid #25D366">
             <h4 style="font-size:1.05rem;margin-bottom:8px">💬 WhatsApp &amp; Reach Out Hotlines</h4>
             <p style="font-size:0.92rem;line-height:1.8;margin-bottom:12px">
-              Direct Phone 1: <a href="tel:07042664309" style="font-weight:700;color:var(--navy-700)">07042664309</a><br>
-              Direct Phone 2: <a href="tel:0803779632" style="font-weight:700;color:var(--navy-700)">0803779632</a><br>
-              Email: <span style="font-weight:600">info@mojulichristglorious.edu.ng</span>
+              Direct Phone 1: <a href="tel:${settings.phone1}" style="font-weight:700;color:var(--navy-700)">${settings.phone1}</a><br>
+              Direct Phone 2: <a href="tel:${settings.phone2}" style="font-weight:700;color:var(--navy-700)">${settings.phone2}</a><br>
+              Email: <span style="font-weight:600">${escapeHtml(settings.email||"")}</span>
             </p>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
-              <a href="https://wa.me/2347042664309?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 07042664309</a>
-              <a href="https://wa.me/234803779632?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 0803779632</a>
+              <a href="https://wa.me/${waNumber(settings.phone1)}?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 07042664309</a>
+              <a href="https://wa.me/${waNumber(settings.phone2)}?text=Hello%20Mojuli%20Christ%20Glorious%20School,%20I%20would%20like%20to%20make%20an%20inquiry." target="_blank" rel="noopener" class="btn btn-sm" style="background:#25D366;color:#fff;font-weight:700"><span>💬</span> WhatsApp 0803779632</a>
             </div>
           </div>
           <div class="card">
@@ -7768,9 +7800,9 @@ openFeePaymentModal=function(){showModal({title:'Pay School Fees',message:'Onlin
 
 
 /* Browser / phone back button support */
-const PROTECTED_VIEWS=new Set(['admin-dashboard','teacher-dashboard','primary-dashboard','secondary-dashboard','parent-portal']);
+const PROTECTED_VIEWS=new Set(['admin-dashboard','teacher-dashboard','primary-dashboard','secondary-dashboard','parent-portal','forum']);
 function canView(id){const r=session&&session.role;
- return id==='admin-dashboard'?r==='staff-admin':id==='teacher-dashboard'?r==='staff-teacher':id==='primary-dashboard'?r==='student-primary':id==='secondary-dashboard'?r==='student-secondary':id==='parent-portal'?r==='parent':true;}
+ return id==='admin-dashboard'?r==='staff-admin':id==='teacher-dashboard'?r==='staff-teacher':id==='primary-dashboard'?r==='student-primary':id==='secondary-dashboard'?r==='student-secondary':id==='parent-portal'?r==='parent':id==='forum'?(r==='parent'||r==='staff-admin'||r==='staff-teacher'):true;}
 window.addEventListener('popstate',e=>{closeModal();closeLightbox();closeMobileNav();
  let id=(e.state&&e.state.v)||(location.hash||'').slice(1)||'home';
  if(!views[id]||!canView(id)){id='home';try{history.replaceState({v:id},'','#'+id);}catch(_){}}
@@ -7862,7 +7894,7 @@ function enrollApplicant(id){
   if(a.enrolledId){ showEnrolledLogin(id); return; }
   showModal({title:'Are you sure?',message:`Enroll ${a.name} into ${a.cls} and create their student login?`,confirmText:'Yes, Enroll',cancelText:'Cancel',onConfirm:()=>{
     try{
-      const sid=generateNextStudentId(), pw=makeAutoPassword();
+      const sid=generateNextStudentId(a.cls), pw=sid;
       classRoster.push({id:sid,name:a.name,cls:a.cls,gender:a.gender||'Pupil',parent:a.parent||'',phone:a.phone||'',dob:a.dob||'',address:a.address||'Ado-Ekiti',status:'Enrolled',admissionType:'Online Admission ('+a.id+')',photoUrl:''});
       saveClassRoster();
       userAccounts.push({id:sid,identifier:sid,email:a.email||'',phone:a.phone||'',name:a.name,role:kindForClass(a.cls)==='secondary'?'student-secondary':'student-primary',cls:a.cls,gender:a.gender||'Female',password:pw,registeredAt:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})});
@@ -7879,17 +7911,17 @@ function showEnrolledLogin(id){
   const acc=userAccounts.find(u=>u.id===a.enrolledId); const sid=a.enrolledId, pw=acc?acc.password:'(changed by pupil)';
   const overlay=document.getElementById('genericModalOverlay'), card=document.getElementById('genericModalCard');
   card.innerHTML=`<h3>🎓 ${escapeHtml(a.name)} is enrolled</h3><p>Give these login details to the parent. The pupil signs in under <b>Student Login</b>.</p>
-    <div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Class:</b> ${escapeHtml(a.cls)}<br><b>Student ID (username):</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> <code>${escapeHtml(pw)}</code></div>
+    <div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Class:</b> ${escapeHtml(a.cls)}<br><b>Registration ID (username):</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> <code>${escapeHtml(pw)}</code></div>
     <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="modalCancelBtn">Close</button><button class="btn btn-navy btn-sm" id="modalConfirmBtn">📋 Copy login</button></div>`;
   overlay.classList.add('open');
   document.getElementById('modalCancelBtn').onclick=()=>overlay.classList.remove('open');
-  document.getElementById('modalConfirmBtn').onclick=()=>{ const txt=`Mojuli Christ Glorious School\n${a.name} (${a.cls})\nStudent ID: ${sid}\nPassword: ${pw}`;
+  document.getElementById('modalConfirmBtn').onclick=()=>{ const txt=`Mojuli Christ Glorious School\n${a.name} (${a.cls})\nRegistration ID: ${sid}\nPassword: ${pw}`;
     try{ navigator.clipboard.writeText(txt); toast('Login details copied','success'); }catch(e){ toast('Copy not supported, write the details down.'); } };
 }
 
 /* ===== Shared online accounts (Supabase). Active when a URL and key are set. ===== */
 /* Paste your Supabase Project URL and anon/public key between the quotes (Project Settings > API). */
-const MOJULI_CLOUD = { url: '', key: '' };
+const MOJULI_CLOUD = { url: 'https://kokgtrbvawmvstkebudd.supabase.co', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtva2d0cmJ2YXdtdnN0a2VidWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1OTAwMzcsImV4cCI6MjEwNjE2NjAzN30.fPFRyA0UIwNuUWUjSfNlcpWVBs3VScDHSYpi2dbxCjs' };
 let cloudStaff = [];
 const Cloud = {
   token: (function(){ try{ return sessionStorage.getItem('mjl_cloud_token')||''; }catch(e){ return ''; } })(),
@@ -7942,8 +7974,8 @@ document.addEventListener('submit', async function(e){
     'loginForm-parent-portal': async ()=>{
       const a=await cloudLogin(val('loginId-parent-portal').trim(),val('loginPass-parent-portal').trim(),r=>r==='parent',f); if(!a) return;
       session={role:'parent',name:a.name,user:a,childId:a.childId}; Sound.playSuccess(); toast(`Welcome to Parent Portal, ${a.name}!`,'success'); go('parent-portal'); },
-    'registerForm-primary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Student ID and password the school office gave you.','error'); },
-    'registerForm-secondary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Student ID and password the school office gave you.','error'); },
+    'registerForm-primary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Registration ID and password the school office gave you.','error'); },
+    'registerForm-secondary-dashboard': async ()=>{ toast('Student logins are created by the school. Use the Registration ID and password the school office gave you.','error'); },
     'registerForm-parent-portal': async ()=>{
       if(val('regPass-parent-portal')!==val('regPassConfirm-parent-portal')){ toast('❌ Passwords do not match! Please check again.','error'); return; }
       const email=val('regEmail-parent-portal').trim(), phone=val('regPhone-parent-portal').trim();
@@ -8005,7 +8037,7 @@ deleteStaffAccount=function(id){ if(!(Cloud.active()&&Cloud.token)) return _dsa2
     await Cloud.refreshAdmin(); }}); };
 function cloudLoginCard(title,intro,sid,pw,onNew){
   const overlay=document.getElementById('genericModalOverlay'), card=document.getElementById('genericModalCard');
-  card.innerHTML=`<h3>${title}</h3><p>${intro}</p><div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Login ID:</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> ${pw?`<code>${escapeHtml(pw)}</code>`:'<span class="small-muted">hidden for security — press “New password” to make one</span>'}</div>
+  card.innerHTML=`<h3>${title}</h3><p>${intro}</p><div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Login ID:</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> ${pw?`<code>${escapeHtml(pw)}</code>`:'<span class="small-muted">not stored for this account — press “New password” to make one</span>'}</div>
     <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="modalCancelBtn">Close</button><button class="btn btn-ghost btn-sm" id="modalNewBtn">🔑 New password</button>${pw?'<button class="btn btn-navy btn-sm" id="modalConfirmBtn">📋 Copy login</button>':''}</div>`;
   overlay.classList.add('open');
   document.getElementById('modalCancelBtn').onclick=()=>overlay.classList.remove('open');
@@ -8023,7 +8055,7 @@ const _ea=enrollApplicant;
 enrollApplicant=function(id){ if(!(Cloud.active()&&Cloud.token)) return _ea(id);
   const a=applications.find(x=>x.id===id); if(!a) return; if(a.enrolledId){ showEnrolledLogin(id); return; }
   showModal({title:'Are you sure?',message:`Enroll ${a.name} into ${a.cls} and create their student login?`,confirmText:'Yes, Enroll',cancelText:'Cancel',onConfirm:async()=>{
-    try{ const res=await Cloud.rpc('portal_enroll_student',{p_token:Cloud.token,p_year:String((settings.session||'2026/2027')).slice(2,4),
+    try{ const res=await Cloud.rpc('portal_enroll_student',{p_token:Cloud.token,
         p_pupil:{name:a.name,cls:a.cls,gender:a.gender||'',parent:a.parent||'',phone:a.phone||'',email:a.email||'',dob:a.dob||'',address:a.address||'',appId:a.id,admissionType:'Online Admission ('+a.id+')'}});
       if(!res.ok){ if(res.id){ a.enrolledId=res.id; saveApplications(); renderAdminAdmissions(); } toast('❌ '+res.reason,'error'); return; }
       a.status='Accepted'; a.enrolledId=res.id; saveApplications();
@@ -8034,7 +8066,19 @@ enrollApplicant=function(id){ if(!(Cloud.active()&&Cloud.token)) return _ea(id);
 const _sel=showEnrolledLogin;
 showEnrolledLogin=function(id){ if(!(Cloud.active()&&Cloud.token)) return _sel(id);
   const a=applications.find(x=>x.id===id); if(!a||!a.enrolledId) return;
-  cloudLoginCard(`🎓 ${escapeHtml(a.name)} is enrolled`,`The pupil signs in under <b>Student Login</b> (${escapeHtml(a.cls)}).`,a.enrolledId,null,()=>resetAccountPassword(a.enrolledId,a.name,a.enrolledId)); };
+  showStudentLogin(a.enrolledId,a.name,a.cls); };
+async function showStudentLogin(id,name,cls){
+  const p=classRoster.find(x=>x.id===id)||{}; name=name||p.name||id; cls=cls||p.cls||'';
+  const intro=`The pupil signs in under <b>Student Login</b>${cls?` (${escapeHtml(cls)})`:''}.`;
+  if(Cloud.active()&&Cloud.token){
+    try{ const r=await Cloud.rpc('portal_get_initial_password',{p_token:Cloud.token,p_account_id:id});
+      cloudLoginCard(`🎓 ${escapeHtml(name)}`,intro,id,(r&&r.password)||null,()=>resetAccountPassword(id,name,id)); }
+    catch(e){ toast('❌ '+e.message,'error'); }
+  } else {
+    const u=userAccounts.find(x=>x.id===id);
+    cloudLoginCard(`🎓 ${escapeHtml(name)}`,intro,id,(u&&u.password)||null,()=>{ const pw=makeAutoPassword(); if(u){ u.password=pw; saveUserAccounts(); } cloudLoginCard(`🔑 New password for ${escapeHtml(name)}`,'The old password no longer works.',id,u?pw:null,()=>showStudentLogin(id,name,cls)); });
+  }
+}
 const _cd2=cloudDelete;
 cloudDelete=function(m,id){ _cd2(m,id); if(Cloud.active()&&Cloud.token&&m==='deleteStudent') Cloud.rpc('portal_delete_account',{p_token:Cloud.token,p_id:id}).catch(()=>{}); };
 const _ssp=saveSchoolPasscode;
@@ -8057,6 +8101,750 @@ afterRender=function(id){ _ar4(id); if(!(Cloud.active()&&Cloud.token)) return;
   if(['admin-dashboard','teacher-dashboard','primary-dashboard','secondary-dashboard','parent-portal'].includes(id))
     Cloud.syncRoster().then(ch=>{ if(!ch) return; if(id==='admin-dashboard'||id==='teacher-dashboard') refreshAdminLists(); else go(id,true); }); };
 
+/* ===== Admin adds a student directly (no application needed) ===== */
+const ALL_CLASS_NAMES=['Creche','KG 1','KG 2','Nursery 1','Nursery 2','Primary 1','Primary 2','Primary 3','Primary 4','Primary 5','JSS 1','JSS 2','JSS 3','SS 1','SS 2','SS 3'];
+function showAddStudentDirect(){
+  const overlay=document.getElementById('genericModalOverlay'), card=document.getElementById('genericModalCard');
+  card.innerHTML=`<h3>➕ Add a student</h3><p>The Registration ID and password are created automatically.</p>
+  <form id="addStudentDirectForm" style="display:grid;gap:10px;margin-top:8px">
+    <div class="field"><label>Full name *</label><input id="asdName" required placeholder="Pupil's full name"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Class *</label><select id="asdClass" required>${ALL_CLASS_NAMES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Gender</label><select id="asdGender"><option>Male</option><option>Female</option></select></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label>Parent / guardian</label><input id="asdParent" placeholder="Parent's name"></div>
+      <div class="field"><label>Parent phone</label><input id="asdPhone" placeholder="080..."></div></div>
+    <div class="modal-actions"><button type="button" class="btn btn-ghost btn-sm" id="asdCancel">Cancel</button><button type="submit" class="btn btn-gold btn-sm">Create student &amp; login</button></div>
+  </form>`;
+  overlay.classList.add('open');
+  document.getElementById('asdCancel').onclick=()=>overlay.classList.remove('open');
+  document.getElementById('addStudentDirectForm').onsubmit=async function(e){
+    e.preventDefault(); e.stopImmediatePropagation();
+    const pupil={name:$v('asdName').trim(),cls:$v('asdClass'),gender:$v('asdGender'),parent:$v('asdParent').trim(),phone:$v('asdPhone').trim(),email:'',dob:'',address:'Ado-Ekiti',appId:'',admissionType:'Direct admission by admin'};
+    if(!pupil.name){ toast('Enter the pupil\'s name','error'); return; }
+    const btn=e.target.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='Please wait…';
+    try{
+      let sid,pw;
+      if(Cloud.active()&&Cloud.token){
+        const res=await Cloud.rpc('portal_enroll_student',{p_token:Cloud.token,p_pupil:pupil});
+        if(!res.ok){ toast('❌ '+res.reason,'error'); btn.disabled=false; btn.textContent='Create student & login'; return; }
+        sid=res.id; pw=res.password; await Cloud.syncRoster();
+      } else {
+        sid=generateNextStudentId(pupil.cls); pw=sid;
+        classRoster.push(Object.assign({id:sid,status:'Enrolled',photoUrl:''},pupil)); saveClassRoster();
+        userAccounts.push({id:sid,identifier:sid,email:'',phone:pupil.phone,name:pupil.name,role:kindForClass(pupil.cls)==='secondary'?'student-secondary':'student-primary',cls:pupil.cls,gender:pupil.gender,password:pw,registeredAt:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}); saveUserAccounts();
+      }
+      Sound.playSuccess(); try{ renderAdminStudentRegistry(); }catch(_){}
+      card.innerHTML=`<h3>🎓 ${escapeHtml(pupil.name)} is added</h3><p>Give these details to the parent. The pupil signs in under <b>Student Login</b> (${escapeHtml(pupil.cls)}).</p>
+        <div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Login ID:</b> <code>${escapeHtml(sid)}</code><br><b>Password:</b> <code>${escapeHtml(pw)}</code></div>
+        <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="asdClose">Close</button><button class="btn btn-ghost btn-sm" id="asdAnother">➕ Add another</button><button class="btn btn-navy btn-sm" id="asdCopy">📋 Copy login</button></div>`;
+      document.getElementById('asdClose').onclick=()=>overlay.classList.remove('open');
+      document.getElementById('asdAnother').onclick=showAddStudentDirect;
+      document.getElementById('asdCopy').onclick=()=>{ try{ navigator.clipboard.writeText(`Mojuli Christ Glorious School\n${pupil.name} (${pupil.cls})\nLogin ID: ${sid}\nPassword: ${pw}`); toast('Login details copied','success'); }catch(_){ toast('Copy not supported, write the details down.'); } };
+    }catch(err){ console.error(err); toast('❌ '+err.message,'error'); btn.disabled=false; btn.textContent='Create student & login'; }
+  };
+}
+
+/* =====================================================================
+   ROUND 3 — IDs for every enrolled pupil, printable forms, admin-only
+   gallery, editable pages, locked parents forum
+   ===================================================================== */
+const _el = id => document.getElementById(id);
+const _enc = s => escapeHtml(String(s == null ? '' : s));
+function personWord(cls){ return kindForClass(cls) === 'secondary' ? 'student' : 'pupil'; }
+function waNumber(p){ const d = String(p||'').replace(/\D/g,''); return d.startsWith('234') ? d : '234' + d.replace(/^0/,''); }
+
+/* ---------- attendance + pass/weak remark for the printed result ---------- */
+function attendanceSummary(id){
+  const o = { present:0, late:0, absent:0, total:0 };
+  try { Object.values(attendanceStore || {}).forEach(d => { const v = d && d[id]; if(v){ o.total++; if(o[v] !== undefined) o[v]++; } }); } catch(e){}
+  o.days = o.present + o.late;
+  return o;
+}
+function passRemark(pct){ return pct >= 50 ? 'PASSED' : 'WEAK'; }
+
+/* ---------- image helper (keeps pictures small so the site stays fast) ---------- */
+function compressImage(file, max, q){
+  max = max || 1000; q = q || 0.72;
+  return new Promise((res, rej) => {
+    if(!file || !/^image\//.test(file.type || '')) return rej(new Error('Please choose a picture file.'));
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error('Could not read that file.'));
+    fr.onload = () => {
+      const im = new Image();
+      im.onerror = () => rej(new Error('That file is not a usable picture.'));
+      im.onload = () => {
+        const s = Math.min(1, max / Math.max(im.width, im.height));
+        const w = Math.max(1, Math.round(im.width * s)), h = Math.max(1, Math.round(im.height * s));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(im, 0, 0, w, h);
+        res(c.toDataURL('image/jpeg', q));
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* =====================================================================
+   A. ENROLLING PUPILS / STUDENTS (teacher or admin) — ID works everywhere
+   ===================================================================== */
+function pupilLoginCard(name, cls, id, pw){
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard');
+  card.innerHTML = `<h3>🎓 ${_enc(name)} is enrolled</h3>
+    <p>The ${personWord(cls)} signs in under <b>${personWord(cls)==='student'?'Student':'Pupil'} Login</b> (${_enc(cls)}) and the parent can use this same ID in the <b>Parents Portal</b>.</p>
+    <div class="note-box" style="margin:12px 0;font-size:1rem;line-height:1.9"><b>Registration ID (login):</b> <code>${_enc(id)}</code><br><b>Password:</b> <code>${_enc(pw)}</code> <span class="small-muted">(same as the ID)</span></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="plClose">Close</button><button class="btn btn-navy btn-sm" id="plCopy">📋 Copy login</button></div>`;
+  overlay.classList.add('open');
+  _el('plClose').onclick = () => overlay.classList.remove('open');
+  _el('plCopy').onclick = () => { try{ navigator.clipboard.writeText(`Mojuli Christ Glorious School\n${name} (${cls})\nRegistration ID: ${id}\nPassword: ${pw}`); toast('Login details copied','success'); }catch(e){ toast('Copy not supported, write the details down.'); } };
+}
+
+async function enrollPupilEverywhere(pupil){
+  /* returns {id,pw}. Cloud first (so the ID works on every device), local only when the school server is not set up. */
+  if(Cloud.active()){
+    if(!Cloud.token) throw new Error('Please log in again to enroll a pupil.');
+    const res = await Cloud.rpc('portal_enroll_student', { p_token: Cloud.token, p_pupil: pupil });
+    if(!res.ok) throw new Error(res.reason || 'Could not enroll this pupil.');
+    await Cloud.syncRoster();
+    return { id: res.id, pw: res.password };
+  }
+  const id = generateNextStudentId(pupil.cls);
+  classRoster.push(Object.assign({ id, status:'Enrolled', photoUrl:'' }, pupil)); saveClassRoster();
+  try{ registerUserAccount({ identifier:id, email:'', phone:pupil.phone||'', name:pupil.name,
+    role: kindForClass(pupil.cls)==='secondary' ? 'student-secondary' : 'student-primary', cls:pupil.cls, gender:pupil.gender, password:id }); }catch(e){}
+  return { id, pw: id };
+}
+
+async function refreshModalPupilId(){
+  const idEl = _el('modal_pupilId'), cls = (_el('modal_pupilCls')||{}).value || 'Primary 4'; if(!idEl) return;
+  let v = generateNextStudentId(cls);
+  if(Cloud.active() && Cloud.token){ try{ v = await Cloud.rpc('portal_next_student_id', { p_token: Cloud.token, p_cls: cls }) || v; }catch(e){} }
+  idEl.value = v;
+}
+const _spem = showPupilEnrollmentModal;
+showPupilEnrollmentModal = function(kind){
+  _spem(kind);
+  const idEl = _el('modal_pupilId'), clsEl = _el('modal_pupilCls');
+  if(idEl){ idEl.readOnly = true; idEl.style.background = 'var(--surface-alt)'; idEl.placeholder = 'MJL/../....'; }
+  const lab = idEl && idEl.closest('.field') && idEl.closest('.field').querySelector('label'); if(lab) lab.textContent = 'Registration ID (automatic)';
+  const hint = idEl && idEl.closest('.field') && idEl.closest('.field').querySelector('.hint');
+  if(hint) hint.textContent = 'Created automatically (MJL/YY/0001 for pupils, MJLS/YY/0001 for JSS–SS students). The first password is the same ID.';
+  if(clsEl){ clsEl.addEventListener('change', refreshModalPupilId); }
+  refreshModalPupilId();
+};
+
+submitPupilEnrollModal = async function(kind){
+  const val = id => ((_el(id)||{}).value || '').trim();
+  const name = val('modal_pupilName'), gender = val('modal_pupilGender'), cls = val('modal_pupilCls') || 'Primary 4';
+  if(!name){ toast('Please enter the full name','error'); return; }
+  if(!gender){ toast('Please select Male or Female','error'); return; }
+  const pupil = { name, cls, gender, dob: val('modal_pupilDob') || '', parent: val('modal_pupilParent') || 'Guardian', phone: val('modal_pupilPhone'),
+    address: val('modal_pupilAddress') || '', photoUrl: window._tempModalPhotoUrl || '', status:'Enrolled',
+    admissionType: val('modal_pupilAdmissionType') || 'Direct / Walk-In Admission' };
+  const btn = document.querySelector('#pupilEnrollModalForm button[type=submit]'); const old = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Please wait…'; }
+  try{
+    const r = await enrollPupilEverywhere(pupil);
+    activePupilId = r.id; getPupilResults(r.id);
+    window._tempModalPhotoUrl = null; Sound.playSuccess();
+    pupilLoginCard(name, cls, r.id, r.pw);
+    try{ renderTeacherResultsPanel(kind); }catch(e){} try{ renderAssignedClassPanel(); }catch(e){} try{ renderTeacherAttendancePanel(); }catch(e){} try{ renderAdminStudentRegistry(); }catch(e){}
+  }catch(err){ toast('❌ ' + err.message, 'error'); if(btn){ btn.disabled = false; btn.innerHTML = old; } }
+};
+
+submitInlinePupilEnrollment = async function(){
+  const val = id => ((_el(id)||{}).value || '').trim();
+  const name = val('inline_name'), gender = val('inline_gender'), cls = 'Primary 4';
+  if(!name || !gender){ toast('Please fill in the name and gender','error'); return; }
+  const pupil = { name, cls, gender, dob: val('inline_dob'), parent: val('inline_parent') || 'Guardian', phone: val('inline_phone'),
+    address: val('inline_address'), photoUrl: window._tempInlinePhotoUrl || '', status:'Enrolled', admissionType: val('inline_admissionType') || 'Direct / Walk-In Admission' };
+  try{
+    const r = await enrollPupilEverywhere(pupil);
+    activePupilId = r.id; getPupilResults(r.id); window._tempInlinePhotoUrl = null; Sound.playSuccess();
+    pupilLoginCard(name, cls, r.id, r.pw);
+    try{ renderAssignedClassPanel(); }catch(e){} try{ renderTeacherResultsPanel('primary'); }catch(e){} try{ renderTeacherAttendancePanel(); }catch(e){}
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+};
+
+/* pupils enrolled earlier on one device are pushed to the shared database the next time staff log in */
+Cloud.syncRoster = async function(){
+  if(!this.token) return false;
+  try{
+    let list = await this.rpc('portal_get_roster', { p_token: this.token });
+    const staff = session && (session.role === 'staff-teacher' || session.role === 'staff-admin');
+    if(staff){
+      let done = []; try{ done = JSON.parse(localStorage.getItem('mjl_imported') || '[]'); }catch(e){}
+      const have = new Set((list||[]).map(p => String(p.id).toUpperCase()));
+      const miss = classRoster.filter(p => p && p.id && p.name && !have.has(String(p.id).toUpperCase()) && !done.includes(p.id) && !isGone(p.id));
+      if(miss.length){
+        try{
+          await this.rpc('portal_import_pupils', { p_token: this.token, p_list: miss.map(p => ({ id:p.id, name:p.name, cls:p.cls, gender:p.gender, dob:p.dob, parent:p.parent, phone:p.phone, address:p.address, status:p.status, admissionType:p.admissionType, photoUrl:p.photoUrl })) });
+          done = done.concat(miss.map(p => p.id)); try{ localStorage.setItem('mjl_imported', JSON.stringify(done)); }catch(e){}
+          list = await this.rpc('portal_get_roster', { p_token: this.token });
+        }catch(e){ console.warn(e); }
+      }
+    }
+    let changed = false;
+    (list||[]).forEach(p => { const i = classRoster.findIndex(x => x.id === p.id);
+      if(i < 0){ classRoster.push(Object.assign({ gender:'Pupil', photoUrl:'' }, p)); changed = true; }
+      else { const next = Object.assign({}, classRoster[i], p); if(JSON.stringify(next) !== JSON.stringify(classRoster[i])){ classRoster[i] = next; changed = true; } } });
+    if(changed) saveClassRoster();
+    return changed;
+  }catch(e){ return false; }
+};
+
+/* the admin "Add student" and "Enroll applicant" screens no longer send the old year field */
+
+/* =====================================================================
+   B. ADMISSIONS — shared applications, tracker, printable admission form
+   ===================================================================== */
+function admissionFee(){ return settings.admissionFee || '₦3,000'; }
+
+function admissionFormHTML(a){
+  const logo = settings.logoDataUrl || 'assets/school_logo.png';
+  const school = (settings.schoolName || 'MOJULI CHRIST GLORIOUS SCHOOL').toUpperCase();
+  const word = personWord(a.cls), Word = word.charAt(0).toUpperCase() + word.slice(1);
+  const row = (l, v) => `<tr><td class="af-l">${l}</td><td class="af-v">${_enc(v || '')}&nbsp;</td></tr>`;
+  return `
+  <div class="rc-page af-page">
+    <div class="rc-watermark"><img src="${logo}" alt=""><span>${_enc(school)}</span></div>
+    <div class="rc-top">
+      <img class="rc-logo" src="${logo}" alt="School logo">
+      <div class="rc-schoolinfo">
+        <h1>${_enc(school)}</h1>
+        <div class="rc-motto">"${_enc((settings.motto || 'JESUS IS OUR GREAT TEACHER').toUpperCase())}"</div>
+        <div class="rc-addr">${_enc(settings.address || '')}<br>Hotlines: ${_enc(settings.phone1 || '')} · ${_enc(settings.phone2 || '')} · ${_enc(settings.email || '')}</div>
+        <div class="rc-report-title">Admission Application Form — ${_enc(settings.session || '2026/2027')}</div>
+      </div>
+      <div class="af-photo">Affix passport photograph here</div>
+    </div>
+
+    <div class="af-banner">✔ ADMISSION GRANTED &nbsp;·&nbsp; Reference No: <b>${_enc(a.id)}</b> &nbsp;·&nbsp; Date applied: ${_enc(a.date || '')}</div>
+
+    <div class="rc-section-title">1. ${Word} details</div>
+    <table class="af-table">
+      ${row('Full name', a.name)}
+      ${row('Class admitted into', a.cls)}
+      ${row('Date of birth', a.dob)}
+      ${row('Gender', a.gender)}
+      ${row('Previous school', a.prevSchool)}
+    </table>
+
+    <div class="rc-section-title">2. Parent / guardian details</div>
+    <table class="af-table">
+      ${row('Parent / guardian name', a.parent)}
+      ${row('Phone number', a.phone)}
+      ${row('Email address', a.email)}
+      ${row('Home address', a.address)}
+      ${row('Emergency contact phone', a.emergency)}
+    </table>
+
+    <div class="af-fee">
+      <b>💳 THIS FORM IS PAID FOR — ${_enc(admissionFee())} (three thousand naira) per ${word}.</b><br>
+      Please bring <b>${_enc(admissionFee())}</b> with you when you come to submit this printed form at the school office.
+    </div>
+
+    <div class="rc-section-title">3. Declaration</div>
+    <p style="font-size:0.84rem;line-height:1.7;margin:6px 0 18px">I confirm that the information given above is correct. I will obey the rules and regulations of ${_enc(settings.schoolName || 'Mojuli Christ Glorious School')}.</p>
+    <div class="rc-sign" style="margin-top:42px">
+      <div>Parent / Guardian Signature &amp; Date</div>
+      <div>School Registrar / Principal Signature &amp; Stamp</div>
+    </div>
+    <p class="small-muted" style="margin-top:18px;text-align:center;font-size:0.72rem">Printed from the school portal. Submit the signed copy at the school office.</p>
+  </div>`;
+}
+function printAdmissionForm(a){
+  if(!a || a.status !== 'Accepted'){ toast('The admission form can only be printed after admission has been given.','error'); return; }
+  const box = _el('printReportCard'); box.innerHTML = admissionFormHTML(a);
+  Sound.playSuccess(); setTimeout(() => window.print(), 150);
+}
+function printAdmissionFormById(id){
+  const a = applications.find(x => x.id === id);
+  if(!a) return; printAdmissionForm(a);
+}
+
+/* tracker: reference ID only; the print needs the parent's phone number too */
+searchApplicationStatus = async function(){
+  const q = ((_el('trackerSearchInput') || {}).value || '').trim();
+  const box = _el('trackerResultBox');
+  if(!q){ toast('Please enter your application reference ID','error'); return; }
+  let app = null, full = false;
+  try{
+    if(Cloud.active()){
+      const r = await Cloud.rpc('portal_app_track', { p_id: q, p_phone: '' });
+      if(r.ok){ app = r.app; full = !!r.full; }
+    } else {
+      app = applications.find(a => a.id.toLowerCase() === q.toLowerCase()); full = !!app;
+    }
+  }catch(e){ toast('❌ ' + e.message, 'error'); return; }
+  box.style.display = 'block';
+  if(!app){
+    toast('No application found. Check the reference ID.', 'error');
+    box.innerHTML = `<div class="card" style="background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.2)"><p style="color:var(--crimson-600);font-weight:700">No application found for "${_enc(q)}". Please check the reference ID you were given when you applied.</p></div>`;
+    return;
+  }
+  toast('Application found', 'success');
+  const s = app.status, acc = s === 'Accepted', rev = s === 'Under Review' || acc;
+  const step = (cls, ic, t, sub) => `<div class="tracker-step-item ${cls}"><div class="tracker-icon">${ic}</div><div><b style="font-size:0.85rem">${t}</b><span style="font-size:0.75rem;color:var(--text-muted);display:block">${sub}</span></div></div>`;
+  box.innerHTML = `
+    <div class="card" style="border-color:var(--gold-500)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <span class="badge gold">${_enc(app.id)}</span>
+          <h3 style="margin-top:8px">${_enc(app.name)}</h3>
+          <p class="small-muted">Class Applied: <b>${_enc(app.cls)}</b> &bull; Parent: ${_enc(app.parent)} &bull; Submitted: ${_enc(app.date)}</p>
+        </div>
+        <span class="pill ${acc?'accepted':s==='Under Review'?'review':s==='Rejected'?'rejected':'pending'}" style="font-size:0.85rem">Status: ${_enc(s)}</span>
+      </div>
+      <div class="tracker-steps">
+        ${step('done','✓','1. Form Submitted',_enc(app.date))}
+        ${step(rev?'done':'active',rev?'✓':'2','2. File Screening','Registry Review')}
+        ${step(acc?'done':rev?'active':'',acc?'✓':'3','3. Assessment','Ado-Ekiti Campus')}
+        ${step(acc?'done':'',acc?'✓':'4','4. Admission Offer',acc?'Offered':'In Progress')}
+      </div>
+      ${acc ? `<div class="note-box" style="margin-top:14px"><span>🎉</span><div><b>Admission has been given.</b> Print the admission form and bring it to the school office. The form costs <b>${_enc(admissionFee())}</b> per ${personWord(app.cls)} — please come with ${_enc(admissionFee())}.<br>
+        <button class="btn btn-gold btn-sm" style="margin-top:10px" onclick="printMyAdmissionForm('${_enc(app.id)}')">🖨 Print admission form</button></div></div>` : ''}
+    </div>`;
+};
+
+function printMyAdmissionForm(id){
+  if(!Cloud.active()){ printAdmissionFormById(id); return; }
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard');
+  card.innerHTML = `<h3>🖨 Print admission form</h3><p>For your privacy, enter the parent's phone number used on the application.</p>
+    <div class="field"><input id="paPhone" inputmode="tel" placeholder="e.g. 08012345678"></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="paCancel">Cancel</button><button class="btn btn-gold btn-sm" id="paGo">Show &amp; print</button></div>`;
+  overlay.classList.add('open');
+  _el('paCancel').onclick = () => overlay.classList.remove('open');
+  _el('paGo').onclick = async () => {
+    const ph = ((_el('paPhone') || {}).value || '').trim();
+    if(ph.replace(/\D/g,'').length < 6){ toast('Enter the parent phone number','error'); return; }
+    try{
+      const r = await Cloud.rpc('portal_app_track', { p_id: id, p_phone: ph });
+      if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+      if(!r.full){ toast('The admission form is only available after admission is given.', 'error'); return; }
+      overlay.classList.remove('open'); printAdmissionForm(r.app);
+    }catch(e){ toast('❌ ' + e.message, 'error'); }
+  };
+}
+
+/* applications go to the shared database so the admin sees them from any device */
+document.addEventListener('submit', async function(e){
+  const f = e.target; if(!f || f.id !== 'admissionForm' || !Cloud.active()) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const g = n => ((f.elements[n] || {}).value || '').trim();
+  const rec = { name:g('name'), dob:g('dob'), gender:g('gender'), prevSchool:g('prevSchool'), cls:g('cls'), parent:g('parent'), phone:g('phone'), email:g('email'), address:g('address'), emergency:g('emergency') };
+  const btn = e.submitter || f.querySelector('button[type=submit]'); const old = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Submitting…'; }
+  try{
+    const r = await Cloud.rpc('portal_app_submit', { p_app: rec });
+    if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+    Sound.playSuccess(); toast('Application submitted successfully', 'success');
+    showModal({ title:'Application Received!', message:`Your admission application for ${rec.name} (${rec.cls}) has been registered with Reference ID: ${r.id}. Write it down — you can track the status anytime on this page.`,
+      confirmText:'Track Status Now', cancelText:'Done', onConfirm: () => { const i = _el('trackerSearchInput'); if(i){ i.value = r.id; searchApplicationStatus(); } } });
+    f.reset();
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+  finally{ if(btn){ btn.disabled = false; btn.innerHTML = old; } }
+}, true);
+
+Cloud.refreshApps = async function(){
+  if(!this.token) return;
+  try{
+    const l = await this.rpc('portal_app_list', { p_token: this.token }) || [];
+    const ids = new Set(l.map(x => x.id));
+    applications = l.concat(applications.filter(a => !ids.has(a.id) && !isGone(a.id)));
+    saveApplications();
+  }catch(e){ console.warn(e); }
+  try{ renderAdminAdmissions(); }catch(e){}
+};
+const _uas = updateAppStatus;
+updateAppStatus = function(id, status){
+  _uas(id, status);
+  if(Cloud.active() && Cloud.token) Cloud.rpc('portal_app_set_status', { p_token: Cloud.token, p_id: id, p_status: status }).catch(e => toast('❌ ' + e.message, 'error'));
+};
+const _cd3 = cloudDelete;
+cloudDelete = function(m, id){
+  _cd3(m, id);
+  if(Cloud.active() && Cloud.token && m === 'deleteAdmission') Cloud.rpc('portal_app_delete', { p_token: Cloud.token, p_id: id }).catch(() => {});
+};
+
+/* =====================================================================
+   C. SHARED WEBSITE CONTENT — editable pages, admin-only gallery
+   ===================================================================== */
+const ED_PAGES = { home:'Home', about:'About', admission:'Admission', gallery:'Gallery', contact:'Contact', forum:'Parents Forum' };
+const ED_SEL = 'h1,h2,h3,h4,p,li,summary,.badge,.body,legend,.small-muted';
+const ED_BLOCKED = '.school-brand-title,.school-brand-motto,.school-brand-address,.school-brand-email,.school-brand-phone1,.school-brand-phone2';
+function edHash(s){ let h = 5381; for(let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function edNorm(t){ return String(t || '').replace(/\s+/g, ' ').trim(); }
+function edEligible(el){
+  if(el.closest(ED_BLOCKED) || el.matches(ED_BLOCKED)) return false;
+  if(el.querySelector('a,input,button,select,textarea,svg,img,form,details,table,ul,ol,div,h1,h2,h3,h4,p,section,label')) return false;
+  const t = edNorm(el.textContent); if(t.length < 3) return false;
+  if(el.closest('.hero') && (el.matches('h1') || el.matches('p.lead'))) return false;   /* these live in Settings */
+  return true;
+}
+function edKey(view, el){ return 'ed:' + view + '|' + edHash(edNorm(el.textContent)); }
+function edItems(view){
+  const d = document.createElement('div'); d.innerHTML = views[view] ? views[view]() : '';
+  const seen = {}, out = [];
+  d.querySelectorAll(ED_SEL).forEach(el => {
+    if(!edEligible(el)) return;
+    const key = edKey(view, el); if(seen[key]) return; seen[key] = 1;
+    out.push({ key, tag: el.tagName.toLowerCase(), text: edNorm(el.textContent), raw: (el.innerHTML.indexOf('<br') > -1) ? el.innerHTML.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim() : edNorm(el.textContent) });
+  });
+  return out;
+}
+function edApply(view){
+  const root = _el('app'); if(!root || !Site.content) return;
+  root.querySelectorAll(ED_SEL).forEach(el => {
+    if(!edEligible(el)) return;
+    const v = Site.content[edKey(view, el)];
+    if(typeof v === 'string' && v.length) el.innerHTML = escapeHtml(v).replace(/\n/g, '<br>');
+  });
+}
+
+const Site = {
+  content: {}, cloudGallery: null, srcCache: {},
+  init(){ try{ this.content = DB.get('siteContent', {}) || {}; this.cloudGallery = DB.get('siteGallery', null); }catch(e){ this.content = {}; } this.apply(); },
+  hidden(){ try{ return JSON.parse(this.content.gallery_hidden || '[]'); }catch(e){ return []; } },
+  computeGallery(){
+    const hid = this.hidden();
+    const cloud = (this.cloudGallery || []).map(p => Object.assign({ src: this.srcCache[p.id] || '' }, p));
+    return cloud.concat(DEFAULT_PHOTOS.filter(p => !hid.includes(p.id)));
+  },
+  apply(){
+    if(this.content.settings){
+      try{ const s = JSON.parse(this.content.settings); delete s.adminPasscode; settings = Object.assign({}, DEFAULT_SETTINGS, s); }catch(e){}
+    }
+    gallery = this.computeGallery();
+    try{ applyAllSchoolSettings(); }catch(e){}
+  },
+  async load(){
+    if(!Cloud.active()) return;
+    try{
+      const before = JSON.stringify([this.content, this.cloudGallery]);
+      const r = await Cloud.rpc('portal_public_content', {});
+      this.content = r.content || {}; this.cloudGallery = r.gallery || [];
+      try{ DB.set('siteContent', this.content); DB.set('siteGallery', this.cloudGallery); }catch(e){}
+      this.apply();
+      if(before !== JSON.stringify([this.content, this.cloudGallery])){
+        const v = window._cv;
+        if(['home','about','admission','contact','gallery'].includes(v) && !(_el('genericModalOverlay')||{classList:{contains:()=>false}}).classList.contains('open')){
+          const sy = window.scrollY; go(v, true); setTimeout(() => window.scrollTo(0, sy), 400);
+        } else if(v === 'forum'){ edApply('forum'); }
+      }
+    }catch(e){ console.warn('Site content', e); }
+  },
+  async ensureSrc(p){
+    if(p.src) return p.src;
+    if(this.srcCache[p.id]){ p.src = this.srcCache[p.id]; return p.src; }
+    try{ const s = await Cloud.rpc('portal_gallery_item', { p_id: p.id }); if(s){ this.srcCache[p.id] = s; p.src = s; } }catch(e){}
+    return p.src || '';
+  },
+  hydrate(){
+    const imgs = [...document.querySelectorAll('img[data-gid]')].filter(i => !i.getAttribute('src') || i.dataset.pending);
+    let i = 0;
+    const worker = async () => {
+      while(i < imgs.length){
+        const img = imgs[i++]; const p = gallery.find(x => x.id === img.dataset.gid); if(!p) continue;
+        const s = await this.ensureSrc(p); if(s){ img.src = s; img.removeAttribute('data-pending'); }
+      }
+    };
+    for(let n = 0; n < 3; n++) worker();
+  },
+  async setContent(pairs){
+    if(!Cloud.token) throw new Error('Please log in as the administrator first.');
+    const r = await Cloud.rpc('portal_set_content', { p_token: Cloud.token, p_pairs: pairs });
+    if(!r.ok) throw new Error(r.reason || 'Could not save.');
+    Object.keys(pairs).forEach(k => { if(pairs[k] === null) delete this.content[k]; else this.content[k] = pairs[k]; });
+    try{ DB.set('siteContent', this.content); }catch(e){}
+    this.apply();
+  }
+};
+const BLANK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const galleryImg = (p, extra) => `<img data-gid="${_enc(p.id)}" ${p.src ? `src="${p.src}"` : `src="${BLANK_IMG}" data-pending="1"`} alt="${_enc(p.caption || 'School photo')}" ${extra || ''}>`;
+
+/* settings (fees, phones, term notice…) are shared: when the admin saves, everyone sees it */
+let _pushTimer = null;
+const _ss2 = saveSettings;
+saveSettings = function(){
+  _ss2();
+  if(!(Cloud.active() && Cloud.token && session && session.role === 'staff-admin')) return;
+  clearTimeout(_pushTimer);
+  _pushTimer = setTimeout(async () => {
+    try{
+      const s = Object.assign({}, settings); delete s.adminPasscode;
+      if(s.logoDataUrl && s.logoDataUrl.length > 700000) s.logoDataUrl = null;
+      await Site.setContent({ settings: JSON.stringify(s) });
+    }catch(e){ toast('❌ Could not share the settings online: ' + e.message, 'error'); }
+  }, 700);
+};
+
+/* ---------- public gallery: VIEW ONLY ---------- */
+renderGalleryHome = function(){
+  const el = _el('galleryGridHome'); if(!el) return;
+  const items = gallery.slice(0, 4);
+  if(!items.length){ el.innerHTML = `<div class="empty" style="grid-column:1/-1">No photos currently uploaded.</div>`; return; }
+  el.innerHTML = items.map((p, i) => `<div class="gallery-item" onclick="openLightbox(${i})">${galleryImg(p)}${p.caption ? `<div class="cap">${_enc(p.caption)}</div>` : ''}</div>`).join('');
+  Site.hydrate();
+};
+renderGalleryFull = function(){
+  const el = _el('galleryGridFull'); if(!el) return;
+  let list = gallery;
+  if(galleryCategory !== 'All') list = list.filter(p => p.category === galleryCategory);
+  el.innerHTML = list.length ? list.map(p => `<div class="gallery-item" onclick="openLightbox(${gallery.indexOf(p)})">${galleryImg(p)}${p.caption ? `<div class="cap">${_enc(p.caption)}</div>` : ''}</div>`).join('')
+    : `<div class="empty" style="grid-column:1/-1">No photos in this collection yet.</div>`;
+  Site.hydrate();
+};
+deletePhoto = function(){ toast('Only the school administrator can remove photos.', 'error'); };
+renderLightbox = function(){
+  const p = gallery[lightboxIndex]; if(!p) return;
+  const set = () => { _el('lightboxImg').src = p.src || BLANK_IMG; };
+  set(); if(!p.src) Site.ensureSrc(p).then(set);
+  _el('lightboxCap').textContent = p.caption || '';
+  _el('lightboxCount').textContent = `${lightboxIndex + 1} of ${gallery.length}`;
+};
+
+/* ---------- admin gallery space ---------- */
+function renderAdminGallery(){
+  const el = _el('adminGalleryPanel'); if(!el) return;
+  const hid = Site.hidden();
+  const mine = (Site.cloudGallery || []).map(p => Object.assign({ src: Site.srcCache[p.id] || '' }, p));
+  const builtIn = DEFAULT_PHOTOS.map(p => Object.assign({ hidden: hid.includes(p.id) }, p));
+  el.innerHTML = `
+    <h3 style="margin-bottom:4px">🖼 School Gallery</h3>
+    <p class="small-muted" style="margin-bottom:14px">Only you (the administrator) can add or delete pictures. Visitors can only look at them.</p>
+    <div class="card" style="margin-bottom:18px">
+      <h4 style="margin-bottom:10px">➕ Add a photo</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
+        <div class="field mb0"><label>Picture *</label><input type="file" accept="image/*" id="galNewFile"></div>
+        <div class="field mb0"><label>Caption</label><input id="galNewCap" placeholder="e.g. Cultural Day 2026"></div>
+        <div class="field mb0"><label>Collection</label><select id="galNewCat"><option value="Campus">Campus &amp; Entrance</option><option value="Events">Ceremonies &amp; Choir</option><option value="Classrooms">Classrooms &amp; Learning</option><option value="Science">Science Laboratories</option></select></div>
+        <button class="btn btn-gold" id="galNewBtn" onclick="adminGalleryAdd()">Upload photo</button>
+      </div>
+    </div>
+    <h4 style="margin-bottom:8px">Photos you uploaded (${mine.length})</h4>
+    <div class="gallery-grid" style="margin-bottom:22px">${mine.length ? mine.map(p => `
+      <div class="gallery-item">${galleryImg(p)}<div class="cap">${_enc(p.caption || '')} · ${_enc(p.category)}</div>
+        <button class="del" style="opacity:1" title="Delete photo" onclick="adminGalleryDelete('${_enc(p.id)}')">×</button></div>`).join('') : '<div class="empty" style="grid-column:1/-1">You have not uploaded any photos yet.</div>'}</div>
+    <h4 style="margin-bottom:8px">Original school photos</h4>
+    <div class="gallery-grid">${builtIn.map(p => `
+      <div class="gallery-item" style="${p.hidden ? 'opacity:.45' : ''}"><img src="${p.src}" alt=""><div class="cap">${_enc(p.caption)}</div>
+        <button class="btn btn-sm ${p.hidden ? 'btn-gold' : 'btn-ghost'}" style="position:absolute;top:8px;right:8px" onclick="adminGalleryToggleBuiltIn('${p.id}')">${p.hidden ? 'Show again' : 'Hide'}</button></div>`).join('')}</div>`;
+  Site.hydrate();
+}
+async function adminGalleryAdd(){
+  const f = (_el('galNewFile') || {}).files && _el('galNewFile').files[0];
+  if(!f){ toast('Choose a picture first', 'error'); return; }
+  const btn = _el('galNewBtn'); btn.disabled = true; btn.textContent = 'Uploading…';
+  try{
+    const src = await compressImage(f, 1000, 0.72);
+    const r = await Cloud.rpc('portal_gallery_add', { p_token: Cloud.token, p_caption: (_el('galNewCap').value || '').trim(), p_category: _el('galNewCat').value, p_src: src });
+    if(!r.ok) throw new Error(r.reason || 'Upload failed');
+    await Site.load(); Sound.playSuccess(); toast('Photo added to the gallery', 'success'); renderAdminGallery();
+  }catch(e){ toast('❌ ' + e.message, 'error'); btn.disabled = false; btn.textContent = 'Upload photo'; }
+}
+function adminGalleryDelete(id){
+  const p = (Site.cloudGallery || []).find(x => x.id === id);
+  showModal({ title:'Are you sure?', message:`Delete "${(p && p.caption) || 'this photo'}" from the gallery? This cannot be undone.`, confirmText:'Yes, Delete', cancelText:'Cancel',
+    onConfirm: async () => { try{ const r = await Cloud.rpc('portal_gallery_delete', { p_token: Cloud.token, p_id: id }); if(!r.ok) throw new Error(r.reason);
+      await Site.load(); toast('Photo deleted successfully', 'success'); renderAdminGallery(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+}
+async function adminGalleryToggleBuiltIn(id){
+  const h = Site.hidden(); const i = h.indexOf(id); if(i > -1) h.splice(i, 1); else h.push(id);
+  try{ await Site.setContent({ gallery_hidden: JSON.stringify(h) }); toast(i > -1 ? 'Photo is visible again' : 'Photo hidden from the public gallery', 'success'); renderAdminGallery(); }catch(e){ toast('❌ ' + e.message, 'error'); }
+}
+
+/* ---------- admin: edit the wording of each public page ---------- */
+let _wsPage = 'home';
+function setWebsitePage(k){ _wsPage = k; renderAdminWebsite(); }
+function renderAdminWebsite(){
+  const el = _el('adminWebsitePanel'); if(!el) return;
+  const chips = Object.entries(ED_PAGES).map(([k, v]) => `<button class="btn btn-sm ${k === _wsPage ? 'btn-navy' : 'btn-ghost'}" onclick="setWebsitePage('${k}')">${v}</button>`).join(' ');
+  el.innerHTML = `<h3 style="margin-bottom:4px">🌐 Website Pages</h3>
+    <p class="small-muted" style="margin-bottom:12px">Pick a page, change any wording below, then press <b>Save</b>. Visitors see it on every device.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">${chips}</div><div id="wsBody"></div>`;
+  renderWebsiteBody();
+}
+function wsField(id, label, val, ta){ return `<div class="field"><label>${label}</label>${ta ? `<textarea id="${id}" rows="3">${_enc(val)}</textarea>` : `<input id="${id}" value="${_enc(val)}">`}</div>`; }
+function renderWebsiteBody(){
+  const el = _el('wsBody'); if(!el) return; const p = _wsPage;
+  let extra = '';
+  if(p === 'home') extra = `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:10px">Main headline</h4>${wsField('wsHeroH','Headline',settings.heroHeadline)}${wsField('wsHeroS','Sub-text under the headline',settings.heroSubtitle,true)}${wsField('wsNext','Next-term notice',settings.nextTerm,true)}</div>`;
+  if(p === 'admission') extra = `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:10px">Admission form fee</h4>${wsField('wsFee','Fee printed on the admission form (per pupil/student)',admissionFee())}</div>`;
+  if(p === 'contact') extra = `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:10px">Contact details</h4>${wsField('wsPh1','Phone 1',settings.phone1)}${wsField('wsPh2','Phone 2',settings.phone2)}${wsField('wsEm','Email',settings.email)}${wsField('wsAd','Address',settings.address,true)}</div>`;
+  if(p === 'gallery') extra = `<div class="card" style="margin-bottom:16px"><b>Photos:</b> add or delete pictures in the <a href="#" onclick="event.preventDefault();document.querySelector('[data-tab-ad=gallery]').click()" style="color:var(--navy-700);font-weight:700">🖼 Gallery</a> tab.</div>`;
+  if(p === 'forum') extra = `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:6px">Parents Forum switch</h4><p class="small-muted" style="margin-bottom:10px">Only parents with a login can enter the forum. Close it to stop parents from posting questions or replies until you open it again.</p>
+      <div id="wsForumState" class="small-muted">Checking…</div></div>`;
+  const items = edItems(p);
+  el.innerHTML = extra + `<div class="card"><h4 style="margin-bottom:4px">Page wording</h4><p class="small-muted" style="margin-bottom:12px">Edit the text in any box. Leave a box unchanged to keep the original wording.</p>
+    ${items.length ? items.map((it, i) => `<div class="field"><label style="text-transform:none;font-size:.78rem">${it.tag.match(/^h/) ? 'Heading' : it.tag === 'li' ? 'List item' : it.tag === 'summary' ? 'Question' : 'Text'} ${i + 1}</label>
+      <textarea class="ws-text" data-key="${_enc(it.key)}" data-orig="${_enc(it.raw)}" rows="${Math.min(6, Math.max(1, Math.ceil(it.raw.length / 70)))}">${_enc(Site.content[it.key] != null ? Site.content[it.key] : it.raw)}</textarea></div>`).join('') : '<div class="empty">No editable text on this page.</div>'}</div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn btn-gold" id="wsSaveBtn" onclick="saveWebsitePage()">💾 Save this page</button>
+    <button class="btn btn-ghost" onclick="resetWebsitePage()">↩ Restore original wording</button></div>`;
+  if(p === 'forum') refreshForumSwitch();
+}
+async function saveWebsitePage(){
+  const p = _wsPage, btn = _el('wsSaveBtn'); btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    const pairs = {};
+    document.querySelectorAll('#wsBody .ws-text').forEach(t => {
+      const orig = t.dataset.orig; const v = t.value.trim();
+      if(!v || v === orig.trim()){ if(Site.content[t.dataset.key] != null) pairs[t.dataset.key] = null; }
+      else if(Site.content[t.dataset.key] !== v) pairs[t.dataset.key] = v;
+    });
+    const sp = {}; const g = id => (_el(id) || {}).value;
+    if(p === 'home'){ sp.heroHeadline = g('wsHeroH'); sp.heroSubtitle = g('wsHeroS'); sp.nextTerm = g('wsNext'); }
+    if(p === 'admission'){ sp.admissionFee = g('wsFee'); }
+    if(p === 'contact'){ sp.phone1 = g('wsPh1'); sp.phone2 = g('wsPh2'); sp.email = g('wsEm'); sp.address = g('wsAd'); }
+    const hasSettings = Object.keys(sp).some(k => sp[k] !== undefined && sp[k] !== settings[k]);
+    if(hasSettings){ Object.keys(sp).forEach(k => { if(sp[k] !== undefined) settings[k] = sp[k]; }); const s = Object.assign({}, settings); delete s.adminPasscode; if(s.logoDataUrl && s.logoDataUrl.length > 700000) s.logoDataUrl = null; pairs.settings = JSON.stringify(s); DB.set('settings', settings); }
+    if(!Object.keys(pairs).length){ toast('Nothing was changed.'); btn.disabled = false; btn.textContent = '💾 Save this page'; return; }
+    await Site.setContent(pairs); Sound.playSuccess(); toast('Saved. Visitors will see the new wording.', 'success'); renderWebsiteBody();
+  }catch(e){ toast('❌ ' + e.message, 'error'); btn.disabled = false; btn.textContent = '💾 Save this page'; }
+}
+function resetWebsitePage(){
+  showModal({ title:'Are you sure?', message:`Remove all your wording changes on the ${ED_PAGES[_wsPage]} page and go back to the original text?`, confirmText:'Yes, restore', cancelText:'Cancel',
+    onConfirm: async () => { try{ const pairs = {}; Object.keys(Site.content).forEach(k => { if(k.indexOf('ed:' + _wsPage + '|') === 0) pairs[k] = null; });
+      if(Object.keys(pairs).length) await Site.setContent(pairs); toast('Original wording restored', 'success'); renderWebsiteBody(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+}
+
+/* =====================================================================
+   D. PARENTS FORUM — parents with a login only; admin can close it
+   ===================================================================== */
+let _forumOpen = true;
+function forumAllowed(){ const r = session && session.role; return r === 'parent' || r === 'staff-admin' || r === 'staff-teacher'; }
+function forumIsAdmin(){ return session && session.role === 'staff-admin'; }
+async function setForumOpen(open){
+  try{ await Site.setContent({ forum_open: open ? '1' : '0' }); _forumOpen = open; toast(open ? 'Forum is open again' : 'Forum closed — parents cannot post until you open it', 'success'); forumLockUI(); refreshForumSwitch(); }
+  catch(e){ toast('❌ ' + e.message, 'error'); }
+}
+async function refreshForumSwitch(){
+  const el = _el('wsForumState'); if(!el) return;
+  let open = Site.content.forum_open !== '0'; _forumOpen = open;
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="pill ${open ? 'accepted' : 'rejected'}" style="font-size:.85rem">${open ? '🟢 Forum is OPEN' : '🔴 Forum is CLOSED'}</span>
+    <button class="btn btn-sm ${open ? 'btn-ghost' : 'btn-gold'}" onclick="setForumOpen(${!open})">${open ? '🔒 Close forum' : '🔓 Open forum'}</button></div>`;
+}
+function forumLockUI(){
+  const list = _el('forumThreadList'); if(!list) return;
+  const admin = forumIsAdmin();
+  const tg = _el('forumAdminToggle'); if(tg){ const c = tg.closest('.card'); if(c) c.style.display = 'none'; }
+  let bar = _el('forumStateBar');
+  if(!bar){ bar = document.createElement('div'); bar.id = 'forumStateBar'; list.parentNode.insertBefore(bar, list); }
+  bar.innerHTML = _forumOpen ? (admin ? `<div class="note-box" style="margin-bottom:12px"><span>🟢</span><div>Forum is open. <button class="btn btn-sm btn-ghost" onclick="setForumOpen(false)">🔒 Close forum</button></div></div>` : '')
+    : `<div class="note-box" style="margin-bottom:12px;border-left:4px solid var(--crimson-600)"><span>🔒</span><div><b>The forum is closed for new questions right now.</b> You can still read earlier discussions. It will open again when the school administrator reopens it.${admin ? ' <button class="btn btn-sm btn-gold" onclick="setForumOpen(true)">🔓 Open forum</button>' : ''}</div></div>`;
+  if(!_forumOpen && !admin){
+    list.querySelectorAll('form').forEach(f => f.remove());
+    const nf = _el('newThreadForm'); if(nf){ nf.innerHTML = `<p class="small-muted">New topics are closed by the school administrator at the moment.</p>`; }
+  }
+}
+const _rft2 = renderForumThreads;
+renderForumThreads = function(){ _rft2(); forumLockUI(); };
+
+async function loadForum(){
+  if(Cloud.active()){
+    if(!Cloud.token){ toast('Please log in as a parent to use the forum.', 'error'); go('parent-login'); return; }
+    try{
+      const r = await Cloud.rpc('portal_forum_list', { p_token: Cloud.token });
+      if(!r.ok){ toast(r.reason, 'error'); go('parent-login'); return; }
+      threads = r.threads || []; _forumOpen = !!r.open;
+    }catch(e){ toast('❌ ' + e.message, 'error'); }
+  }
+  renderForumThreads();
+}
+initForum = function(){
+  if(!forumAllowed()){ toast('The Parents Forum is for parents with a login. Please log in first.', 'error'); go('parent-login'); return; }
+  forumAdminMode = forumIsAdmin();
+  document.querySelectorAll('.tabs-inline button[data-cat]').forEach(b => {
+    b.addEventListener('click', () => { forumFilter = b.dataset.cat; renderForumThreads();
+      document.querySelectorAll('.tabs-inline button[data-cat]').forEach(x => x.classList.toggle('active', x === b)); });
+  });
+  const nf = _el('newThreadForm');
+  if(nf && !nf._bound){
+    nf._bound = true;
+    nf.addEventListener('submit', async e => {
+      e.preventDefault();
+      if(!_forumOpen && !forumIsAdmin()){ toast('The forum is closed for new posts right now.', 'error'); return; }
+      const cat = _el('newThreadCat').value, title = _el('newThreadTitle').value.trim(), body = _el('newThreadBody').value.trim();
+      try{
+        if(Cloud.active()){
+          const r = await Cloud.rpc('portal_forum_post', { p_token: Cloud.token, p_cat: cat, p_title: title, p_body: body });
+          if(!r.ok){ toast('❌ ' + r.reason, 'error'); if(/closed/i.test(r.reason)){ _forumOpen = false; forumLockUI(); } return; }
+        } else {
+          threads.unshift({ id: genId(), cat, title, author: (session.name || 'Parent') + ' (Parent)', date: fmtDate(), pinned: false, body, comments: [] }); saveThreads();
+        }
+        nf.reset(); Sound.playSuccess(); toast('Discussion topic posted!', 'success'); loadForum();
+      }catch(err){ toast('❌ ' + err.message, 'error'); }
+    });
+  }
+  loadForum();
+};
+addComment = async function(e, id){
+  e.preventDefault();
+  const input = _el('reply-' + id); const body = input && input.value.trim(); if(!body) return;
+  if(!_forumOpen && !forumIsAdmin()){ toast('The forum is closed for new posts right now.', 'error'); return; }
+  try{
+    if(Cloud.active()){
+      const r = await Cloud.rpc('portal_forum_reply', { p_token: Cloud.token, p_id: id, p_body: body });
+      if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+    } else { const t = threads.find(x => x.id === id); if(t){ t.comments.push({ author: (session.name || 'Parent') + ' (Parent)', date: fmtDate(), body }); saveThreads(); } }
+    Sound.playClick(); toast('Reply posted'); loadForum();
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+};
+togglePin = async function(id){
+  try{ if(Cloud.active()) await Cloud.rpc('portal_forum_pin', { p_token: Cloud.token, p_id: id }); else { const t = threads.find(x => x.id === id); if(t){ t.pinned = !t.pinned; saveThreads(); } }
+    loadForum(); }catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+deleteThread = function(id){
+  const t = threads.find(x => x.id === id);
+  showModal({ title:'Are you sure?', message:`Delete the discussion "${t ? t.title : 'this thread'}" and all its replies? This cannot be undone.`, confirmText:'Yes, Delete', cancelText:'Cancel',
+    onConfirm: async () => { try{ if(Cloud.active()) await Cloud.rpc('portal_forum_delete', { p_token: Cloud.token, p_id: id }); else { threads = threads.filter(x => x.id !== id); saveThreads(); }
+      toast('Thread deleted successfully', 'success'); loadForum(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+};
+
+/* =====================================================================
+   E. CONTACT MESSAGES — delivered to the admin from any device
+   ===================================================================== */
+const _scm = submitContactMessage;
+submitContactMessage = async function(e){
+  if(!Cloud.active()) return _scm(e);
+  e.preventDefault();
+  const f = e.target, v = [...f.querySelectorAll('input,textarea')].map(x => x.value.trim());
+  try{
+    const r = await Cloud.rpc('portal_contact_send', { p_name: v[0], p_email: v[1], p_phone: v[2], p_msg: v[3] });
+    if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+    f.reset(); Sound.playSuccess(); toast('Thank you! Your message has been received.', 'success');
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+};
+const _ram = renderAdminMessages;
+renderAdminMessages = function(){
+  if(Cloud.active() && Cloud.token && !Cloud._msgBusy){
+    Cloud._msgBusy = true;
+    Cloud.rpc('portal_contact_list', { p_token: Cloud.token }).then(l => { contactMessages = (l || []).map(m => ({ id:m.id, name:m.name, email:m.email, phone:m.phone, message:m.msg, date:m.date })); })
+      .catch(() => {}).finally(() => { Cloud._msgBusy = false; _ram(); });
+  } else _ram();
+};
+const _dcm = deleteContactMessage;
+deleteContactMessage = function(id){
+  if(!(Cloud.active() && Cloud.token)) return _dcm(id);
+  showModal({ title:'Are you sure?', message:'Delete this message permanently?', confirmText:'Yes, Delete', cancelText:'Cancel',
+    onConfirm: async () => { try{ await Cloud.rpc('portal_contact_delete', { p_token: Cloud.token, p_id: id }); toast('Deleted successfully', 'success'); }catch(e){ toast('❌ ' + e.message, 'error'); } renderAdminMessages(); } });
+};
+
+/* ---------- hook everything into page rendering ---------- */
+const _ar5 = afterRender;
+afterRender = function(id){
+  _ar5(id);
+  try{ if(ED_PAGES[id]) edApply(id); }catch(e){ console.warn(e); }
+  if(id === 'home' || id === 'gallery') try{ Site.hydrate(); }catch(e){}
+  if(id === 'admin-dashboard'){
+    try{ renderAdminWebsite(); renderAdminGallery(); }catch(e){ console.warn(e); }
+    if(Cloud.active() && Cloud.token){ Cloud.refreshApps(); }
+  }
+};
+Site.init();
+Site.load();
+
 /* Stay on the same page after a reload (login kept for this browser tab only) */
 const _goBase=go;
 go=function(id,fromHistory){
@@ -8068,6 +8856,12 @@ go=function(id,fromHistory){
       sessionStorage.setItem('mjl_session',JSON.stringify({view:id,s:s}));
     } else { if(Cloud.token) Cloud.logout(); sessionStorage.removeItem('mjl_session'); ['ad','td','sd','pd','pp'].forEach(k=>sessionStorage.removeItem('mjl_tab_'+k)); Object.keys(sessionStorage).filter(k=>k.indexOf('mjl_tab_')===0).forEach(k=>sessionStorage.removeItem(k)); }
   }catch(e){}
+};
+/* The Parents Forum is only for logged-in parents (and staff) */
+const _goForum = go;
+go = function(id, fromHistory){
+  if(id === 'forum' && !forumAllowed()){ toast('The Parents Forum is for parents with a login. Please log in first.', 'error'); return _goForum('parent-login', fromHistory); }
+  return _goForum(id, fromHistory);
 };
 (function restoreSession(){
   try{
