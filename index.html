@@ -5471,6 +5471,7 @@ registerView('teacher-dashboard', ()=>`
       <button class="tab" data-tab-td="books">📖 Book List</button>
       <button class="tab" data-tab-td="cbt">📝 CBT Test / Exam</button>
       <button class="tab" data-tab-td="cbtdone">✅ Finished CBT</button>
+      <button class="tab" data-tab-td="exam">✍️ Type Exam</button>
       <button class="tab" data-tab-td="announcements">📢 Notices</button>
       <button class="tab" data-tab-td="past">🗂 Past Students &amp; Results</button>
       <button class="tab" data-tab-td="profile">👤 My Profile</button>
@@ -5512,6 +5513,7 @@ registerView('teacher-dashboard', ()=>`
       <div data-panel-td="books" class="panel"><div id="tBooksPanel"></div></div>
       <div data-panel-td="cbt" class="panel"><div id="tCbtPanel"></div></div>
       <div data-panel-td="cbtdone" class="panel"><div id="tCbtDonePanel"></div></div>
+      <div data-panel-td="exam" class="panel"><div id="tExamPanel"></div></div>
       <div data-panel-td="past" class="panel"><div id="teacherPastPanel"></div></div>
       <div data-panel-td="profile" class="panel">
         <h2 style="margin-bottom:14px">Staff Profile</h2>
@@ -9333,7 +9335,9 @@ const R5_CSS = `
 .xf-grid .field{ margin:0; }
 .fee-tbl input, .fee-tbl select{ padding:6px; border:1px solid #ccc; border-radius:4px; max-width:150px; }
 .cbt-q{ border:1px solid var(--border); border-radius:10px; padding:12px; margin:10px 0; background:var(--surface); }
-.cbt-opt{ display:flex; gap:8px; align-items:center; padding:6px 8px; border:1px solid var(--border); border-radius:8px; margin:5px 0; cursor:pointer; }
+.cbt-opt{ display:flex; gap:10px; align-items:center; justify-content:space-between; text-align:left; padding:8px 10px; border:1px solid var(--border); border-radius:8px; margin:5px 0; cursor:pointer; }
+.cbt-opt .cbt-t{ flex:1; text-align:left; }
+.cbt-opt input[type=radio]{ width:22px !important; height:22px; min-width:22px; margin:0; flex:0 0 auto; padding:0; }
 .cbt-opt.ok{ background:rgba(16,185,129,.14); border-color:#10B981; } .cbt-opt.bad{ background:rgba(239,68,68,.12); border-color:#EF4444; }
 .new-dot{ background:#C62828; color:#fff; border-radius:10px; padding:1px 7px; font-size:.72rem; margin-left:6px; }
 .rc-qr{ display:flex; align-items:center; gap:10px; justify-content:flex-end; margin-top:8px; font-size:.68rem; color:#475569; }
@@ -9440,7 +9444,7 @@ function gateParent(){
   document.querySelectorAll('button[onclick^="printReportCard"]').forEach(b => { if(b.closest('.dash-topbar')) b.style.display = 'none'; });
 }
 
-/* ---------- BOOK LIST ---------- */
+/* ---------- BOOK LIST (for the class pupils are moving UP to) ---------- */
 const BOOK_TYPES = ['Textbook','Notebook','Pen','Pencil','Eraser','Other materials'];
 const Books = {
   map: lsGet('mjl_books5', {}),
@@ -9448,11 +9452,12 @@ const Books = {
   async set(cls, data){ if(cloudOn()){ const r = await Cloud.rpc('portal_books_set', { p_token: Cloud.token, p_cls: cls, p_data: data }); if(!r.ok) throw new Error(r.reason || 'Could not save'); } this.map[cls] = data; lsSet('mjl_books5', this.map); }
 };
 let bookDraft = null;
+function bookTarget(cls){ const n = nextClassOf(cls); return n === 'Graduated' ? '' : n; }
 function bookTableHTML(cls, d, edit){
   const items = (d && d.items) || [];
   if(!edit){
     if(!items.length) return '<div class="empty">No book list has been posted for ' + _enc(cls) + ' yet.</div>';
-    return `<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Get it from</th><th>Quantity</th><th>When</th></tr></thead><tbody>${items.map((b, i) => `<tr><td>${i + 1}</td><td>${_enc(b.type)}</td><td><b>${_enc(b.name)}</b></td><td>${_enc(b.source)}</td><td>${_enc(b.qty)}</td><td>${b.third ? '<span class="pill pending">Given in 3rd term (before the new session)</span>' : 'Start of term'}</td></tr>`).join('')}</tbody></table></div>${d.note ? `<p class="small-muted" style="margin-top:8px"><b>Note:</b> ${_enc(d.note)}</p>` : ''}`;
+    return `<div class="bk-wrap" style="overflow-x:auto"><table><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Get it from</th><th>Quantity</th><th>When</th></tr></thead><tbody>${items.map((b, i) => `<tr><td>${i + 1}</td><td>${_enc(b.type)}</td><td><b>${_enc(b.name)}</b></td><td>${_enc(b.source)}</td><td>${_enc(b.qty)}</td><td>${b.third ? 'Given in 3rd term (before the new session)' : 'Start of term'}</td></tr>`).join('')}</tbody></table></div>${d.note ? `<p class="small-muted" style="margin-top:8px"><b>Note:</b> ${_enc(d.note)}</p>` : ''}`;
   }
   return `<div style="overflow-x:auto"><table style="min-width:760px"><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Source</th><th>Qty</th><th>3rd term only</th><th></th></tr></thead><tbody>${items.map((b, i) => `<tr data-bi="${i}">
     <td>${i + 1}</td><td><select data-bk="type">${BOOK_TYPES.map(t => `<option ${t === b.type ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
@@ -9465,34 +9470,39 @@ function bookTableHTML(cls, d, edit){
 function renderTeacherBooks(){
   const el = _el('tBooksPanel'); if(!el) return;
   const isAdm = session && session.role === 'staff-admin'; const mine = teacherClass();
-  const cls = (bookDraft && bookDraft.cls) || mine || 'Primary 4';
-  if(!bookDraft || bookDraft.cls !== cls){ const src = Books.map[cls] || { items: [], note: '' }; bookDraft = { cls, items: JSON.parse(JSON.stringify(src.items || [])), note: src.note || '' }; }
-  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Book List</h2><p class="small-muted" style="margin-bottom:10px">Write the books and materials pupils must bring. Pupils see this list under <b>Book List</b> and can print it.</p>
-  <div class="field" style="max-width:260px"><label>Class</label><select id="bkCls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  const cls = (bookDraft && bookDraft.cls) || (mine ? bookTarget(mine) : '') || 'Primary 5';
+  if(mine && !isAdm && !bookTarget(mine)){ el.innerHTML = '<h2>📖 Book List</h2><div class="empty">Your class graduates, so there is no next class to prepare a book list for.</div>'; return; }
+  if(!bookDraft || bookDraft.cls !== cls){ const src = Books.map[cls] || { items: [], note: '' }; bookDraft = { cls, items: JSON.parse(JSON.stringify(src.items || [])), note: src.note || '', session: src.session || nextSession(settings.session) }; }
+  el.innerHTML = `<h2 style="margin-bottom:4px">📖 Book List</h2><p class="small-muted" style="margin-bottom:10px">This list is for the <b>next class</b> your pupils are moving up to${mine ? ` (${_enc(mine)} → <b>${_enc(cls)}</b>)` : ''}. Pupils see it under <b>Book List</b> and can print it. Tick "3rd term only" for books given in the promotion term.</p>
+  <div class="grid-2"><div class="field"><label>Class they are moving to</label><select id="bkCls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  <div class="field"><label>Upcoming session (shown on the printed list)</label><input id="bkSess" value="${_enc(bookDraft.session)}" placeholder="2027/2028"></div></div>
   <div id="bkTable">${bookTableHTML(cls, bookDraft, true)}</div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button class="btn btn-ghost btn-sm" id="bkAdd">➕ Add a row</button><button class="btn btn-gold btn-sm" id="bkSave">💾 Save book list</button><button class="btn btn-navy btn-sm" id="bkPrint">🖨 Print</button></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button class="btn btn-ghost btn-sm" id="bkAdd">➕ Add a row</button><button class="btn btn-gold btn-sm" id="bkSave">💾 Save book list</button><button class="btn btn-navy btn-sm" id="bkPrint">🖨 Print book list</button></div>
   <div class="field"><label>Note for parents (optional)</label><textarea id="bkNote" placeholder="e.g. Items marked '3rd term only' are given before the new session begins.">${_enc(bookDraft.note)}</textarea></div>`;
-  _el('bkCls').onchange = e => { bookDraft = { cls: e.target.value, items: [], note: '' }; const s = Books.map[e.target.value]; if(s){ bookDraft.items = JSON.parse(JSON.stringify(s.items || [])); bookDraft.note = s.note || ''; } renderTeacherBooks(); };
+  _el('bkCls').onchange = e => { bookDraft = null; bookDraft = { cls: e.target.value, items: [], note: '', session: nextSession(settings.session) }; const s = Books.map[e.target.value]; if(s){ bookDraft.items = JSON.parse(JSON.stringify(s.items || [])); bookDraft.note = s.note || ''; bookDraft.session = s.session || bookDraft.session; } renderTeacherBooks(); };
   _el('bkAdd').onclick = () => { bookDraft.items.push({ type:'Textbook', name:'', source:'Bookshop', qty:1, third:false }); _el('bkTable').innerHTML = bookTableHTML(cls, bookDraft, true); };
   _el('bkNote').oninput = e => { bookDraft.note = e.target.value; };
+  _el('bkSess').oninput = e => { bookDraft.session = e.target.value; };
   _el('bkPrint').onclick = () => printBooks(cls, bookDraft);
   _el('bkSave').onclick = () => showModal({ title:'Are you sure?', message:`Save the book list for ${cls}?`, confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
-    try{ const items = bookDraft.items.filter(b => String(b.name).trim()); await Books.set(cls, { items, note: bookDraft.note }); bookDraft.items = items; Sound.playSuccess(); toast('Book list saved', 'success'); renderTeacherBooks(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
+    try{ const items = bookDraft.items.filter(b => String(b.name).trim()); await Books.set(cls, { items, note: bookDraft.note, session: bookDraft.session }); bookDraft.items = items; Sound.playSuccess(); toast('Book list saved', 'success'); renderTeacherBooks(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
 }
 document.addEventListener('input', e => { const t = e.target; if(!t.dataset || !t.dataset.bk || !bookDraft) return; const tr = t.closest('tr'); const b = bookDraft.items[+tr.dataset.bi]; if(!b) return; b[t.dataset.bk] = t.type === 'checkbox' ? t.checked : t.value; });
 document.addEventListener('change', e => { const t = e.target; if(t.dataset && t.dataset.bk === 'third' && bookDraft){ const b = bookDraft.items[+t.closest('tr').dataset.bi]; if(b) b.third = t.checked; } });
 document.addEventListener('click', e => { const d = e.target.closest && e.target.closest('[data-bdel]'); if(!d || !bookDraft) return; bookDraft.items.splice(+d.dataset.bdel, 1); _el('bkTable').innerHTML = bookTableHTML(bookDraft.cls, bookDraft, true); });
 function renderPupilBooks(){
-  const el = _el('sBooksPanel'); if(!el) return; const st = session && session.student; const cls = st ? st.cls : '';
+  const el = _el('sBooksPanel'); if(!el) return; const st = session && session.student; const cls = st ? bookTarget(st.cls) : '';
+  if(!cls){ el.innerHTML = '<h2>📚 Book List</h2><div class="empty">No book list for your class.</div>'; return; }
   const d = Books.map[cls];
-  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Book List — ${_enc(cls)}</h2><p class="small-muted" style="margin-bottom:10px">Books and materials to get, and where to get them.</p>${bookTableHTML(cls, d, false)}${d && d.items && d.items.length ? `<div style="margin-top:10px"><button class="btn btn-navy btn-sm" id="pbPrint">🖨 Print book list</button></div>` : ''}`;
+  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Book List — ${_enc(cls)} <span class="small-muted" style="font-size:.9rem">(${_enc((d && d.session) || nextSession(settings.session))})</span></h2><p class="small-muted" style="margin-bottom:10px">Books and materials for the class you are moving up to, and where to get them.</p>${bookTableHTML(cls, d, false)}${d && d.items && d.items.length ? `<div style="margin-top:10px"><button class="btn btn-navy btn-sm" id="pbPrint">🖨 Print book list</button></div>` : ''}`;
   const b = _el('pbPrint'); if(b) b.onclick = () => printBooks(cls, d);
 }
 function printBooks(cls, d){
-  const logo = settings.logoDataUrl || 'assets/school_logo.png', items = (d && d.items) || [];
-  if(!items.length){ toast('The book list is empty.', 'error'); return; }
-  _el('printReportCard').innerHTML = `<div class="rc-page"><div class="rc-top"><img class="rc-logo" src="${logo}" alt=""><div class="rc-schoolinfo"><h1>${_enc((settings.schoolName || 'Mojuli Christ Glorious School').toUpperCase())}</h1><div class="rc-addr">${_enc(settings.address || '')}</div><div class="rc-report-title">Book &amp; Materials List — ${_enc(cls)} — ${_enc(settings.session || '')} ${_enc(settings.term || '')}</div></div></div>${bookTableHTML(cls, d, false)}</div>`;
-  setTimeout(() => window.print(), 120);
+  const logo = settings.logoDataUrl || 'assets/school_logo.png', items = (d && d.items || []).filter(b => String(b.name || '').trim());
+  if(!items.length){ toast('Add at least one book first.', 'error'); return; }
+  const d2 = Object.assign({}, d, { items });
+  _el('printReportCard').innerHTML = `<div class="rc-page"><div class="rc-top"><img class="rc-logo" src="${logo}" alt=""><div class="rc-schoolinfo"><h1>${_enc((settings.schoolName || 'Mojuli Christ Glorious School').toUpperCase())}</h1><div class="rc-addr">${_enc(settings.address || '')}</div><div class="rc-report-title">Book &amp; Materials List — ${_enc(cls)} — ${_enc((d && d.session) || nextSession(settings.session))}</div></div></div>${bookTableHTML(cls, d2, false).replace(/overflow-x:auto/g, '')}</div>`;
+  setTimeout(() => window.print(), 150);
 }
 
 /* ---------- CBT ---------- */
@@ -9524,7 +9534,7 @@ async function renderTeacherCbt(){
   const mine = teacherClass(), isAdm = session && session.role === 'staff-admin';
   list = list.filter(t => isAdm || !mine || t.cls === mine || true);
   el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted">Set multiple-choice questions. Pupils answer on their portal and are marked automatically.</p></div><button class="btn btn-gold btn-sm" id="cbtNew">➕ Create new test</button></div>
-  ${list.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Title</th><th>Class</th><th>Type</th><th>Questions</th><th>Finished</th><th></th></tr></thead><tbody>${list.map(t => `<tr><td><b>${_enc(t.subject)}</b></td><td>${_enc(t.title)}</td><td>${_enc(t.cls)}</td><td>${_enc(t.kind)}</td><td>${t.count}</td><td>${t.done}${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</td><td style="white-space:nowrap"><button class="btn btn-sm btn-ghost" data-cbtedit="${_enc(t.id)}">✏️ Edit</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-cbtdel="${_enc(t.id)}">🗑</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No test has been created yet.</div>'}`;
+  ${list.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Title</th><th>Class</th><th>Type</th><th>Questions</th><th>Finished</th><th></th></tr></thead><tbody>${list.map(t => `<tr><td><b>${_enc(t.subject)}</b></td><td>${_enc(t.title)}</td><td>${_enc(t.cls)}</td><td>${_enc(t.kind)}</td><td>${t.count}</td><td>${t.done}${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</td><td style="white-space:nowrap">${t.done ? '' : `<button class="btn btn-sm btn-ghost" data-cbtedit="${_enc(t.id)}">✏️ Edit</button> `}<button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-cbtdel="${_enc(t.id)}">🗑</button> <button class="btn btn-sm ${t.published ? 'btn-gold' : 'btn-ghost'}" data-cbtpub="${_enc(t.id)}|${t.published ? 0 : 1}">${t.published ? '👁 Visible to pupils — hide' : '🙈 Hidden — allow view'}</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No test has been created yet.</div>'}`;
   _el('cbtNew').onclick = () => { cbtEdit = { cls: mine || 'Primary 4', subject: 'Mathematics', kind: 'Test', title: '', questions: [blankQ()] }; renderTeacherCbt(); };
 }
 function renderCbtEditor(el){
@@ -9547,7 +9557,7 @@ function renderCbtEditor(el){
     for(let i = 0; i < t.questions.length; i++){ const q = t.questions[i];
       if(!q.q.trim() || !q.a.trim() || !q.b.trim()){ toast('Question ' + (i + 1) + ' needs the question and at least options A and B.', 'error'); return; }
       if(!q[q.correct.toLowerCase()].trim()){ toast('Question ' + (i + 1) + ': the correct answer option is empty.', 'error'); return; } }
-    showModal({ title:'Are you sure?', message: t.id ? 'Saving changes will clear pupils\' earlier submissions for this test. Continue?' : 'Save this test and show it to ' + t.cls + '?', confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
+    showModal({ title:'Are you sure?', message: t.id ? 'Save your changes to this test?' : 'Save this test and show it to ' + t.cls + '?', confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
       try{ const r = await Cloud.rpc('portal_cbt_save', { p_token: Cloud.token, p_test: t }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
         Sound.playSuccess(); toast('Test saved', 'success'); cbtEdit = null; renderTeacherCbt(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
   };
@@ -9573,7 +9583,7 @@ async function renderTeacherCbtDone(quiet){
   window._cbtFresh = fresh; if(quiet || !el) return;
   const subs = ['All'].concat(Array.from(new Set(list.map(t => t.subject))));
   const shown = list.filter(t => cbtDoneSubject === 'All' || t.subject === cbtDoneSubject);
-  el.innerHTML = `<h2 style="margin-bottom:4px">✅ Finished CBT</h2><p class="small-muted" style="margin-bottom:10px">Pick a subject to see the pupils who have finished. Tap a pupil to see the paper and result.</p>
+  el.innerHTML = `${releaseCardHTML()}<h2 style="margin-bottom:4px">✅ Finished CBT</h2><p class="small-muted" style="margin-bottom:10px">Pick a subject to see the pupils who have finished. Tap a pupil to see the paper and result.</p>
   <div class="field" style="max-width:280px"><label>Subject</label><select id="cbtDoneSub">${subs.map(s => `<option ${s === cbtDoneSubject ? 'selected' : ''}>${_enc(s)}</option>`).join('')}</select></div>
   ${shown.length ? shown.map(t => `<div class="card" style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${_enc(t.subject)} — ${_enc(t.title || t.kind)} <span class="small-muted">(${_enc(t.cls)})</span></b><span>${t.done} finished${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</span></div><div class="cbtres" data-tid="${_enc(t.id)}"><button class="btn btn-sm btn-navy" style="margin-top:8px" data-cbtshow="${_enc(t.id)}">👁 Show pupils</button></div></div>`).join('') : '<div class="empty">No tests for this subject.</div>'}`;
   _el('cbtDoneSub').onchange = e => { cbtDoneSubject = e.target.value; renderTeacherCbtDone(); };
@@ -9598,21 +9608,22 @@ async function renderPupilCbt(){
   const err = cbtNeed(); if(err){ el.innerHTML = `<h2>📝 CBT Test / Exam</h2><div class="empty">${err}</div>`; return; }
   if(cbtTaking){ return renderCbtTake(el); }
   let list = []; try{ list = await Cloud.rpc('portal_cbt_list', { p_token: Cloud.token }) || []; }catch(e){ el.innerHTML = '<div class="empty">❌ ' + _enc(e.message) + '</div>'; return; }
-  el.innerHTML = `<h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted" style="margin-bottom:10px">Answer the questions on the screen. You can submit each test only once, and you will see your score and the corrections straight away.</p>
+  const st = session && session.student, rel = st && Rel.is(st.cls);
+  el.innerHTML = `<h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted" style="margin-bottom:10px">You can submit each test only once. Your score and corrections appear here when your teacher releases the results.</p>
   ${list.length ? list.map(t => `<div class="card" style="margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>${_enc(t.subject)}</b> — ${_enc(t.title || t.kind)}<div class="small-muted">${_enc(t.kind)} · ${t.count} questions · ${_enc(t.at)}</div></div>
-    ${t.score != null ? `<div><span class="pill accepted">Score ${t.score}/${t.total}</span> <button class="btn btn-sm btn-navy" data-cbtmine="${_enc(t.id)}">View paper</button></div>` : `<button class="btn btn-sm btn-gold" data-cbtstart="${_enc(t.id)}">▶ Start</button>`}</div>`).join('') : '<div class="empty">No CBT test is available for your class yet.</div>'}`;
+    ${t.done ? `<div><span class="pill accepted">✔ Done · ${_enc(t.doneAt)}</span> ${rel && t.score != null ? `<span class="pill review">Score ${t.score}/${t.total}</span> <button class="btn btn-sm btn-navy" data-cbtmine="${_enc(t.id)}">View paper</button>` : '<span class="small-muted">Result has not been finalized yet.</span>'}</div>` : `<button class="btn btn-sm btn-gold" data-cbtstart="${_enc(t.id)}">▶ Start</button>`}</div>`).join('') : '<div class="empty">No CBT test is open for your class yet.</div>'}`;
 }
 function renderCbtTake(el){
   const t = cbtTaking;
   el.innerHTML = `<h3>${_enc(t.subject)} — ${_enc(t.title || t.kind)}</h3><p class="small-muted">Choose one answer for each question, then press Submit.</p>
-  ${t.questions.map((q, i) => `<div class="cbt-q"><b>${i + 1}. ${_enc(q.q)}</b>${LET.filter(l => q[l.toLowerCase()]).map(l => `<label class="cbt-opt"><input type="radio" name="cq${i}" value="${l}" ${t._a[i] === l ? 'checked' : ''}> <b>${l}.</b> ${_enc(q[l.toLowerCase()])}</label>`).join('')}</div>`).join('')}
+  ${t.questions.map((q, i) => `<div class="cbt-q"><b>${i + 1}. ${_enc(q.q)}</b>${LET.filter(l => q[l.toLowerCase()]).map(l => `<label class="cbt-opt"><span class="cbt-t"><b>${l}.</b> ${_enc(q[l.toLowerCase()])}</span><input type="radio" name="cq${i}" value="${l}" ${t._a[i] === l ? 'checked' : ''}></label>`).join('')}</div>`).join('')}
   <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-gold" id="cbtSubmit">✅ Submit answers</button><button class="btn btn-ghost" id="cbtLeave">Leave</button></div>`;
   el.onchange = e => { const m = /^cq(\d+)$/.exec(e.target.name || ''); if(m) t._a[+m[1]] = e.target.value; };
   _el('cbtLeave').onclick = () => { cbtTaking = null; renderPupilCbt(); };
   _el('cbtSubmit').onclick = () => { const n = t.questions.filter((q, i) => !t._a[i]).length;
     showModal({ title:'Are you sure?', message: n ? `${n} question(s) are not answered. Submit anyway? You cannot retake it.` : 'Submit your answers now? You cannot retake it.', confirmText:'Yes, submit', cancelText:'Not yet', onConfirm: async () => {
       try{ const r = await Cloud.rpc('portal_cbt_submit', { p_token: Cloud.token, p_id: t.id, p_answers: t._a }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
-        cbtTaking = null; Sound.playSuccess(); el.onchange = null; el.innerHTML = paperHTML(r.test, r.answers, r.score, r.total, '') + '<button class="btn btn-navy btn-sm" id="cbtBack">← Back to tests</button>'; _el('cbtBack').onclick = renderPupilCbt; }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+        cbtTaking = null; Sound.playSuccess(); el.onchange = null; el.innerHTML = `<div class="pay-lock" style="border-color:#10B981;background:rgba(16,185,129,.07)"><div style="font-size:2.4rem">✅</div><h3 style="color:#047857">Submitted — ${_enc(r.at)}</h3><p>Your answers have been received. Your result will show here when your teacher releases the results.</p></div><div style="text-align:center"><button class="btn btn-navy btn-sm" id="cbtBack">← Back to tests</button></div>`; _el('cbtBack').onclick = renderPupilCbt; }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
 }
 document.addEventListener('click', async e => {
   const b = e.target.closest && e.target.closest('[data-cbtstart],[data-cbtmine]'); if(!b) return;
@@ -9641,7 +9652,7 @@ function fitPrint(){
     try{
       const m = /Percentage:<\/b>\s*(\d+)%/.exec(h); const pct = m ? m[1] + '%' : '';
       const txt = `${settings.schoolName || 'Mojuli Christ Glorious School'} | ${student.name} | ID ${student.id} | ${student.cls} | ${student.session} ${student.term}${pct ? ' | ' + pct : ''}`;
-      const qr = `<div class="rc-qr"><div style="text-align:right">Scan to read this result summary.<br>${_enc(student.name)} · ${_enc(student.id)}</div>${mjlQRsvg(txt, 84)}</div>`;
+      const qr = `<div class="rc-qr"><div style="text-align:right">Scan to open the Pupil / Student Login portal.<br>${_enc(student.name)} · ${_enc(student.id)}</div>${mjlQRsvg(location.href.split('#')[0].split('?')[0] + '#student-login', 84)}</div>`;
       const i = h.lastIndexOf('</div>'); if(i > 0) h = h.slice(0, i) + qr + h.slice(i);
     }catch(e){ console.warn(e); }
     return h;
@@ -9678,14 +9689,159 @@ function readXF(){ const r = {}; document.querySelectorAll('[data-xf]').forEach(
   Cloud.rpc = function(name, params){ if(name === 'portal_enroll_student' && params && params.p_pupil && _el('addStudentDirectForm')) Object.assign(params.p_pupil, readXF()); return _rpc(name, params); };
 }
 
+/* ---------- RESULT RELEASE (teacher turns on the general result view) ---------- */
+const Rel = {
+  map: lsGet('mjl_rel6', {}),
+  label(){ return (settings.session || '') + ' ' + (settings.term || ''); },
+  is(cls){ return this.map[cls] === this.label(); },
+  async load(){ if(!cloudOn()) return false; try{ const m = await Cloud.rpc('portal_release_get', { p_token: Cloud.token }) || {}; const ch = JSON.stringify(m) !== JSON.stringify(this.map); this.map = m; lsSet('mjl_rel6', m); return ch; }catch(e){ return false; } },
+  async set(cls, on){ const label = this.label(); if(cloudOn()){ const r = await Cloud.rpc('portal_release_set', { p_token: Cloud.token, p_cls: cls, p_label: label, p_on: on }); if(!r.ok) throw new Error(r.reason || 'Could not save'); } if(on) this.map[cls] = label; else delete this.map[cls]; lsSet('mjl_rel6', this.map); }
+};
+function finalHTML(){
+  return `<div class="pay-lock" style="border-color:#B8860B;background:rgba(184,134,11,.07)"><div style="font-size:2.6rem">⏳</div><h3 style="color:#B8860B">Result has not been finalized yet</h3><p>Your teacher will release this term's results soon. Results of past terms are in <b>Past Results</b>.</p></div>`;
+}
+function relClass(){ return teacherClass() || window._relCls || 'Primary 4'; }
+function releaseCardHTML(){
+  const mine = teacherClass(), cls = relClass(), on = Rel.is(cls);
+  return `<div class="card relbox" style="margin-bottom:14px;border:2px solid ${on ? '#10B981' : '#B8860B'}"><b>📢 Result release — ${_enc(Rel.label())}</b>
+  <p class="small-muted" style="margin:4px 0 8px">${on ? 'Results are RELEASED. Pupils who have cleared their fees can see their performance, academic results, attendance and CBT papers.' : 'Results are NOT released. Pupils see "Result has not been finalized yet".'}</p>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${mine ? `<b>${_enc(cls)}</b>` : `<select id="relCls">${ALL_CLASS_NAMES.map(c => `<option ${c === cls ? 'selected' : ''}>${c}</option>`).join('')}</select>`}
+  <button class="btn btn-sm ${on ? 'btn-ghost' : 'btn-gold'}" data-relset="${on ? 'off' : 'on'}">${on ? '🔒 Hide results again' : '📢 Allow general result view'}</button></div></div>`;
+}
+function placeRelBoxes(){
+  document.querySelectorAll('.relbox').forEach(b => { b.outerHTML = releaseCardHTML(); });
+  const cp = document.querySelector('[data-panel-td="classes"]');
+  if(cp && !cp.querySelector('.relbox')) cp.insertAdjacentHTML('afterbegin', releaseCardHTML());
+}
+document.addEventListener('change', e => { if(e.target.id === 'relCls'){ window._relCls = e.target.value; placeRelBoxes(); } });
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-relset]'); if(!b) return; const on = b.dataset.relset === 'on', cls = relClass();
+  showModal({ title:'Are you sure?', message: on ? `Let ${cls} pupils (who have cleared their fees) see their results, attendance and CBT papers for ${Rel.label()}?` : `Hide results from ${cls} again?`, confirmText:'Yes', cancelText:'Cancel',
+    onConfirm: async () => { try{ await Rel.set(cls, on); Sound.playSuccess(); toast(on ? 'Results released' : 'Results hidden', 'success'); placeRelBoxes(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
+});
+
+/* ---------- gates ---------- */
+function lockHTML(fs, stu){
+  return `<div class="pay-lock"><div style="font-size:2.6rem">🔒</div><h3>Payment not cleared yet</h3>
+    <p>School fees payment is incomplete${!stu && fs && fs.owed ? ` (outstanding <b>${naira(fs.owed)}</b>)` : ''}. This section opens as soon as the school marks the fees as cleared.</p>
+    <p class="small-muted">You can still use Homework, Timetable, CBT Test / Exam, Bulletins, School Calendar, Book List and the Pupil Profile.</p></div>`;
+}
+function gateStudent(){
+  const st = session && session.student; if(!st) return; const fs = feeState(myPid(), st.cls);
+  const ALLOW = ['homework','timetable','announcements','calendar','profile','books','cbt'];
+  if(!fs.cleared){
+    document.querySelectorAll('[data-panel-sd]').forEach(p => { if(!ALLOW.includes(p.dataset.panelSd)){ p.classList.add('locked'); if(!p.querySelector('.pay-lock')) p.insertAdjacentHTML('afterbegin', lockHTML(fs, true)); } });
+  } else if(!Rel.is(st.cls)){
+    ['overview','results','attendance'].forEach(k => { const p = document.querySelector('[data-panel-sd="' + k + '"]'); if(p){ p.classList.add('locked'); if(!p.querySelector('.pay-lock')) p.insertAdjacentHTML('afterbegin', finalHTML()); } });
+  }
+  if(!fs.cleared || !Rel.is(st.cls)) document.querySelectorAll('.dash-shell button[onclick*="printReportCard"]').forEach(b => b.remove());
+}
+function gateParent(){
+  const ch = getParentChildren(); const c = ch[activeChild] || ch[0]; if(!c) return; const fs = feeState(c.id, c.cls);
+  const html = !fs.cleared ? lockHTML(fs, false) : (!Rel.is(c.cls) ? finalHTML() : ''); if(!html) return;
+  document.querySelectorAll('h3').forEach(h => {
+    const t = h.textContent.trim();
+    if(t === 'Term Academic Performance'){ const col = h.parentElement.parentElement; col.innerHTML = html; }
+    if(t === 'Term Attendance Summary'){ const sc = h.nextElementSibling; if(sc && sc.classList.contains('stat-cards')) sc.remove(); h.insertAdjacentHTML('afterend', html); }
+  });
+  document.querySelectorAll('button[onclick^="printReportCard"]').forEach(b => { if(b.closest('.dash-topbar')) b.style.display = 'none'; });
+}
+
+/* ---------- TYPE EXAM (written exam paper for printing; pupils never see it) ---------- */
+const Exams = { list(){ return lsGet('mjl_exams6', []); }, save(l){ lsSet('mjl_exams6', l); } };
+let exDraft = null;
+function newExam(){
+  return { id:'EX' + Date.now(), cls: teacherClass() || 'Primary 5', subject:'', title:((settings.term || 'First Term') + ' Examination').toUpperCase(),
+    address: String(settings.address || '').replace(/<br\s*\/?>|\n/g, ', ').toUpperCase(), total:'40', objNote:'Part A: Objectives', thNote:'Part B: Theory',
+    obj:[{ q:'', a:'', b:'', c:'', d:'' }], theory:[{ q:'', marks:'' }] };
+}
+function examHTML(x){
+  const logo = settings.logoDataUrl || 'assets/school_logo.png', school = String(settings.schoolName || 'Mojuli Christ Glorious School').toUpperCase();
+  const opts = o => ['a','b','c','d'].filter(k => String(o[k] || '').trim()).map(k => `(${k}) ${_enc(o[k])}`).join(' &nbsp; ');
+  return `<div class="ex-page">
+    <div class="ex-head"><img src="${logo}" alt=""><div class="ex-mid"><div class="ex-school">${_enc(school)}</div><div class="ex-addr">${_enc(x.address)}</div><div class="ex-title">${_enc(x.title)}</div></div>
+      <div class="ex-score"><div class="ex-circle"><span>&nbsp;</span><hr><span>${_enc(x.total || '')}</span></div></div></div>
+    <div class="ex-row"><span><b>CLASS :</b> ${_enc(String(x.cls).toUpperCase())}</span><span><b>SUBJECT:</b> ${_enc(String(x.subject).toUpperCase())}</span></div>
+    <div class="ex-name"><b>NAME:</b> <span class="ex-line"></span></div>
+    ${x.obj.some(o => String(o.q).trim()) ? `<h4>${_enc(x.objNote)}</h4><ol class="ex-ol">${x.obj.filter(o => String(o.q).trim()).map(o => `<li>${_enc(o.q)} ${opts(o)}</li>`).join('')}</ol>` : ''}
+    ${x.theory.some(t => String(t.q).trim()) ? `<h4>${_enc(x.thNote)}</h4><ol class="ex-ol">${x.theory.filter(t => String(t.q).trim()).map(t => `<li>${_enc(t.q)} ${t.marks ? `<b>(${_enc(t.marks)} marks)</b>` : ''}</li>`).join('')}</ol><div class="ex-ans">Answer</div>` : ''}
+  </div>`;
+}
+function renderTeacherExam(){
+  const el = _el('tExamPanel'); if(!el) return;
+  if(!exDraft){
+    const saved = Exams.list();
+    el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">✍️ Type Exam</h2><p class="small-muted">Type a written exam (objective + theory) and print it. Pupils do not see this section. Saved on this device.</p></div><button class="btn btn-gold btn-sm" id="exNew">➕ New exam paper</button></div>
+    ${saved.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Class</th><th>Title</th><th></th></tr></thead><tbody>${saved.map(x => `<tr><td><b>${_enc(x.subject)}</b></td><td>${_enc(x.cls)}</td><td>${_enc(x.title)}</td><td style="white-space:nowrap"><button class="btn btn-sm btn-navy" data-exopen="${_enc(x.id)}">✏️ Open</button> <button class="btn btn-sm btn-ghost" data-exprint="${_enc(x.id)}">🖨 Print</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-exdel="${_enc(x.id)}">🗑</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No exam paper saved yet.</div>'}`;
+    _el('exNew').onclick = () => { exDraft = newExam(); renderTeacherExam(); }; return;
+  }
+  const x = exDraft, mine = teacherClass(), isAdm = session && session.role === 'staff-admin';
+  const f = (k, l, ph) => `<div class="field"><label>${l}</label><input data-exf="${k}" value="${_enc(x[k])}" placeholder="${ph || ''}"></div>`;
+  el.innerHTML = `<h2 style="margin-bottom:8px">✍️ Exam paper</h2>
+  <div class="grid-2"><div class="field"><label>Class</label><select data-exf="cls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === x.cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  <div class="field"><label>Subject</label><select data-exf="subject"><option value="">Select subject</option>${CBT_SUBJECTS.map(c => `<option ${c === x.subject ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div>
+  <div class="grid-2">${f('title', 'Exam title', 'SECOND TERM EXAMINATION')}${f('total', 'Total score box (e.g. 40)', '40')}</div>
+  ${f('address', 'Address line under the school name')}
+  <div class="grid-2">${f('objNote', 'Objective section heading')}${f('thNote', 'Theory section heading')}</div>
+  <h4 style="margin:10px 0 4px">Objective questions</h4>
+  ${x.obj.map((o, i) => `<div class="cbt-q"><div style="display:flex;justify-content:space-between"><b>${i + 1}.</b><button class="btn btn-sm btn-ghost" data-exodel="${i}">🗑</button></div>
+    <div class="field"><textarea data-exo="${i}" data-k="q" placeholder="Question (use ________ for a blank)">${_enc(o.q)}</textarea></div>
+    <div class="xf-grid">${['a','b','c','d'].map(k => `<div class="field"><label>(${k})</label><input data-exo="${i}" data-k="${k}" value="${_enc(o[k])}"></div>`).join('')}</div></div>`).join('')}
+  <button class="btn btn-ghost btn-sm" id="exAddO">➕ Add objective question</button>
+  <h4 style="margin:14px 0 4px">Theory questions</h4>
+  ${x.theory.map((t, i) => `<div class="cbt-q"><div style="display:flex;justify-content:space-between"><b>${i + 1}.</b><button class="btn btn-sm btn-ghost" data-extdel="${i}">🗑</button></div>
+    <div class="field"><textarea data-ext="${i}" data-k="q" placeholder="Theory question">${_enc(t.q)}</textarea></div>
+    <div class="field" style="max-width:160px"><label>Marks</label><input data-ext="${i}" data-k="marks" value="${_enc(t.marks)}" placeholder="10"></div></div>`).join('')}
+  <button class="btn btn-ghost btn-sm" id="exAddT">➕ Add theory question</button>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-gold btn-sm" id="exSave">💾 Save</button><button class="btn btn-navy btn-sm" id="exPrint">🖨 Print exam paper</button><button class="btn btn-ghost btn-sm" id="exBack">← Back</button></div>`;
+  _el('exAddO').onclick = () => { x.obj.push({ q:'', a:'', b:'', c:'', d:'' }); renderTeacherExam(); };
+  _el('exAddT').onclick = () => { x.theory.push({ q:'', marks:'' }); renderTeacherExam(); };
+  _el('exBack').onclick = () => { exDraft = null; renderTeacherExam(); };
+  _el('exPrint').onclick = () => printExam(x);
+  _el('exSave').onclick = () => { const l = Exams.list().filter(e => e.id !== x.id); l.unshift(JSON.parse(JSON.stringify(x))); Exams.save(l); Sound.playSuccess(); toast('Exam paper saved', 'success'); };
+}
+function printExam(x){ if(!String(x.subject).trim()){ toast('Pick the subject first.', 'error'); return; } _el('printReportCard').innerHTML = examHTML(x); setTimeout(() => window.print(), 150); }
+document.addEventListener('input', e => { const t = e.target; if(!exDraft || !t.dataset) return;
+  if(t.dataset.exf) exDraft[t.dataset.exf] = t.value;
+  if(t.dataset.exo !== undefined) exDraft.obj[+t.dataset.exo][t.dataset.k] = t.value;
+  if(t.dataset.ext !== undefined) exDraft.theory[+t.dataset.ext][t.dataset.k] = t.value; });
+document.addEventListener('change', e => { const t = e.target; if(exDraft && t.dataset && t.dataset.exf) exDraft[t.dataset.exf] = t.value; });
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-exopen],[data-exprint],[data-exdel],[data-exodel],[data-extdel]'); if(!b) return;
+  const find = id => Exams.list().find(x => x.id === id);
+  if(b.dataset.exopen){ exDraft = JSON.parse(JSON.stringify(find(b.dataset.exopen))); renderTeacherExam(); }
+  else if(b.dataset.exprint){ printExam(find(b.dataset.exprint)); }
+  else if(b.dataset.exdel){ showModal({ title:'Are you sure?', message:'Delete this exam paper?', confirmText:'Yes, delete', cancelText:'Cancel', onConfirm: () => { Exams.save(Exams.list().filter(x => x.id !== b.dataset.exdel)); renderTeacherExam(); } }); }
+  else if(b.dataset.exodel !== undefined && exDraft && exDraft.obj.length > 1){ exDraft.obj.splice(+b.dataset.exodel, 1); renderTeacherExam(); }
+  else if(b.dataset.extdel !== undefined && exDraft && exDraft.theory.length > 1){ exDraft.theory.splice(+b.dataset.extdel, 1); renderTeacherExam(); }
+});
+{ const st = document.createElement('style'); st.textContent = `
+.ex-page{ font-family:Arial,Helvetica,sans-serif; color:#000; background:#fff; padding:6px 10px; font-size:13.5px; line-height:1.55; }
+.ex-head{ display:grid; grid-template-columns:90px 1fr 110px; align-items:center; gap:8px; margin-bottom:8px; }
+.ex-head img{ width:84px; height:84px; object-fit:contain; }
+.ex-mid{ text-align:center; } .ex-school{ font-weight:800; font-size:19px; } .ex-addr{ font-weight:700; font-size:14px; } .ex-title{ font-weight:800; font-size:15px; margin-top:4px; }
+.ex-circle{ width:96px; height:70px; border:2px solid #C62828; border-radius:50%; margin:0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#C62828; font-weight:700; }
+.ex-circle hr{ width:60%; border:0; border-top:2px solid #C62828; margin:2px 0; }
+.ex-row{ display:flex; justify-content:space-between; font-size:15px; margin:6px 0; }
+.ex-name{ margin-bottom:6px; } .ex-line{ display:inline-block; border-bottom:1.5px solid #000; width:60%; }
+.ex-page h4{ margin:14px 0 4px; font-size:15px; } .ex-ol{ margin:0; padding-left:26px; } .ex-ol li{ margin:3px 0; }
+.ex-ans{ margin:14px 0 0; text-decoration:underline; font-weight:700; }
+@media print{ .ex-page{ break-inside:auto; } }`; document.head.appendChild(st); }
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('[data-cbtpub]'); if(!b) return; const [id, v] = b.dataset.cbtpub.split('|');
+  try{ await Cloud.rpc('portal_cbt_set_published', { p_token: Cloud.token, p_id: id, p_pub: v === '1' }); toast(v === '1' ? 'Pupils can now see this test' : 'Test hidden from pupils', 'success'); renderTeacherCbt(); }catch(err){ toast('❌ ' + err.message, 'error'); }
+});
 /* ---------- wiring ---------- */
 document.addEventListener('click', e => {
-  const t = e.target.closest && e.target.closest('[data-tab-sd="cbt"],[data-tab-sd="books"],[data-tab-td="cbt"],[data-tab-td="cbtdone"]'); if(!t) return;
+  const t = e.target.closest && e.target.closest('[data-tab-sd="cbt"],[data-tab-sd="books"],[data-tab-td="cbt"],[data-tab-td="cbtdone"],[data-tab-td="exam"],[data-tab-td="books"]'); if(!t) return;
   setTimeout(() => { try{
-    if(t.dataset.tabSd === 'cbt'){ cbtTaking = cbtTaking; if(!cbtTaking) renderPupilCbt(); }
+    if(t.dataset.tabSd === 'cbt'){ if(!cbtTaking) renderPupilCbt(); }
     if(t.dataset.tabSd === 'books'){ Books.load().then(() => renderPupilBooks()); }
     if(t.dataset.tabTd === 'cbt' && !cbtEdit) renderTeacherCbt();
     if(t.dataset.tabTd === 'cbtdone') renderTeacherCbtDone();
+    if(t.dataset.tabTd === 'exam') renderTeacherExam();
+    if(t.dataset.tabTd === 'books') renderTeacherBooks();
   }catch(_){} }, 50);
 });
 const _ar7 = afterRender;
@@ -9694,12 +9850,13 @@ afterRender = function(id){
   try{
     if(id === 'primary-dashboard' || id === 'secondary-dashboard'){
       gateStudent(); renderPupilBooks(); renderPupilCbt();
-      Promise.all([Fees.load(), Books.load()]).then(r => { if(r[0]) go(id, true); else if(r[1]) renderPupilBooks(); });
+      Promise.all([Fees.load(), Books.load(), Rel.load()]).then(r => { if(r[0] || r[2]) go(id, true); else if(r[1]) renderPupilBooks(); });
     }
-    if(id === 'parent-portal'){ gateParent(); Fees.load().then(ch => { if(ch) go(id, true); }); }
+    if(id === 'parent-portal'){ gateParent(); Promise.all([Fees.load(), Rel.load()]).then(r => { if(r[0] || r[1]) go(id, true); }); }
     if(id === 'teacher-dashboard'){
-      renderTeacherBooks(); renderTeacherCbt(); renderTeacherCbtDone();
-      Books.load().then(ch => { if(ch) renderTeacherBooks(); });
+      renderTeacherBooks(); renderTeacherCbt(); renderTeacherCbtDone(); renderTeacherExam(); placeRelBoxes();
+      Rel.load().then(ch => { if(ch) placeRelBoxes(); });
+      Books.load().then(ch => { if(ch){ bookDraft = null; renderTeacherBooks(); } });
       clearInterval(window._cbtT); window._cbtT = setInterval(() => { if(_el('tCbtDonePanel')) renderTeacherCbtDone(true); else clearInterval(window._cbtT); }, 60000);
     }
     if(id === 'admin-dashboard'){ renderAdminFees(); Fees.load().then(() => renderAdminFees()); }
