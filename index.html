@@ -89,8 +89,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 html, body {
-  overflow-x: hidden;
-  overflow-x: clip;
+  overflow-x: auto;
   width: 100%;
 }
 body {
@@ -100,8 +99,7 @@ body {
   background-color: var(--bg-main);
   line-height: 1.6;
   transition: background-color var(--transition-smooth), color var(--transition-smooth);
-  overflow-x: hidden;
-  overflow-x: clip;
+  overflow-x: auto;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -1929,6 +1927,16 @@ body:has(.modal-overlay.open){ overflow: hidden; }
 .af-l{ width: 36%; background: #F1F5F9; font-weight: 700; }
 .af-fee{ border: 2px solid #C62828; background: #FEF2F2; color: #7F1D1D; padding: 12px 14px; border-radius: 6px; margin: 12px 0 14px; font-size: .88rem; line-height: 1.6; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 @media print{ .rc-page{ box-shadow: none; } .rc-watermark{ opacity: .09 !important; } }
+/* ===== Round 4 ===== */
+.dash-main, .panel, .card, .thread, .wrap, .grid-2 > *{ min-width: 0; }
+.dash-main{ overflow-x: auto; }
+.card, .thread, .panel, .table-wrap, #forumThreadList{ max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table{ max-width: none; }
+body.sec-off [data-go="student-login-secondary"], body.sec-off .level-btn[data-go="student-login-secondary"]{ display: none !important; }
+.tt-table{ border-collapse: collapse; width: 100%; min-width: 560px; }
+.tt-table th, .tt-table td{ border: 1px solid var(--border); padding: 6px 8px; font-size: .85rem; }
+.tt-table input{ width: 100%; min-width: 90px; padding: 6px 8px; font-size: .85rem; }
+img{ cursor: default; } table img, .zoomwrap img{ cursor: zoom-in; }
 </style>
 </head>
 <body>
@@ -3930,6 +3938,7 @@ function renderAssignedClassPanel() {
                 <td><span class="small-muted">${escapeHtml(p.admissionType || 'Direct / Walk-In Admission')}</span></td>
                 <td><span class="pill accepted">Enrolled</span></td>
                 <td style="white-space:nowrap">
+                  <button class="btn btn-sm btn-ghost" title="Edit pupil" onclick="showEditPupil('${p.id}')">✏️ Edit</button>
                   <button class="btn btn-sm btn-ghost" title="Enter Scores" onclick="switchTeacherPupil('${p.id}', 'primary'); document.querySelector('[data-tab-td=\\'results\\']')?.click();">📝 Grade</button>
                   <button class="btn btn-sm btn-navy" title="Print Report Card" onclick="printReportCardForPupil('${p.id}', 'primary')">🖨 Report</button>
                   <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" title="Remove Pupil" onclick="promptRemovePupilFromRoster('${p.id}')">✕</button>
@@ -4623,6 +4632,37 @@ registerView('admission', ()=>`
               </div>
             </fieldset>
 
+            <fieldset>
+              <legend>3. More details about the pupil</legend>
+              <div class="grid-2">
+                <div class="field"><label>State of Origin</label><input name="stateOfOrigin"></div>
+                <div class="field"><label>Religion</label><select name="religion"><option value="">Select</option><option>Christianity</option><option>Islam</option><option>Other</option></select></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>4. Father's Details</legend>
+              <div class="field"><label>Full names</label><input name="fName"></div>
+              <div class="field"><label>Contact address</label><input name="fAddress"></div>
+              <div class="grid-2">
+                <div class="field"><label>Phone number</label><input name="fPhone" type="tel"></div>
+                <div class="field"><label>Occupation</label><input name="fJob"></div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>5. Mother's Details</legend>
+              <div class="grid-2">
+                <div class="field"><label>Full names</label><input name="mName"></div>
+                <div class="field"><label>Other names</label><input name="mOther"></div>
+              </div>
+              <div class="field"><label>Contact address</label><input name="mAddress"></div>
+              <div class="grid-2">
+                <div class="field"><label>Phone number</label><input name="mPhone" type="tel"></div>
+                <div class="field"><label>Occupation</label><input name="mJob"></div>
+              </div>
+            </fieldset>
+
             <div class="note-box">
               <span>ℹ️</span>
               <div>
@@ -4958,6 +4998,10 @@ registerView('staff-login', ()=>`
                 <label>Telephone Number</label>
                 <input id="staffRegPhone" placeholder="08012345678">
               </div>
+              <div class="field">
+                <label>Gender *</label>
+                <select id="staffRegGender" required><option value="">-- Select --</option><option>Male</option><option>Female</option></select>
+              </div>
             </div>
 
             <div class="grid-2">
@@ -5132,9 +5176,10 @@ function studentDashboard(kind){
   return `
   <div class="dash-shell">
     <aside class="dash-side">
-      <div class="who">
-        <b>${s.name}</b>
-        <span>${s.cls} &bull; ${s.id}</span>
+      <div class="who" style="display:flex;align-items:center;gap:10px">
+        ${(() => { const ph = s.photoUrl || (classRoster.find(p => p.id === s.id) || {}).photoUrl; return `<div class="zoomwrap" style="width:48px;height:56px;border-radius:8px;overflow:hidden;border:2px solid rgba(255,255,255,.35);background:#1E3A6E;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700">${ph ? `<img src="${ph}" alt="" style="width:100%;height:100%;object-fit:cover">` : initialsFor(s.name)}</div>`; })()}
+        <div style="min-width:0"><b>${s.name}</b>
+        <span>${s.cls} &bull; ${s.id}</span></div>
       </div>
       <button class="tab active" data-tab-sd="overview">📊 Performance Overview</button>
       <button class="tab" data-tab-sd="results">📑 Academic Results</button>
@@ -5142,6 +5187,9 @@ function studentDashboard(kind){
       <button class="tab" data-tab-sd="homework">📝 Homework</button>
       ${extraTab}
       <button class="tab" data-tab-sd="timetable">⏰ Timetable</button>
+      <button class="tab" data-tab-sd="books">📚 Book List</button>
+      <button class="tab" data-tab-sd="cbt">📝 CBT Test / Exam</button>
+      <button class="tab" data-tab-sd="past">📚 Past Results</button>
       <button class="tab" data-tab-sd="announcements">📢 Bulletins</button>
       <button class="tab" data-tab-sd="calendar">📆 School Calendar</button>
       <button class="tab" data-tab-sd="profile">👤 Pupil Profile</button>
@@ -5354,6 +5402,9 @@ function studentDashboard(kind){
         </div>
       </div>
 
+      <div data-panel-sd="books" class="panel"><div id="sBooksPanel"></div></div>
+      <div data-panel-sd="cbt" class="panel"><div id="sCbtPanel"></div></div>
+      <div data-panel-sd="past" class="panel"><div id="pupilPastPanel"></div></div>
       <div data-panel-sd="announcements" class="panel">
         <h2 style="margin-bottom:14px">School Announcements</h2>
         <div class="list-simple">
@@ -5417,7 +5468,11 @@ registerView('teacher-dashboard', ()=>`
       <button class="tab" data-tab-td="results">📝 Enter Results</button>
       <button class="tab" data-tab-td="attendance">📅 Roll Call Attendance</button>
       <button class="tab" data-tab-td="homework">📚 Assignments</button>
+      <button class="tab" data-tab-td="books">📖 Book List</button>
+      <button class="tab" data-tab-td="cbt">📝 CBT Test / Exam</button>
+      <button class="tab" data-tab-td="cbtdone">✅ Finished CBT</button>
       <button class="tab" data-tab-td="announcements">📢 Notices</button>
+      <button class="tab" data-tab-td="past">🗂 Past Students &amp; Results</button>
       <button class="tab" data-tab-td="profile">👤 My Profile</button>
       <button class="tab" style="margin-top:auto;color:var(--gold-400)" data-go="home">🚪 Sign Out</button>
     </aside>
@@ -5454,6 +5509,10 @@ registerView('teacher-dashboard', ()=>`
         </div>
       </div>
 
+      <div data-panel-td="books" class="panel"><div id="tBooksPanel"></div></div>
+      <div data-panel-td="cbt" class="panel"><div id="tCbtPanel"></div></div>
+      <div data-panel-td="cbtdone" class="panel"><div id="tCbtDonePanel"></div></div>
+      <div data-panel-td="past" class="panel"><div id="teacherPastPanel"></div></div>
       <div data-panel-td="profile" class="panel">
         <h2 style="margin-bottom:14px">Staff Profile</h2>
         <div class="card" style="max-width:520px;display:flex;gap:20px;align-items:flex-start">
@@ -5468,6 +5527,7 @@ registerView('teacher-dashboard', ()=>`
             <p style="margin:4px 0"><b style="color:var(--text-main)">Status:</b> <span class="badge live">Active Faculty</span></p>
           </div>
         </div>
+        <div id="teacherProfilePanel" style="margin-top:22px"></div>
       </div>
     </div>
   </div>
@@ -5491,6 +5551,9 @@ registerView('admin-dashboard', ()=>`
       <button class="tab" data-tab-ad="announcements">📢 Broadcasts</button>
       <button class="tab" data-tab-ad="settings">⚙️ Portal Settings</button>
       <button class="tab" data-tab-ad="security">🔐 Security</button>
+      <button class="tab" data-tab-ad="staffs">🧑‍🏫 Staffs</button>
+      <button class="tab" data-tab-ad="timetables">🗓 Timetables</button>
+      <button class="tab" data-tab-ad="past">🗂 Past Results</button>
       <button class="tab" data-tab-ad="website">🌐 Website Pages</button>
       <button class="tab" data-tab-ad="gallery">🖼 Gallery</button>
       <button class="tab" data-tab-ad="messages">✉️ Messages</button>
@@ -5552,7 +5615,7 @@ registerView('admin-dashboard', ()=>`
       <div data-panel-ad="students" class="panel">
         <div class="table-filter-bar">
           <div>
-            <h3 style="margin-bottom:4px">Enrolled Pupils &amp; Students Registry</h3>
+            <h3 style="margin-bottom:4px">Enrolled Pupils &amp; Students Registry</h3><button class="btn btn-sm btn-gold" style="margin:6px 0" onclick="promoteAllPupils()">⬆ End of session: promote everyone to next class</button>
             <p class="small-muted">Complete registry across all kindergarten, nursery, primary and secondary classes.</p>
           </div>
           <div class="search-input-wrap">
@@ -5567,7 +5630,7 @@ registerView('admin-dashboard', ()=>`
         <div class="table-filter-bar">
           <div>
             <h3 style="margin-bottom:4px">Student Fees & Billing</h3>
-            <p class="small-muted">Search for a pupil and set their remaining school fee balance.</p>
+            <p class="small-muted">Set each pupil's term fee, previous unpaid fees and amount paid. Cleared pupils (and parents) can open results.</p>
           </div>
           <div class="search-input-wrap">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -5649,7 +5712,7 @@ registerView('admin-dashboard', ()=>`
               <div class="field mb0">
                 <label style="display:flex;align-items:center;gap:10px;font-size:0.9rem;font-weight:600;cursor:pointer">
                   <input type="checkbox" id="set_secondaryActive" style="width:auto" ${settings.secondaryActive?'checked':''}>
-                  Display Secondary School Section as fully active on portal
+                  JSS 1 – SS 3 (Secondary School) is ON — untick to hide everything about it from the portal
                 </label>
               </div>
             </div>
@@ -5799,8 +5862,6 @@ registerView('admin-dashboard', ()=>`
           </div>
 
           <div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-            <button type="button" class="btn btn-ghost" style="color:var(--crimson-600);border:1px solid #fee2e2" onclick="resetToCleanProductionSlate()" title="Remove demo data and reset to completely clean school portal">🧹 Reset to Clean Slate</button>
-            <button type="button" class="btn btn-ghost" onclick="resetVisualSettingsToDefault()">Reset to Default Values</button>
             <button type="submit" class="btn btn-gold" style="font-weight:700">💾 Save &amp; Apply All School Settings</button>
           </div>
         </form>
@@ -5827,6 +5888,9 @@ registerView('admin-dashboard', ()=>`
         </div>
       </div>
       <div data-panel-ad="messages" class="panel"><h3 style="margin-bottom:14px">Contact Messages</h3><div id="adminMessagesList"></div></div>
+      <div data-panel-ad="staffs" class="panel"><div id="adminStaffsPanel"></div></div>
+      <div data-panel-ad="timetables" class="panel"><div id="adminTimetablePanel"></div></div>
+      <div data-panel-ad="past" class="panel"><div id="adminPastPanel"></div></div>
       <div data-panel-ad="website" class="panel"><div id="adminWebsitePanel"></div></div>
       <div data-panel-ad="gallery" class="panel"><div id="adminGalleryPanel"></div></div>
       <div data-panel-ad="supabase" class="panel">
@@ -5899,7 +5963,7 @@ function renderAdminStudentRegistry() {
               <td>${escapeHtml(p.gender || 'Pupil')}</td>
               <td>${escapeHtml(p.parent || 'Guardian')} <span class="small-muted">(📞 ${escapeHtml(p.phone || '')})</span></td>
               <td>
-                <button class="btn btn-sm btn-gold" onclick="showStudentLogin('${p.id}')">🔑 Login</button> <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStudentAccount('${p.id}')">🗑 Delete</button>
+                <button class="btn btn-sm btn-ghost" onclick="showEditPupil('${p.id}')">✏️ Edit</button> <button class="btn btn-sm btn-gold" onclick="showStudentLogin('${p.id}')">🔑 Login</button> <button class="btn btn-sm btn-navy" onclick="printReportCardForPupil('${p.id}', '${kindForClass(p.cls)}')">🖨 Report</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStudentAccount('${p.id}')">🗑 Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -6691,10 +6755,7 @@ registerView('parent-portal', ()=>{
           <span id="parentChildName" style="font-family:var(--font-heading);font-weight:700;font-size:1.25rem">${curr.name}</span>
           <p id="parentChildMeta" class="small-muted" style="margin-top:4px">${curr.cls} &bull; ${curr.id}</p>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:1.1rem;font-weight:bold;color:var(--crimson-600)">Fee Balance: ₦${feeBalance.toLocaleString()}</div>
-          <div class="small-muted">${escapeHtml(feeMessage)}</div>
-        </div>
+        ${parentFeeHTML(curr)}
       </div>
 
       <div class="grid-2">
@@ -6738,7 +6799,7 @@ registerView('parent-portal', ()=>{
             <table>
               <thead><tr><th>Term Session</th><th>Total Due</th><th>Amount Paid</th><th>Balance</th><th>Status</th><th>Receipt</th></tr></thead>
               <tbody>
-                <tr><td style="font-weight:700">${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}</td><td>${escapeHtml(feeForClass(curr.cls))}</td><td>—</td><td><b>₦${feeBalance.toLocaleString()}</b></td><td><span class="pill ${feeBalance>0?'pending':'accepted'}">${feeBalance>0?'Outstanding':'Cleared'}</span></td><td>—</td></tr>
+                <tr><td style="font-weight:700">${escapeHtml((settings.term||'First Term')+' '+(settings.session||''))}</td><td>${naira(feeState(curr.id,curr.cls).balance)}</td><td>${naira(feeState(curr.id,curr.cls).paid)}</td><td><b>${naira(feeState(curr.id,curr.cls).owed)}</b></td><td>${feeBadge(feeState(curr.id,curr.cls))}</td><td>—</td></tr>
               </tbody>
             </table>
           </div>
@@ -7987,7 +8048,7 @@ document.addEventListener('submit', async function(e){
       const role=val('staffRegRole')||'teacher';
       if(val('staffRegPass')!==val('staffRegPassConfirm')){ toast('❌ Passwords do not match!','error'); return; }
       const res=await Cloud.rpc('portal_register_staff',{p_name:val('staffRegName').trim(),p_email:val('staffRegEmail').trim(),p_phone:val('staffRegPhone').trim(),p_role:role,
-        p_cls:role==='admin'?'':val('staffRegClass').trim(),p_password:val('staffRegPass'),p_photo:window._tempStaffRegPhotoUrl||'',p_passcode:val('staffRegAuthCode').trim()});
+        p_cls:role==='admin'?'':val('staffRegClass').trim(),p_password:val('staffRegPass'),p_photo:window._tempStaffRegPhotoUrl||'',p_passcode:val('staffRegAuthCode').trim(),p_gender:val('staffRegGender')});
       if(!res.ok){ const pc=document.getElementById('staffRegAuthCode'); if(pc&&/passcode/i.test(res.reason)) pc.classList.add('err'); toast('❌ '+res.reason,'error'); return; }
       window._tempStaffRegPhotoUrl=null; Sound.playSuccess();
       if(res.status==='created'){ Cloud.setToken(res.token); const a=res.account; session={role:'staff-admin',name:a.name,user:a}; toast(`🎉 Administrator account created! Welcome, ${a.name}!`,'success'); go('admin-dashboard'); }
@@ -8056,7 +8117,7 @@ enrollApplicant=function(id){ if(!(Cloud.active()&&Cloud.token)) return _ea(id);
   const a=applications.find(x=>x.id===id); if(!a) return; if(a.enrolledId){ showEnrolledLogin(id); return; }
   showModal({title:'Are you sure?',message:`Enroll ${a.name} into ${a.cls} and create their student login?`,confirmText:'Yes, Enroll',cancelText:'Cancel',onConfirm:async()=>{
     try{ const res=await Cloud.rpc('portal_enroll_student',{p_token:Cloud.token,
-        p_pupil:{name:a.name,cls:a.cls,gender:a.gender||'',parent:a.parent||'',phone:a.phone||'',email:a.email||'',dob:a.dob||'',address:a.address||'',appId:a.id,admissionType:'Online Admission ('+a.id+')'}});
+        p_pupil:{photoUrl:a.photoUrl||'',name:a.name,cls:a.cls,gender:a.gender||'',parent:a.parent||'',phone:a.phone||'',email:a.email||'',dob:a.dob||'',address:a.address||'',...xfFrom(a),appId:a.id,admissionType:'Online Admission ('+a.id+')'}});
       if(!res.ok){ if(res.id){ a.enrolledId=res.id; saveApplications(); renderAdminAdmissions(); } toast('❌ '+res.reason,'error'); return; }
       a.status='Accepted'; a.enrolledId=res.id; saveApplications();
       if(window.SupabaseService) try{ window.SupabaseService.updateAdmissionStatus(a.id,'Accepted'); }catch(e){}
@@ -8120,7 +8181,7 @@ function showAddStudentDirect(){
   document.getElementById('asdCancel').onclick=()=>overlay.classList.remove('open');
   document.getElementById('addStudentDirectForm').onsubmit=async function(e){
     e.preventDefault(); e.stopImmediatePropagation();
-    const pupil={name:$v('asdName').trim(),cls:$v('asdClass'),gender:$v('asdGender'),parent:$v('asdParent').trim(),phone:$v('asdPhone').trim(),email:'',dob:'',address:'Ado-Ekiti',appId:'',admissionType:'Direct admission by admin'};
+    const pupil={photoUrl:window._asdPhoto||'',name:$v('asdName').trim(),cls:$v('asdClass'),gender:$v('asdGender'),parent:$v('asdParent').trim(),phone:$v('asdPhone').trim(),email:'',dob:'',address:'Ado-Ekiti',appId:'',admissionType:'Direct admission by admin'};
     if(!pupil.name){ toast('Enter the pupil\'s name','error'); return; }
     const btn=e.target.querySelector('button[type=submit]'); btn.disabled=true; btn.textContent='Please wait…';
     try{
@@ -8157,6 +8218,7 @@ function waNumber(p){ const d = String(p||'').replace(/\D/g,''); return d.starts
 /* ---------- attendance + pass/weak remark for the printed result ---------- */
 function attendanceSummary(id){
   const o = { present:0, late:0, absent:0, total:0 };
+  if(window._pastNoAtt){ o.days = 0; return o; }
   try { Object.values(attendanceStore || {}).forEach(d => { const v = d && d[id]; if(v){ o.total++; if(o[v] !== undefined) o[v]++; } }); } catch(e){}
   o.days = o.present + o.late;
   return o;
@@ -8317,7 +8379,7 @@ function admissionFormHTML(a){
         <div class="rc-addr">${_enc(settings.address || '')}<br>Hotlines: ${_enc(settings.phone1 || '')} · ${_enc(settings.phone2 || '')} · ${_enc(settings.email || '')}</div>
         <div class="rc-report-title">Admission Application Form — ${_enc(settings.session || '2026/2027')}</div>
       </div>
-      <div class="af-photo">Affix passport photograph here</div>
+      <div class="af-photo" style="padding:0;overflow:hidden">${a.photoUrl ? `<img src="${a.photoUrl}" alt="" style="width:100%;height:100%;object-fit:cover">` : 'Affix passport photograph here'}</div>
     </div>
 
     <div class="af-banner">✔ ADMISSION GRANTED &nbsp;·&nbsp; Reference No: <b>${_enc(a.id)}</b> &nbsp;·&nbsp; Date applied: ${_enc(a.date || '')}</div>
@@ -8338,6 +8400,12 @@ function admissionFormHTML(a){
       ${row('Email address', a.email)}
       ${row('Home address', a.address)}
       ${row('Emergency contact phone', a.emergency)}
+    </table>
+    <div class="rc-section-title">2b. State, religion, father's &amp; mother's details</div>
+    <table class="af-table">
+      ${row('State of origin', a.stateOfOrigin)}${row('Religion', a.religion)}
+      ${row("Father's full names", a.fName)}${row("Father's contact address", a.fAddress)}${row("Father's phone", a.fPhone)}${row("Father's occupation", a.fJob)}
+      ${row("Mother's full names", a.mName)}${row("Mother's other names", a.mOther)}${row("Mother's contact address", a.mAddress)}${row("Mother's phone", a.mPhone)}${row("Mother's occupation", a.mJob)}
     </table>
 
     <div class="af-fee">
@@ -8433,7 +8501,8 @@ document.addEventListener('submit', async function(e){
   const f = e.target; if(!f || f.id !== 'admissionForm' || !Cloud.active()) return;
   e.preventDefault(); e.stopImmediatePropagation();
   const g = n => ((f.elements[n] || {}).value || '').trim();
-  const rec = { name:g('name'), dob:g('dob'), gender:g('gender'), prevSchool:g('prevSchool'), cls:g('cls'), parent:g('parent'), phone:g('phone'), email:g('email'), address:g('address'), emergency:g('emergency') };
+  const rec = { name:g('name'), dob:g('dob'), gender:g('gender'), prevSchool:g('prevSchool'), cls:g('cls'), parent:g('parent'), phone:g('phone'), email:g('email'), address:g('address'), emergency:g('emergency'), stateOfOrigin:g('stateOfOrigin'), religion:g('religion'), fName:g('fName'), fAddress:g('fAddress'), fPhone:g('fPhone'), fJob:g('fJob'), mName:g('mName'), mAddress:g('mAddress'), mPhone:g('mPhone'), mJob:g('mJob'), mOther:g('mOther') };
+  try{ const pf = f.elements['passport'] && f.elements['passport'].files[0]; if(pf) rec.photoUrl = await compressImage(pf, 400, 0.7); }catch(e){}
   const btn = e.submitter || f.querySelector('button[type=submit]'); const old = btn ? btn.innerHTML : '';
   if(btn){ btn.disabled = true; btn.textContent = 'Submitting…'; }
   try{
@@ -8857,6 +8926,786 @@ go=function(id,fromHistory){
     } else { if(Cloud.token) Cloud.logout(); sessionStorage.removeItem('mjl_session'); ['ad','td','sd','pd','pp'].forEach(k=>sessionStorage.removeItem('mjl_tab_'+k)); Object.keys(sessionStorage).filter(k=>k.indexOf('mjl_tab_')===0).forEach(k=>sessionStorage.removeItem(k)); }
   }catch(e){}
 };
+
+/* =====================================================================
+   ROUND 4 — secondary on/off, timetables, promotion & past results,
+   staff list, profile editing, pupil editing, photo zoom
+   ===================================================================== */
+
+/* ---------- panels always sit inside the main area ---------- */
+function fixPanels(prefix){
+  const first = document.querySelector(`[data-panel-${prefix}]`); if(!first) return;
+  const host = first.parentNode;
+  document.querySelectorAll(`[data-panel-${prefix}]`).forEach(p => { if(p.parentNode !== host) host.appendChild(p); });
+}
+
+/* ---------- JSS 1 – SS 3 on / off ---------- */
+const SEC_ALL = [...SECONDARY_CLASSES], ALL_BASE = [...ALL_CLASS_NAMES];
+function secondaryOn(){ return settings.secondaryActive !== false; }
+function applySecondaryState(){
+  const on = secondaryOn();
+  SECONDARY_CLASSES.length = 0; if(on) SEC_ALL.forEach(c => SECONDARY_CLASSES.push(c));
+  ALL_CLASS_NAMES.length = 0; ALL_BASE.filter(c => on || !/^(JSS|SS)/.test(c)).forEach(c => ALL_CLASS_NAMES.push(c));
+  document.body.classList.toggle('sec-off', !on);
+}
+{ const _sa = Site.apply.bind(Site); Site.apply = function(){ _sa(); applySecondaryState(); }; }
+{ const _s3 = saveSettings; saveSettings = function(){ _s3(); applySecondaryState(); }; }
+applySecondaryState();
+{
+  const _ias = initAdminSettings;
+  initAdminSettings = function(){
+    const t = _el('set_secondaryActive');
+    if(t && !t._bound){
+      t._bound = true;
+      t.addEventListener('change', e => {
+        const want = e.target.checked; e.target.checked = !want;
+        showModal({ title:'Are you sure?', confirmText:'Yes, continue', cancelText:'Cancel',
+          message: want ? 'Turn ON JSS 1 – SS 3? The secondary section will show again everywhere on the portal.'
+                        : 'Turn OFF JSS 1 – SS 3? Everything about the secondary section (login, admission, classes, fees) will be hidden from the whole portal until you turn it back on. Nothing is deleted.',
+          onConfirm: () => { e.target.checked = want; settings.secondaryActive = want; saveSettings();
+            toast(want ? 'JSS 1 – SS 3 is ON' : 'JSS 1 – SS 3 is OFF and hidden from the portal', 'success'); setTimeout(() => go(window._cv, true), 350); } });
+      });
+    }
+    _ias();
+  };
+}
+
+/* ---------- timetables ---------- */
+const TT_GROUPS = { kg:'KG 1 – KG 2 (Crèche, KG & Nursery)', pri:'Primary 1 – 5', jss:'JSS 1 – 3', ss:'SS 1 – 3' };
+const TT_TYPES = { school:'School Timetable', test:'Test Timetable', exam:'Exam Timetable' };
+function ttGroupFor(cls){ return /^JSS/.test(cls||'') ? 'jss' : /^SS/.test(cls||'') ? 'ss' : /^Primary/.test(cls||'') ? 'pri' : 'kg'; }
+function ttDefault(type){
+  return type === 'school'
+    ? { cols:['Time','Monday','Tuesday','Wednesday','Thursday','Friday'], rows:[['8:00 – 8:40','','','','',''],['8:40 – 9:20','','','','',''],['9:20 – 10:00','','','','','']] }
+    : { cols:['Date','Time','Subject','Venue / Notes'], rows:[['','','',''],['','','','']] };
+}
+function ttGet(g, t){ try{ const v = Site.content['tt:' + g + ':' + t]; return v ? JSON.parse(v) : null; }catch(e){ return null; } }
+function ttTableHTML(tt, edit){
+  const cols = tt.cols;
+  return `<div style="overflow-x:auto"><table class="tt-table"><thead><tr>${cols.map((c, i) => edit ? `<th><input class="tt-h" data-c="${i}" value="${_enc(c)}"></th>` : `<th>${_enc(c)}</th>`).join('')}${edit ? '<th></th>' : ''}</tr></thead>
+    <tbody>${tt.rows.map((r, ri) => `<tr>${cols.map((c, i) => edit ? `<td><input class="tt-c" data-r="${ri}" data-c="${i}" value="${_enc(r[i] || '')}"></td>` : `<td${i === 0 ? ' style="font-weight:700"' : ''}>${_enc(r[i] || '')}</td>`).join('')}${edit ? `<td><button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="ttDelRow(${ri})">✕</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
+}
+let _ttG = 'kg', _ttT = 'school', _ttDraft = null;
+function renderAdminTimetables(){
+  const el = _el('adminTimetablePanel'); if(!el) return;
+  const groups = Object.entries(TT_GROUPS).filter(([k]) => secondaryOn() || (k !== 'jss' && k !== 'ss'));
+  if(!groups.some(([k]) => k === _ttG)) _ttG = groups[0][0];
+  _ttDraft = JSON.parse(JSON.stringify(ttGet(_ttG, _ttT) || ttDefault(_ttT)));
+  el.innerHTML = `<h3 style="margin-bottom:4px">🗓 Timetables</h3><p class="small-muted" style="margin-bottom:12px">Pick a class group and a timetable type, edit it, then Save. Pupils and students see it in their dashboard.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <select id="ttGroup" onchange="_ttG=this.value;renderAdminTimetables()">${groups.map(([k, v]) => `<option value="${k}" ${k === _ttG ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      <select id="ttType" onchange="_ttT=this.value;renderAdminTimetables()">${Object.entries(TT_TYPES).map(([k, v]) => `<option value="${k}" ${k === _ttT ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    </div>
+    <div class="card" id="ttEditor">${ttTableHTML(_ttDraft, true)}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-ghost btn-sm" onclick="ttAddRow()">➕ Add row</button><button class="btn btn-ghost btn-sm" onclick="ttAddCol()">➕ Add column</button>
+      <button class="btn btn-gold" onclick="ttSave()">💾 Save timetable</button><button class="btn btn-ghost" style="color:var(--crimson-600)" onclick="ttClear()">🗑 Clear</button></div></div>`;
+}
+function ttCollect(){
+  document.querySelectorAll('#ttEditor .tt-h').forEach(i => { _ttDraft.cols[+i.dataset.c] = i.value; });
+  document.querySelectorAll('#ttEditor .tt-c').forEach(i => { _ttDraft.rows[+i.dataset.r][+i.dataset.c] = i.value; });
+}
+function ttAddRow(){ ttCollect(); _ttDraft.rows.push(_ttDraft.cols.map(() => '')); _el('ttEditor').firstElementChild.outerHTML = ttTableHTML(_ttDraft, true); }
+function ttAddCol(){ ttCollect(); _ttDraft.cols.push('New column'); _ttDraft.rows.forEach(r => r.push('')); _el('ttEditor').firstElementChild.outerHTML = ttTableHTML(_ttDraft, true); }
+function ttDelRow(i){ ttCollect(); _ttDraft.rows.splice(i, 1); _el('ttEditor').firstElementChild.outerHTML = ttTableHTML(_ttDraft, true); }
+function ttSave(){
+  ttCollect();
+  showModal({ title:'Are you sure?', message:`Save the ${TT_TYPES[_ttT]} for ${TT_GROUPS[_ttG]}? Pupils will see the new timetable.`, confirmText:'Yes, save', cancelText:'Cancel',
+    onConfirm: async () => { try{ await Site.setContent({ ['tt:' + _ttG + ':' + _ttT]: JSON.stringify(_ttDraft) }); Sound.playSuccess(); toast('Timetable saved', 'success'); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+}
+function ttClear(){
+  showModal({ title:'Are you sure?', message:`Delete the ${TT_TYPES[_ttT]} for ${TT_GROUPS[_ttG]}?`, confirmText:'Yes, delete', cancelText:'Cancel',
+    onConfirm: async () => { try{ await Site.setContent({ ['tt:' + _ttG + ':' + _ttT]: null }); toast('Timetable deleted', 'success'); renderAdminTimetables(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+}
+let _stT = 'school';
+function renderStudentTimetable(){
+  const panel = document.querySelector('[data-panel-sd="timetable"]'); if(!panel) return;
+  const u = session && (session.student || {}); const g = ttGroupFor(u.cls || '');
+  const tt = ttGet(g, _stT);
+  panel.innerHTML = `<h2 style="margin-bottom:4px">Timetable</h2><p class="small-muted" style="margin-bottom:12px">${_enc(TT_GROUPS[g])}</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${Object.entries(TT_TYPES).map(([k, v]) => `<button class="btn btn-sm ${k === _stT ? 'btn-navy' : 'btn-ghost'}" onclick="_stT='${k}';renderStudentTimetable()">${v}</button>`).join('')}</div>
+    ${tt ? `<div class="card">${ttTableHTML(tt, false)}</div>` : '<div class="empty">This timetable has not been published yet.</div>'}`;
+}
+Site.fetchOnly = async function(){ try{ const r = await Cloud.rpc('portal_public_content', {}); this.content = r.content || {}; }catch(e){} };
+
+/* ---------- class history, promotion and past results ---------- */
+let classHistory = DB.get('classHistory', {}) || {};
+function nextClassOf(cls){
+  const order = ALL_BASE; const i = order.indexOf(cls); if(i < 0) return cls;
+  const n = order[i + 1]; if(!n) return 'Graduated';
+  if(/^JSS/.test(n) && !secondaryOn()) return 'Graduated';
+  return n;
+}
+function nextSession(s){ const m = String(s || '').match(/^(\d{4})\/(\d{4})$/); return m ? `${+m[1] + 1}/${+m[2] + 1}` : s; }
+{
+  const _acr = archiveCurrentTermResults;
+  archiveCurrentTermResults = function(t, s){
+    _acr(t, s); const ses = s || settings.session;
+    classRoster.forEach(p => { (classHistory[p.id] = classHistory[p.id] || {})[ses] = p.cls; });
+    DB.set('classHistory', classHistory);
+  };
+}
+async function patchPupil(id, patch){
+  const p = classRoster.find(x => x.id === id);
+  if(Cloud.active() && Cloud.token){
+    const r = await Cloud.rpc('portal_update_pupil', { p_token: Cloud.token, p_id: id, p_patch: patch });
+    if(!r.ok) throw new Error(r.reason || 'Could not save');
+  }
+  if(p){ Object.assign(p, patch); saveClassRoster(); }
+  const u = userAccounts.find(x => x.id === id); if(u){ if(patch.name) u.name = patch.name; if(patch.cls){ u.cls = patch.cls; u.role = kindForClass(patch.cls) === 'secondary' ? 'student-secondary' : 'student-primary'; } saveUserAccounts(); }
+}
+function promoteAllPupils(){
+  const list = classRoster.filter(p => p.cls !== 'Graduated');
+  if(!list.length){ toast('There are no pupils to promote.', 'error'); return; }
+  showModal({ title:'Are you sure?', confirmText:'Yes, promote everyone', cancelText:'Cancel',
+    message:`Promote ${list.length} pupil(s)/student(s) to the next class and start session ${nextSession(settings.session)}? Current results are first saved under Past Results. SS 3 leavers become "Graduated". Do this only at the END of the third term.`,
+    onConfirm: async () => {
+      try{
+        archiveCurrentTermResults(settings.term, settings.session);
+        let n = 0;
+        for(const p of list){
+          const nx = nextClassOf(p.cls); await patchPupil(p.id, { cls: nx });
+          [pupilScoresStore, pupilAffectiveStore, pupilCommentsStore].forEach(o => delete o[p.id]); n++;
+        }
+        savePupilScoresStore(); savePupilAffectiveStore(); savePupilCommentsStore();
+        settings.session = nextSession(settings.session); settings.term = 'First Term'; saveSettings();
+        if(Cloud.active() && Cloud.token) await Cloud.syncRoster();
+        Sound.playSuccess(); toast(`✅ ${n} promoted. New session ${settings.session}.`, 'success'); refreshAdminLists();
+      }catch(e){ toast('❌ ' + e.message, 'error'); }
+    } });
+}
+function pastSessionsFor(pid){
+  const set = new Set();
+  Object.keys(termResultsHistory).forEach(id => { if(!pid || id === pid) Object.keys(termResultsHistory[id] || {}).forEach(s => set.add(s)); });
+  if(!set.size) set.add(settings.session);
+  return [...set].sort().reverse();
+}
+function pastClassOf(pid, session){ const p = classRoster.find(x => x.id === pid); return (classHistory[pid] && classHistory[pid][session]) || (p && p.cls) || ''; }
+function pastResultHTML(pid, session, term){
+  const p = classRoster.find(x => x.id === pid); if(!p) return '';
+  const hist = (termResultsHistory[pid] || {})[session] && termResultsHistory[pid][session][term]; if(!hist) return '';
+  const sv = pupilScoresStore[pid], ss = settings.session, st = settings.term, cls = pastClassOf(pid, session);
+  pupilScoresStore[pid] = hist.map(r => ({ subject:r.subject, ca1:r.ca1, ca2:r.ca2, ca3:r.ca3, exam:r.exam, lastTermBF:0, position:'-', remark:r.remark || '' }));
+  settings.session = session; settings.term = term; window._pastNoAtt = true;
+  try{ return buildReportCardHTML({ name:p.name, id:p.id, cls, session, term, gender:p.gender, photoUrl:p.photoUrl }, kindForClass(cls), pid); }
+  finally{ if(sv === undefined) delete pupilScoresStore[pid]; else pupilScoresStore[pid] = sv; settings.session = ss; settings.term = st; window._pastNoAtt = false; }
+}
+function viewPastResult(pid, session, term){
+  const html = pastResultHTML(pid, session, term); if(!html){ toast('No saved result for that term.', 'error'); return; }
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard');
+  card.style.maxWidth = '940px';
+  card.innerHTML = `<div style="overflow:auto;max-width:100%">${html}</div><div class="modal-actions"><button class="btn btn-ghost btn-sm" id="prClose">Close</button><button class="btn btn-navy btn-sm" id="prPrint">🖨 Print</button></div>`;
+  overlay.classList.add('open');
+  _el('prClose').onclick = () => { overlay.classList.remove('open'); card.style.maxWidth = ''; };
+  _el('prPrint').onclick = () => printPastResult(pid, session, term);
+}
+function printPastResult(pid, session, term){
+  const html = pastResultHTML(pid, session, term); if(!html){ toast('No saved result for that term.', 'error'); return; }
+  _el('printReportCard').innerHTML = html; Sound.playSuccess(); setTimeout(() => window.print(), 200);
+}
+function pastRowAvg(pid, session, term){ const h = (termResultsHistory[pid] || {})[session] && termResultsHistory[pid][session][term]; if(!h || !h.length) return null; return Math.round(h.reduce((t, r) => t + (r.total || 0), 0) / h.length); }
+function renderStaffPast(elId, defaultCls){
+  const el = _el(elId); if(!el) return;
+  const sessions = pastSessionsFor();
+  el.innerHTML = `<h3 style="margin-bottom:4px">🗂 Past Students &amp; Results</h3><p class="small-muted" style="margin-bottom:12px">Pick the year, class and term to see everyone who was in that class then.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <select id="${elId}_y">${sessions.map(s => `<option>${s}</option>`).join('')}</select>
+      <select id="${elId}_c">${ALL_CLASS_NAMES.map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>
+      <select id="${elId}_t"><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
+      <button class="btn btn-navy" onclick="showStaffPast('${elId}')">Show students</button></div><div id="${elId}_out"></div>`;
+}
+function showStaffPast(elId){
+  const y = _el(elId + '_y').value, c = _el(elId + '_c').value, t = _el(elId + '_t').value;
+  const rows = classRoster.filter(p => pastClassOf(p.id, y) === c && pastRowAvg(p.id, y, t) !== null);
+  _el(elId + '_out').innerHTML = rows.length ? `<div class="table-wrap"><table><thead><tr><th>SN</th><th>Name</th><th>ID</th><th>Average</th><th>Remark</th><th>Result</th></tr></thead><tbody>${rows.map((p, i) => { const a = pastRowAvg(p.id, y, t);
+    return `<tr><td>${i + 1}.</td><td style="font-weight:700">${_enc(p.name)}</td><td>${_enc(p.id)}</td><td>${a}%</td><td>${passRemark(a)}</td><td style="white-space:nowrap"><button class="btn btn-sm btn-gold" onclick="viewPastResult('${p.id}','${y}','${t}')">👁 View result</button> <button class="btn btn-sm btn-navy" onclick="printPastResult('${p.id}','${y}','${t}')">🖨 Print</button></td></tr>`; }).join('')}</tbody></table></div>`
+    : `<div class="empty">No saved results for ${_enc(c)}, ${_enc(t)}, ${_enc(y)}.</div>`;
+}
+function renderPupilPast(){
+  const el = _el('pupilPastPanel'); if(!el) return; const u = (session && session.student) || {}; const pid = u.id;
+  const sessions = pastSessionsFor(pid);
+  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Past Results</h2><p class="small-muted" style="margin-bottom:12px">Pick a year and term to see that result.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><select id="ppY">${sessions.map(s => `<option>${s}</option>`).join('')}</select>
+    <select id="ppT"><option>First Term</option><option>Second Term</option><option>Third Term</option></select><button class="btn btn-navy" onclick="showPupilPast()">Show</button></div><div id="ppOut"></div>`;
+}
+function showPupilPast(){
+  const pid = ((session && session.student) || {}).id, y = _el('ppY').value, t = _el('ppT').value, a = pastRowAvg(pid, y, t);
+  _el('ppOut').innerHTML = a === null ? `<div class="empty">No saved result for ${_enc(t)}, ${_enc(y)}.</div>`
+    : `<div class="card"><b>${_enc(pastClassOf(pid, y))}</b> · ${_enc(t)} · ${_enc(y)} — Average <b>${a}%</b> (${passRemark(a)})<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="viewPastResult('${pid}','${y}','${t}')">👁 View result</button> <button class="btn btn-navy btn-sm" onclick="printPastResult('${pid}','${y}','${t}')">🖨 Print</button></div></div>`;
+}
+
+/* ---------- edit a pupil / student (ID can never be changed) ---------- */
+function showEditPupil(id){
+  const p = classRoster.find(x => x.id === id); if(!p) return;
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard'); window._editPhoto = null;
+  const classes = ALL_CLASS_NAMES.concat(p.cls && !ALL_CLASS_NAMES.includes(p.cls) ? [p.cls] : []);
+  card.innerHTML = `<h3>✏️ Edit ${_enc(p.name)}</h3><p class="small-muted">Registration ID <b>${_enc(p.id)}</b> cannot be changed.</p>
+    <form id="editPupilForm" style="display:grid;gap:10px">
+      <div style="display:flex;gap:12px;align-items:center"><div class="zoomwrap" style="width:62px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center" id="epPrev">${p.photoUrl ? `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : '🧒'}</div>
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer">📷 Change photo<input type="file" accept="image/*" id="epPhoto" style="display:none"></label></div>
+      <div class="field"><label>Full name *</label><input id="epName" required value="${_enc(p.name)}"></div>
+      <div class="grid-2"><div class="field"><label>Class</label><select id="epCls">${classes.map(c => `<option ${c === p.cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Gender</label><select id="epGender"><option ${p.gender === 'Male' ? 'selected' : ''}>Male</option><option ${p.gender === 'Female' ? 'selected' : ''}>Female</option></select></div></div>
+      <div class="grid-2"><div class="field"><label>Parent / guardian</label><input id="epParent" value="${_enc(p.parent || '')}"></div>
+      <div class="field"><label>Parent phone</label><input id="epPhone" value="${_enc(p.phone || '')}"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost btn-sm" id="epCancel">Cancel</button><button type="submit" class="btn btn-gold btn-sm">💾 Save changes</button></div></form>`;
+  overlay.classList.add('open');
+  _el('epCancel').onclick = () => overlay.classList.remove('open');
+  _el('epPhoto').onchange = async e => { try{ window._editPhoto = await compressImage(e.target.files[0], 500, 0.75); _el('epPrev').innerHTML = `<img src="${window._editPhoto}" style="width:100%;height:100%;object-fit:cover">`; }catch(err){ toast('❌ ' + err.message, 'error'); } };
+  _el('editPupilForm').onsubmit = e => {
+    e.preventDefault();
+    const patch = { name: _el('epName').value.trim(), cls: _el('epCls').value, gender: _el('epGender').value, parent: _el('epParent').value.trim(), phone: _el('epPhone').value.trim() };
+    if(window._editPhoto) patch.photoUrl = window._editPhoto;
+    showModal({ title:'Are you sure?', message:`Save the changes to ${p.name}?`, confirmText:'Yes, save', cancelText:'Cancel',
+      onConfirm: async () => { try{ await patchPupil(id, patch); Sound.playSuccess(); toast('Saved', 'success'); refreshAdminLists(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
+  };
+}
+
+/* ---------- Staffs list (admin) ---------- */
+function renderAdminStaffs(){
+  const el = _el('adminStaffsPanel'); if(!el) return;
+  const cloudOn = Cloud.active() && Cloud.token;
+  const list = cloudOn ? (cloudStaff || []) : userAccounts.filter(u => u.role === 'teacher' || u.role === 'admin');
+  el.innerHTML = `<h3 style="margin-bottom:4px">🧑‍🏫 Staffs</h3><p class="small-muted" style="margin-bottom:12px">Approved staff and their details. Scroll sideways to see every column. Tap a photo to enlarge it.</p>
+    ${list.length ? `<div style="overflow-x:auto;white-space:nowrap"><table style="min-width:900px"><thead><tr><th>SN</th><th>Photo</th><th>Name</th><th>Role</th><th>Gender</th><th>Phone (used to register)</th><th>Email (login)</th><th>Assigned class</th><th>Registered</th></tr></thead>
+    <tbody>${list.map((u, i) => `<tr><td>${i + 1}.</td><td><div style="width:40px;height:40px;border-radius:50%;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center">${u.photoUrl ? `<img src="${u.photoUrl}" alt="" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in">` : initialsFor(u.name)}</div></td>
+      <td style="font-weight:700">${_enc(u.name)}</td><td><span class="badge ${u.role === 'admin' ? 'gold' : 'live'}">${_enc(u.role)}</span></td><td>${_enc(u.gender || '-')}</td><td>${_enc(u.phone || '-')}</td><td>${_enc(u.email || u.identifier || '')}</td><td>${_enc(u.cls || '-')}</td><td>${_enc(u.registeredAt || '')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No approved staff yet.</div>'}`;
+}
+{ const _ra = Cloud.refreshAdmin.bind(Cloud); Cloud.refreshAdmin = async function(){ await _ra(); try{ renderAdminStaffs(); }catch(e){} }; }
+
+/* ---------- teacher: edit own profile ---------- */
+function renderTeacherProfile(){
+  const el = _el('teacherProfilePanel'); if(!el) return; const u = (session && session.user) || {};
+  el.innerHTML = `<h2 style="margin-bottom:4px">👤 My Profile</h2><p class="small-muted" style="margin-bottom:12px">Update your name, email and phone. If a teacher is replaced, the new teacher can put their own details here.</p>
+    <div class="grid-2" style="align-items:flex-start;gap:20px"><form class="card" id="tpForm"><h4 style="margin-bottom:10px">My details</h4>
+      <div class="field"><label>Full name</label><input id="tpName" required value="${_enc(u.name || '')}"></div>
+      <div class="field"><label>Email (your login)</label><input id="tpEmail" type="email" required value="${_enc(u.email || u.identifier || '')}"></div>
+      <div class="field"><label>Phone number</label><input id="tpPhone" value="${_enc(u.phone || '')}"></div>
+      <button class="btn btn-gold" type="submit">💾 Save my details</button></form>
+    <form class="card" id="tpPass"><h4 style="margin-bottom:10px">Change my password</h4>
+      <div class="field"><label>Current password</label><input id="tpCur" type="password" required></div>
+      <div class="field"><label>New password (8+ characters)</label><input id="tpNew" type="password" minlength="8" required></div>
+      <div class="field"><label>Repeat new password</label><input id="tpNew2" type="password" minlength="8" required></div>
+      <button class="btn btn-navy" type="submit">🔐 Change password</button></form></div>`;
+  _el('tpForm').onsubmit = e => { e.preventDefault();
+    showModal({ title:'Are you sure?', message:'Save these profile details?', confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
+      try{
+        if(Cloud.active() && Cloud.token){ const r = await Cloud.rpc('portal_update_profile', { p_token: Cloud.token, p_name: _el('tpName').value, p_email: _el('tpEmail').value, p_phone: _el('tpPhone').value });
+          if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } Object.assign(session.user, r.account); }
+        else { Object.assign(session.user, { name: _el('tpName').value, email: _el('tpEmail').value, identifier: _el('tpEmail').value, phone: _el('tpPhone').value }); saveUserAccounts(); }
+        session.name = session.user.name; Sound.playSuccess(); toast('Profile saved', 'success');
+      }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+  _el('tpPass').onsubmit = e => { e.preventDefault();
+    if(_el('tpNew').value !== _el('tpNew2').value){ toast('New passwords do not match', 'error'); return; }
+    showModal({ title:'Are you sure?', message:'Change your password?', confirmText:'Yes, change', cancelText:'Cancel', onConfirm: async () => {
+      try{
+        if(Cloud.active() && Cloud.token){ const r = await Cloud.rpc('portal_change_password', { p_token: Cloud.token, p_current: _el('tpCur').value, p_new: _el('tpNew').value }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } }
+        else { if(session.user.password !== _el('tpCur').value){ toast('Current password is wrong', 'error'); return; } session.user.password = _el('tpNew').value; saveUserAccounts(); }
+        ['tpCur', 'tpNew', 'tpNew2'].forEach(i => _el(i).value = ''); Sound.playSuccess(); toast('Password changed', 'success');
+      }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+}
+
+/* ---------- teacher only sees the class they teach ---------- */
+function teacherClass(){ const u = session && session.user; return session && session.role === 'staff-teacher' && u && u.cls && ALL_BASE.includes(u.cls) ? u.cls : ''; }
+['renderAssignedClassPanel', 'renderTeacherResultsPanel', 'renderTeacherAttendancePanel'].forEach(name => {
+  const orig = window[name]; if(typeof orig !== 'function') return;
+  window[name] = function(){
+    const c = teacherClass(); if(!c) return orig.apply(this, arguments);
+    const all = classRoster; classRoster = all.filter(p => p.cls === c);
+    try{ return orig.apply(this, arguments); } finally{ classRoster = all; }
+  };
+});
+
+/* ---------- photo zoom (admin tables, staff, profile photos) ---------- */
+document.addEventListener('click', e => {
+  const im = e.target; if(!im || im.tagName !== 'IMG') return;
+  if(!im.closest('table, .zoomwrap, [data-zoom]') || im.closest('.gallery-item,.lightbox-overlay')) return;
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard');
+  card.innerHTML = `<div style="text-align:center"><img src="${im.src}" style="max-width:100%;max-height:75vh;border-radius:10px"></div><div class="modal-actions"><button class="btn btn-navy btn-sm" id="zmClose">Close</button></div>`;
+  overlay.classList.add('open'); _el('zmClose').onclick = () => overlay.classList.remove('open');
+});
+
+/* ---------- ask "are you sure" before changing an application status ---------- */
+{
+  const _uas2 = updateAppStatus;
+  updateAppStatus = function(id, status){
+    const a = applications.find(x => x.id === id); if(!a) return;
+    showModal({ title:'Are you sure?', message:`Change ${a.name}'s application to "${status}"?`, confirmText:'Yes, change', cancelText:'Cancel',
+      onConfirm: () => _uas2(id, status) });
+    try{ renderAdminAdmissions(); }catch(e){}
+  };
+  const _sfo = setForumOpen;
+  setForumOpen = function(open){
+    showModal({ title:'Are you sure?', message: open ? 'Open the Parents Forum again?' : 'Close the Parents Forum? Nobody will be able to post until you open it again.', confirmText:'Yes', cancelText:'Cancel', onConfirm: () => _sfo(open) });
+  };
+}
+
+/* ---------- admin Add-student: passport photo ---------- */
+{
+  const _sasd = showAddStudentDirect;
+  showAddStudentDirect = function(){
+    window._asdPhoto = '';
+    _sasd();
+    const row = _el('asdParent') && _el('asdParent').closest('div[style*="grid"]');
+    if(row) row.insertAdjacentHTML('beforebegin', `<div class="field"><label>Passport photo (optional)</label><input type="file" accept="image/*" id="asdPhotoIn"></div>`);
+    const f = _el('asdPhotoIn'); if(f) f.onchange = async e => { try{ window._asdPhoto = await compressImage(e.target.files[0], 500, 0.75); }catch(err){ toast('❌ ' + err.message, 'error'); } };
+  };
+}
+
+/* ---------- wire the new screens into the dashboards ---------- */
+const _ar6 = afterRender;
+afterRender = function(id){
+  if(id === 'admin-dashboard') fixPanels('ad');
+  if(id === 'teacher-dashboard') fixPanels('td');
+  if(id === 'primary-dashboard' || id === 'secondary-dashboard') fixPanels('sd');
+  _ar6(id);
+  try{
+    if(id === 'admin-dashboard'){ renderAdminTimetables(); renderStaffPast('adminPastPanel', 'Primary 4'); renderAdminStaffs(); }
+    if(id === 'teacher-dashboard'){ renderTeacherProfile(); renderStaffPast('teacherPastPanel', teacherClass() || 'Primary 4'); }
+    if(id === 'primary-dashboard' || id === 'secondary-dashboard'){ renderPupilPast(); renderStudentTimetable(); Site.fetchOnly().then(renderStudentTimetable); }
+  }catch(e){ console.warn(e); }
+};
+{
+  const _go4 = go;
+  go = function(id, fh){
+    if(!secondaryOn() && (id === 'student-login-secondary' || id === 'secondary-dashboard')){ return _go4('student-login', fh); }
+    return _go4(id, fh);
+  };
+}
+
+/* tiny QR code maker (byte mode, error level M, versions 1-10) */
+function mjlQR(text){
+  let data=Array.from(new TextEncoder().encode(String(text)));
+  const ECC=[0,10,16,26,18,24,16,18,22,22,26], BLK=[0,1,1,1,2,2,4,4,4,5,5];
+  const raw=v=>{let r=(16*v+128)*v+64; if(v>=2){const n=Math.floor(v/7)+2; r-=(25*n-10)*n-55; if(v>=7) r-=36;} return r;};
+  if(data.length>200) data=data.slice(0,200);
+  let ver=1;
+  for(;ver<10;ver++){ const cap=Math.floor(raw(ver)/8)-ECC[ver]*BLK[ver]; if(4+(ver<10?8:16)+8*data.length<=cap*8) break; }
+  const capB=Math.floor(raw(ver)/8)-ECC[ver]*BLK[ver];
+  const bits=[]; const put=(v,n)=>{ for(let i=n-1;i>=0;i--) bits.push((v>>>i)&1); };
+  put(4,4); put(data.length,ver<10?8:16); data.forEach(b=>put(b,8));
+  put(0,Math.min(4,capB*8-bits.length)); while(bits.length%8) bits.push(0);
+  const cw=[]; for(let i=0;i<bits.length;i+=8){ let v=0; for(let j=0;j<8;j++) v=(v<<1)|bits[i+j]; cw.push(v); }
+  for(let pad=0xEC;cw.length<capB;pad^=0xEC^0x11) cw.push(pad);
+  const mul=(x,y)=>{ let z=0; for(let i=7;i>=0;i--){ z=(z<<1)^((z>>>7)*0x11D); z^=((y>>>i)&1)*x; } return z; };
+  const d=ECC[ver]; const div=new Array(d).fill(0); div[d-1]=1; let root=1;
+  for(let i=0;i<d;i++){ for(let j=0;j<d;j++){ div[j]=mul(div[j],root); if(j+1<d) div[j]^=div[j+1]; } root=mul(root,2); }
+  const rs=dat=>{ const r=new Array(d).fill(0); dat.forEach(b=>{ const f=b^r.shift(); r.push(0); div.forEach((c,i)=>{ r[i]^=mul(c,f); }); }); return r; };
+  const nb=BLK[ver], rawCw=Math.floor(raw(ver)/8), nShort=nb-rawCw%nb, shortLen=Math.floor(rawCw/nb), blocks=[];
+  for(let i=0,k=0;i<nb;i++){ const dat=cw.slice(k,k+shortLen-d+(i<nShort?0:1)); k+=dat.length; const e=rs(dat); if(i<nShort) dat.push(0); blocks.push(dat.concat(e)); }
+  const all=[]; for(let i=0;i<blocks[0].length;i++) blocks.forEach((b,j)=>{ if(i!==shortLen-d||j>=nShort) all.push(b[i]); });
+  const size=ver*4+17, M=[], F=[]; for(let y=0;y<size;y++){ M.push(new Array(size).fill(false)); F.push(new Array(size).fill(false)); }
+  const sf=(x,y,v)=>{ M[y][x]=v; F[y][x]=true; };
+  for(let i=0;i<size;i++){ sf(6,i,i%2===0); sf(i,6,i%2===0); }
+  const finder=(x,y)=>{ for(let dy=-4;dy<=4;dy++) for(let dx=-4;dx<=4;dx++){ const dist=Math.max(Math.abs(dx),Math.abs(dy)),xx=x+dx,yy=y+dy; if(xx>=0&&xx<size&&yy>=0&&yy<size) sf(xx,yy,dist!==2&&dist!==4); } };
+  finder(3,3); finder(size-4,3); finder(3,size-4);
+  let pos=[]; if(ver>1){ const n=Math.floor(ver/7)+2, step=Math.ceil((ver*4+4)/(n*2-2))*2; pos=[6]; for(let p=size-7;pos.length<n;p-=step) pos.splice(1,0,p); }
+  pos.forEach((a,i)=>pos.forEach((b,j)=>{ if((i===0&&j===0)||(i===0&&j===pos.length-1)||(i===pos.length-1&&j===0)) return; for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++) sf(a+dx,b+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1); }));
+  const fmt=mask=>{ const dd=(0<<3)|mask; let r=dd; for(let i=0;i<10;i++) r=(r<<1)^((r>>>9)*0x537); const b=((dd<<10)|r)^0x5412, g=i=>((b>>>i)&1)===1;
+    for(let i=0;i<=5;i++) sf(8,i,g(i)); sf(8,7,g(6)); sf(8,8,g(7)); sf(7,8,g(8)); for(let i=9;i<15;i++) sf(14-i,8,g(i));
+    for(let i=0;i<8;i++) sf(size-1-i,8,g(i)); for(let i=8;i<15;i++) sf(8,size-15+i,g(i)); sf(8,size-8,true); };
+  fmt(0);
+  if(ver>=7){ let r=ver; for(let i=0;i<12;i++) r=(r<<1)^((r>>>11)*0x1F25); const b=(ver<<12)|r; for(let i=0;i<18;i++){ const c=((b>>>i)&1)===1,a=size-11+i%3,bb=Math.floor(i/3); sf(a,bb,c); sf(bb,a,c); } }
+  let k=0; for(let right=size-1;right>=1;right-=2){ if(right===6) right=5; for(let v=0;v<size;v++) for(let j=0;j<2;j++){ const x=right-j, up=((right+1)&2)===0, y=up?size-1-v:v; if(!F[y][x]&&k<all.length*8){ M[y][x]=((all[k>>>3]>>>(7-(k&7)))&1)===1; k++; } } }
+  const cond=[(x,y)=>(x+y)%2===0,(x,y)=>y%2===0,(x,y)=>x%3===0,(x,y)=>(x+y)%3===0,(x,y)=>(Math.floor(x/3)+Math.floor(y/2))%2===0,(x,y)=>x*y%2+x*y%3===0,(x,y)=>(x*y%2+x*y%3)%2===0,(x,y)=>((x+y)%2+x*y%3)%2===0];
+  const mk=m=>{ for(let y=0;y<size;y++) for(let x=0;x<size;x++) if(!F[y][x]&&cond[m](x,y)) M[y][x]=!M[y][x]; };
+  const pen=()=>{ let p=0; for(let t=0;t<2;t++){ for(let a=0;a<size;a++){ let run=1; for(let b=1;b<size;b++){ const c=t?M[b][a]:M[a][b], q=t?M[b-1][a]:M[a][b-1]; if(c===q){ run++; if(run===5) p+=3; else if(run>5) p++; } else run=1; } } }
+    for(let y=0;y<size-1;y++) for(let x=0;x<size-1;x++){ const c=M[y][x]; if(c===M[y][x+1]&&c===M[y+1][x]&&c===M[y+1][x+1]) p+=3; } let dark=0; M.forEach(r=>r.forEach(c=>{ if(c) dark++; })); p+=Math.floor(Math.abs(dark*20-size*size*10)/(size*size))*10; return p; };
+  let best=0,bp=1e9; for(let m=0;m<8;m++){ mk(m); fmt(m); const p=pen(); if(p<bp){ bp=p; best=m; } mk(m); }
+  if(window.__qrMask!==undefined) best=window.__qrMask;
+  mk(best); fmt(best); return M;
+}
+function mjlQRsvg(text,px){
+  const m=mjlQR(text), n=m.length; let d=''; m.forEach((r,y)=>r.forEach((c,x)=>{ if(c) d+='M'+(x+4)+' '+(y+4)+'h1v1h-1z'; }));
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+(n+8)+' '+(n+8)+'" width="'+(px||96)+'" height="'+(px||96)+'" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';
+}
+
+/* =====================================================================
+   ROUND 5 — fees (previous unpaid, paid, cleared) + locked sections,
+   book list, CBT, one-page print + QR, extra registration fields, photo
+   ===================================================================== */
+const R5_CSS = `
+.panel.locked > *:not(.pay-lock){ display:none !important; }
+.pay-lock{ text-align:center; padding:44px 20px; border:2px dashed #C62828; background:rgba(198,40,40,.05); border-radius:12px; max-width:640px; margin:10px auto; }
+.pay-lock h3{ color:#C62828; margin:8px 0; }
+.xf-box{ border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin:10px 0; background:var(--surface-alt,#F8FAFC); }
+.xf-box h4{ margin:0 0 8px; font-size:.95rem; }
+.xf-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); gap:8px 12px; }
+.xf-grid .field{ margin:0; }
+.fee-tbl input, .fee-tbl select{ padding:6px; border:1px solid #ccc; border-radius:4px; max-width:150px; }
+.cbt-q{ border:1px solid var(--border); border-radius:10px; padding:12px; margin:10px 0; background:var(--surface); }
+.cbt-opt{ display:flex; gap:8px; align-items:center; padding:6px 8px; border:1px solid var(--border); border-radius:8px; margin:5px 0; cursor:pointer; }
+.cbt-opt.ok{ background:rgba(16,185,129,.14); border-color:#10B981; } .cbt-opt.bad{ background:rgba(239,68,68,.12); border-color:#EF4444; }
+.new-dot{ background:#C62828; color:#fff; border-radius:10px; padding:1px 7px; font-size:.72rem; margin-left:6px; }
+.rc-qr{ display:flex; align-items:center; gap:10px; justify-content:flex-end; margin-top:8px; font-size:.68rem; color:#475569; }
+.rc-qr svg{ border:1px solid #CBD5E1; }
+@media print{ @page{ margin:8mm; } #printReportCard{ overflow:hidden; } .rc-page{ break-inside:avoid; page-break-inside:avoid; } }
+`;
+{ const st=document.createElement('style'); st.textContent=R5_CSS; document.head.appendChild(st); }
+const num = v => { const n = Number(String(v == null ? '' : v).replace(/[^\d.]/g,'')); return isFinite(n) ? n : 0; };
+const naira = n => '₦' + Number(n || 0).toLocaleString();
+const myPid = () => { const s = session && session.student; return s ? (s.identifier || s.id || '') : ''; };
+const lsGet = (k, d) => { try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const cloudOn = () => Cloud.active() && !!Cloud.token;
+
+/* ---------- FEES ---------- */
+function feeCalc(d, has, cls){
+  d = d || {};
+  const termFee = d.termFee != null && d.termFee !== '' ? num(d.termFee) : num(feeForClass(cls));
+  const prev = num(d.prevUnpaid), paid = num(d.paid), balance = termFee + prev, owed = Math.max(0, balance - paid);
+  const ov = d.override || '';
+  const cleared = ov === 'cleared' ? true : ov === 'not' ? false : (has ? paid >= balance : false);
+  return { termFee, prev, paid, balance, owed, cleared, override: ov, note: d.note || '', has };
+}
+const Fees = {
+  map: lsGet('mjl_fees5', {}),
+  save(){ lsSet('mjl_fees5', this.map); },
+  async load(){
+    if(!cloudOn()) return false;
+    try{
+      const m = await Cloud.rpc('portal_fee_get', { p_token: Cloud.token }) || {};
+      const changed = JSON.stringify(m) !== JSON.stringify(this.map);
+      this.map = m; this.save(); return changed;
+    }catch(e){ return false; }
+  },
+  async set(id, data){
+    if(cloudOn()){
+      const r = await Cloud.rpc('portal_fee_set', { p_token: Cloud.token, p_id: id, p_data: data });
+      if(!r.ok) throw new Error(r.reason || 'Could not save fees');
+    }
+    this.map[id] = data; this.save();
+  }
+};
+function feeState(id, cls){ return feeCalc(Fees.map[id], !!Fees.map[id], cls); }
+
+renderAdminFees = function(){
+  const c = _el('adminFeesTableWrap'); if(!c) return;
+  const q = ((_el('adminFeesSearch') || {}).value || '').toLowerCase();
+  const list = classRoster.filter(p => !q || String(p.name).toLowerCase().includes(q) || String(p.id).toLowerCase().includes(q) || String(p.cls || '').toLowerCase().includes(q));
+  if(!list.length){ c.innerHTML = '<div class="empty">No pupils found matching your search.</div>'; return; }
+  c.innerHTML = `<p class="small-muted" style="margin-bottom:8px">Scroll sideways to see every column. <b>Current balance = term fee + previous unpaid.</b> A pupil is <b>cleared</b> automatically when the amount paid reaches the current balance. You can also force Cleared / Not cleared.</p>
+  <div style="overflow-x:auto"><table class="fee-tbl" style="min-width:1250px"><thead><tr><th>Pupil ID</th><th>Name</th><th>Class</th><th>Term Fee (₦)</th><th>Previous Unpaid (₦)</th><th>Current Balance</th><th>Amount Paid (₦)</th><th>Fee Note / Message</th><th>Cleared?</th><th>Admin override</th><th>Action</th></tr></thead><tbody>
+  ${list.map(p => { const fs = feeState(p.id, p.cls); const d = Fees.map[p.id] || {};
+    return `<tr data-id="${_enc(p.id)}" data-cls="${_enc(p.cls)}"><td>${_enc(p.id)}</td><td><b>${_enc(p.name)}</b></td><td>${_enc(p.cls)}</td>
+    <td><input type="number" min="0" data-f="termFee" value="${fs.termFee}" style="width:110px"></td>
+    <td><input type="number" min="0" data-f="prev" value="${fs.prev}" style="width:110px"></td>
+    <td class="f-bal"><b>${naira(fs.balance)}</b></td>
+    <td><input type="number" min="0" data-f="paid" value="${fs.paid}" style="width:110px"></td>
+    <td><input type="text" data-f="note" value="${_enc(fs.note)}" placeholder="e.g. Please pay before mid-term" style="width:200px"></td>
+    <td class="f-st">${feeBadge(fs)}</td>
+    <td><select data-f="ov"><option value="" ${!fs.override ? 'selected' : ''}>Auto</option><option value="cleared" ${fs.override === 'cleared' ? 'selected' : ''}>Cleared</option><option value="not" ${fs.override === 'not' ? 'selected' : ''}>Not cleared</option></select></td>
+    <td><button class="btn btn-sm btn-navy" data-feesave="${_enc(p.id)}">Save</button></td></tr>`; }).join('')}
+  </tbody></table></div>`;
+};
+function feeBadge(fs){ return fs.cleared ? '<span class="pill accepted">✔ Cleared</span>' : `<span class="pill pending">Not cleared${fs.owed ? ' · owes ' + naira(fs.owed) : ''}</span>`; }
+function feeRowRead(tr){ const g = k => tr.querySelector('[data-f="' + k + '"]');
+  return { termFee: num(g('termFee').value), prevUnpaid: num(g('prev').value), paid: num(g('paid').value), note: g('note').value.trim(), override: g('ov').value }; }
+document.addEventListener('input', e => {
+  const tr = e.target.closest && e.target.closest('tr[data-id]'); if(!tr || !tr.querySelector('[data-f="termFee"]')) return;
+  const v = feeRowRead(tr), fs = feeCalc(v, true, tr.dataset.cls);
+  tr.querySelector('.f-bal').innerHTML = '<b>' + naira(fs.balance) + '</b>'; tr.querySelector('.f-st').innerHTML = feeBadge(fs);
+});
+document.addEventListener('change', e => { if(e.target.matches && e.target.matches('[data-f="ov"]')) e.target.dispatchEvent(new Event('input', { bubbles:true })); });
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-feesave]'); if(!b) return;
+  const id = b.dataset.feesave, tr = b.closest('tr'), p = classRoster.find(x => x.id === id); if(!tr) return;
+  const v = feeRowRead(tr);
+  showModal({ title:'Are you sure?', message:`Save the fee details for ${p ? p.name : id}?`, confirmText:'Yes, save', cancelText:'Cancel',
+    onConfirm: async () => { try{ await Fees.set(id, v); Sound.playSuccess(); toast('Fee details saved', 'success'); renderAdminFees(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
+});
+
+function lockHTML(fs){
+  return `<div class="pay-lock"><div style="font-size:2.6rem">🔒</div><h3>Payment not cleared yet</h3>
+    <p>School fees payment is incomplete${fs && fs.owed ? ` (outstanding <b>${naira(fs.owed)}</b>)` : ''}. This section opens as soon as the school marks the fees as cleared.</p>
+    <p class="small-muted">You can still use Homework, Timetable, Bulletins, School Calendar, Book List and the Pupil Profile.</p></div>`;
+}
+function parentFeeHTML(c){
+  const fs = feeState(c.id, c.cls);
+  return `<div style="text-align:right;max-width:430px"><div style="font-size:.95rem;line-height:1.7">Term fee: <b>${naira(fs.termFee)}</b> · Previous unpaid: <b>${naira(fs.prev)}</b><br>Current balance: <b>${naira(fs.balance)}</b> · Amount paid: <b>${naira(fs.paid)}</b></div>
+    <div style="font-size:1.1rem;font-weight:bold;margin-top:4px;color:${fs.cleared ? '#047857' : 'var(--crimson-600)'}">${fs.cleared ? '✔ Fees cleared' : 'Not cleared · Outstanding ' + naira(fs.owed)}</div>
+    <div class="small-muted">${_enc(fs.note || (fs.cleared ? 'Payment complete. Thank you!' : 'Please complete the fee payment to open results and attendance.'))}</div></div>`;
+}
+function gateStudent(){
+  const st = session && session.student; if(!st) return; const fs = feeState(myPid(), st.cls); if(fs.cleared) return;
+  const ALLOW = ['homework','timetable','announcements','calendar','profile','books'];
+  document.querySelectorAll('[data-panel-sd]').forEach(p => { if(!ALLOW.includes(p.dataset.panelSd)){ p.classList.add('locked'); if(!p.querySelector('.pay-lock')) p.insertAdjacentHTML('afterbegin', lockHTML(fs)); } });
+}
+function gateParent(){
+  const ch = getParentChildren(); const c = ch[activeChild] || ch[0]; if(!c) return; const fs = feeState(c.id, c.cls); if(fs.cleared) return;
+  document.querySelectorAll('h3').forEach(h => {
+    const t = h.textContent.trim();
+    if(t === 'Term Academic Performance'){ const col = h.parentElement.parentElement; col.innerHTML = lockHTML(fs); }
+    if(t === 'Term Attendance Summary'){ const sc = h.nextElementSibling; if(sc && sc.classList.contains('stat-cards')) sc.remove(); h.insertAdjacentHTML('afterend', lockHTML(fs)); h.textContent = 'Term Attendance Summary'; }
+  });
+  document.querySelectorAll('button[onclick^="printReportCard"]').forEach(b => { if(b.closest('.dash-topbar')) b.style.display = 'none'; });
+}
+
+/* ---------- BOOK LIST ---------- */
+const BOOK_TYPES = ['Textbook','Notebook','Pen','Pencil','Eraser','Other materials'];
+const Books = {
+  map: lsGet('mjl_books5', {}),
+  async load(){ if(!cloudOn()) return false; try{ const m = await Cloud.rpc('portal_books_get', { p_token: Cloud.token }) || {}; const ch = JSON.stringify(m) !== JSON.stringify(this.map); this.map = m; lsSet('mjl_books5', m); return ch; }catch(e){ return false; } },
+  async set(cls, data){ if(cloudOn()){ const r = await Cloud.rpc('portal_books_set', { p_token: Cloud.token, p_cls: cls, p_data: data }); if(!r.ok) throw new Error(r.reason || 'Could not save'); } this.map[cls] = data; lsSet('mjl_books5', this.map); }
+};
+let bookDraft = null;
+function bookTableHTML(cls, d, edit){
+  const items = (d && d.items) || [];
+  if(!edit){
+    if(!items.length) return '<div class="empty">No book list has been posted for ' + _enc(cls) + ' yet.</div>';
+    return `<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Get it from</th><th>Quantity</th><th>When</th></tr></thead><tbody>${items.map((b, i) => `<tr><td>${i + 1}</td><td>${_enc(b.type)}</td><td><b>${_enc(b.name)}</b></td><td>${_enc(b.source)}</td><td>${_enc(b.qty)}</td><td>${b.third ? '<span class="pill pending">Given in 3rd term (before the new session)</span>' : 'Start of term'}</td></tr>`).join('')}</tbody></table></div>${d.note ? `<p class="small-muted" style="margin-top:8px"><b>Note:</b> ${_enc(d.note)}</p>` : ''}`;
+  }
+  return `<div style="overflow-x:auto"><table style="min-width:760px"><thead><tr><th>#</th><th>Type</th><th>Name</th><th>Source</th><th>Qty</th><th>3rd term only</th><th></th></tr></thead><tbody>${items.map((b, i) => `<tr data-bi="${i}">
+    <td>${i + 1}</td><td><select data-bk="type">${BOOK_TYPES.map(t => `<option ${t === b.type ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
+    <td><input data-bk="name" value="${_enc(b.name)}" placeholder="e.g. New Concept Mathematics"></td>
+    <td><select data-bk="source"><option ${b.source === 'School' ? 'selected' : ''}>School</option><option ${b.source === 'Bookshop' ? 'selected' : ''}>Bookshop</option></select></td>
+    <td><input data-bk="qty" type="number" min="1" value="${_enc(b.qty || 1)}" style="width:70px"></td>
+    <td style="text-align:center"><input data-bk="third" type="checkbox" ${b.third ? 'checked' : ''}></td>
+    <td><button class="btn btn-sm btn-ghost" data-bdel="${i}">🗑</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderTeacherBooks(){
+  const el = _el('tBooksPanel'); if(!el) return;
+  const isAdm = session && session.role === 'staff-admin'; const mine = teacherClass();
+  const cls = (bookDraft && bookDraft.cls) || mine || 'Primary 4';
+  if(!bookDraft || bookDraft.cls !== cls){ const src = Books.map[cls] || { items: [], note: '' }; bookDraft = { cls, items: JSON.parse(JSON.stringify(src.items || [])), note: src.note || '' }; }
+  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Book List</h2><p class="small-muted" style="margin-bottom:10px">Write the books and materials pupils must bring. Pupils see this list under <b>Book List</b> and can print it.</p>
+  <div class="field" style="max-width:260px"><label>Class</label><select id="bkCls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  <div id="bkTable">${bookTableHTML(cls, bookDraft, true)}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><button class="btn btn-ghost btn-sm" id="bkAdd">➕ Add a row</button><button class="btn btn-gold btn-sm" id="bkSave">💾 Save book list</button><button class="btn btn-navy btn-sm" id="bkPrint">🖨 Print</button></div>
+  <div class="field"><label>Note for parents (optional)</label><textarea id="bkNote" placeholder="e.g. Items marked '3rd term only' are given before the new session begins.">${_enc(bookDraft.note)}</textarea></div>`;
+  _el('bkCls').onchange = e => { bookDraft = { cls: e.target.value, items: [], note: '' }; const s = Books.map[e.target.value]; if(s){ bookDraft.items = JSON.parse(JSON.stringify(s.items || [])); bookDraft.note = s.note || ''; } renderTeacherBooks(); };
+  _el('bkAdd').onclick = () => { bookDraft.items.push({ type:'Textbook', name:'', source:'Bookshop', qty:1, third:false }); _el('bkTable').innerHTML = bookTableHTML(cls, bookDraft, true); };
+  _el('bkNote').oninput = e => { bookDraft.note = e.target.value; };
+  _el('bkPrint').onclick = () => printBooks(cls, bookDraft);
+  _el('bkSave').onclick = () => showModal({ title:'Are you sure?', message:`Save the book list for ${cls}?`, confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
+    try{ const items = bookDraft.items.filter(b => String(b.name).trim()); await Books.set(cls, { items, note: bookDraft.note }); bookDraft.items = items; Sound.playSuccess(); toast('Book list saved', 'success'); renderTeacherBooks(); }catch(err){ toast('❌ ' + err.message, 'error'); } } });
+}
+document.addEventListener('input', e => { const t = e.target; if(!t.dataset || !t.dataset.bk || !bookDraft) return; const tr = t.closest('tr'); const b = bookDraft.items[+tr.dataset.bi]; if(!b) return; b[t.dataset.bk] = t.type === 'checkbox' ? t.checked : t.value; });
+document.addEventListener('change', e => { const t = e.target; if(t.dataset && t.dataset.bk === 'third' && bookDraft){ const b = bookDraft.items[+t.closest('tr').dataset.bi]; if(b) b.third = t.checked; } });
+document.addEventListener('click', e => { const d = e.target.closest && e.target.closest('[data-bdel]'); if(!d || !bookDraft) return; bookDraft.items.splice(+d.dataset.bdel, 1); _el('bkTable').innerHTML = bookTableHTML(bookDraft.cls, bookDraft, true); });
+function renderPupilBooks(){
+  const el = _el('sBooksPanel'); if(!el) return; const st = session && session.student; const cls = st ? st.cls : '';
+  const d = Books.map[cls];
+  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Book List — ${_enc(cls)}</h2><p class="small-muted" style="margin-bottom:10px">Books and materials to get, and where to get them.</p>${bookTableHTML(cls, d, false)}${d && d.items && d.items.length ? `<div style="margin-top:10px"><button class="btn btn-navy btn-sm" id="pbPrint">🖨 Print book list</button></div>` : ''}`;
+  const b = _el('pbPrint'); if(b) b.onclick = () => printBooks(cls, d);
+}
+function printBooks(cls, d){
+  const logo = settings.logoDataUrl || 'assets/school_logo.png', items = (d && d.items) || [];
+  if(!items.length){ toast('The book list is empty.', 'error'); return; }
+  _el('printReportCard').innerHTML = `<div class="rc-page"><div class="rc-top"><img class="rc-logo" src="${logo}" alt=""><div class="rc-schoolinfo"><h1>${_enc((settings.schoolName || 'Mojuli Christ Glorious School').toUpperCase())}</h1><div class="rc-addr">${_enc(settings.address || '')}</div><div class="rc-report-title">Book &amp; Materials List — ${_enc(cls)} — ${_enc(settings.session || '')} ${_enc(settings.term || '')}</div></div></div>${bookTableHTML(cls, d, false)}</div>`;
+  setTimeout(() => window.print(), 120);
+}
+
+/* ---------- CBT ---------- */
+const CBT_SUBJECTS = ['English Language','Mathematics','Basic Science','Basic Technology','Social Studies','Civic Education','Computer Studies / ICT','Agricultural Science','Verbal Reasoning','Quantitative Reasoning','Phonics','Literacy','Numeracy','Christian Religious Studies','Islamic Studies','Creative Arts','Physical & Health Education','Home Economics','Yoruba','Physics','Chemistry','Biology','Further Mathematics','Economics','Government','Literature in English','Geography','Commerce','Financial Accounting','Business Studies','Other'];
+const LET = ['A','B','C','D','E'];
+const cbtNeed = () => { if(!cloudOn()){ return 'CBT needs the school database. Please log in again (and make sure supabase_accounts.sql has been run).'; } return ''; };
+function paperHTML(test, answers, score, total, who){
+  answers = answers || {}; const qs = test.questions || [];
+  const pct = total ? Math.round(score / total * 100) : 0;
+  return `<h3 style="margin-bottom:4px">${_enc(test.subject)} — ${_enc(test.title || test.kind)}</h3>
+  <p class="small-muted">${who ? '<b>' + _enc(who) + '</b> · ' : ''}${_enc(test.cls)} · ${_enc(test.kind)}</p>
+  <div class="note-box" style="margin:10px 0"><span>${pct >= 50 ? '🎉' : '📘'}</span><div><b>Score: ${score} / ${total} (${pct}%)</b><br>${pct >= 80 ? 'Excellent work!' : pct >= 60 ? 'Very good. Keep it up.' : pct >= 50 ? 'Good effort. Revise the ones you missed.' : 'Keep practising. Go through the corrections below.'}</div></div>
+  ${qs.map((q, i) => { const mine = answers[i] || '', cor = String(q.correct || '').toUpperCase();
+    return `<div class="cbt-q"><b>${i + 1}. ${_enc(q.q)}</b>${LET.filter(l => q[l.toLowerCase()]).map(l => `<div class="cbt-opt ${l === cor ? 'ok' : l === mine ? 'bad' : ''}"><b>${l}.</b> ${_enc(q[l.toLowerCase()])} ${l === mine ? '<span class="small-muted">(chosen)</span>' : ''} ${l === cor ? '✔' : ''}</div>`).join('')}
+    <div class="small-muted">${mine ? (mine === cor ? '✔ Correct' : '✘ Wrong — correct answer: ' + cor) : '— Not answered — correct answer: ' + cor}</div></div>`; }).join('')}`;
+}
+function showPaperModal(html){
+  const o = _el('genericModalOverlay'), c = _el('genericModalCard');
+  c.innerHTML = `<div style="max-height:70vh;overflow-y:auto">${html}</div><div class="modal-actions"><button class="btn btn-ghost btn-sm" id="ppClose">Close</button></div>`;
+  o.classList.add('open'); _el('ppClose').onclick = () => o.classList.remove('open');
+}
+let cbtEdit = null;
+function blankQ(){ return { q:'', a:'', b:'', c:'', d:'', e:'', correct:'A' }; }
+async function renderTeacherCbt(){
+  const el = _el('tCbtPanel'); if(!el) return;
+  const err = cbtNeed(); if(err){ el.innerHTML = `<h2>📝 CBT Test / Exam</h2><div class="empty">${err}</div>`; return; }
+  if(cbtEdit){ return renderCbtEditor(el); }
+  let list = []; try{ list = await Cloud.rpc('portal_cbt_list', { p_token: Cloud.token }) || []; }catch(e){ el.innerHTML = '<div class="empty">❌ ' + _enc(e.message) + '</div>'; return; }
+  const mine = teacherClass(), isAdm = session && session.role === 'staff-admin';
+  list = list.filter(t => isAdm || !mine || t.cls === mine || true);
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted">Set multiple-choice questions. Pupils answer on their portal and are marked automatically.</p></div><button class="btn btn-gold btn-sm" id="cbtNew">➕ Create new test</button></div>
+  ${list.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Title</th><th>Class</th><th>Type</th><th>Questions</th><th>Finished</th><th></th></tr></thead><tbody>${list.map(t => `<tr><td><b>${_enc(t.subject)}</b></td><td>${_enc(t.title)}</td><td>${_enc(t.cls)}</td><td>${_enc(t.kind)}</td><td>${t.count}</td><td>${t.done}${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</td><td style="white-space:nowrap"><button class="btn btn-sm btn-ghost" data-cbtedit="${_enc(t.id)}">✏️ Edit</button> <button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-cbtdel="${_enc(t.id)}">🗑</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No test has been created yet.</div>'}`;
+  _el('cbtNew').onclick = () => { cbtEdit = { cls: mine || 'Primary 4', subject: 'Mathematics', kind: 'Test', title: '', questions: [blankQ()] }; renderTeacherCbt(); };
+}
+function renderCbtEditor(el){
+  const t = cbtEdit, mine = teacherClass(), isAdm = session && session.role === 'staff-admin';
+  el.innerHTML = `<h2 style="margin-bottom:8px">${t.id ? '✏️ Edit test' : '➕ New test'}</h2>
+  <div class="grid-2"><div class="field"><label>Class</label><select id="cbtCls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === t.cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+  <div class="field"><label>Subject</label><select id="cbtSub">${CBT_SUBJECTS.map(c => `<option ${c === t.subject ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div>
+  <div class="grid-2"><div class="field"><label>Type</label><select id="cbtKind"><option ${t.kind !== 'Exam' ? 'selected' : ''}>Test</option><option ${t.kind === 'Exam' ? 'selected' : ''}>Exam</option></select></div>
+  <div class="field"><label>Title (optional)</label><input id="cbtTitle" value="${_enc(t.title)}" placeholder="e.g. First Term Exam"></div></div>
+  <div id="cbtQs">${t.questions.map((q, i) => `<div class="cbt-q" data-qi="${i}"><div style="display:flex;justify-content:space-between"><b>Question ${i + 1}</b><button class="btn btn-sm btn-ghost" data-qdel="${i}">🗑</button></div>
+    <div class="field"><textarea data-q="q" placeholder="Type the question">${_enc(q.q)}</textarea></div>
+    <div class="xf-grid">${LET.map(l => `<div class="field"><label>Option ${l}${l === 'E' ? ' (optional)' : ''}</label><input data-q="${l.toLowerCase()}" value="${_enc(q[l.toLowerCase()])}"></div>`).join('')}
+    <div class="field"><label>Correct answer</label><select data-q="correct">${LET.map(l => `<option ${l === q.correct ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div></div>`).join('')}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-ghost btn-sm" id="cbtAddQ">➕ Add question</button><button class="btn btn-gold btn-sm" id="cbtSave">💾 Save test</button><button class="btn btn-ghost btn-sm" id="cbtCancel">Cancel</button></div>`;
+  _el('cbtCls').onchange = e => { t.cls = e.target.value; }; _el('cbtSub').onchange = e => { t.subject = e.target.value; };
+  _el('cbtKind').onchange = e => { t.kind = e.target.value; }; _el('cbtTitle').oninput = e => { t.title = e.target.value; };
+  _el('cbtAddQ').onclick = () => { t.questions.push(blankQ()); renderCbtEditor(el); };
+  _el('cbtCancel').onclick = () => { cbtEdit = null; renderTeacherCbt(); };
+  _el('cbtSave').onclick = () => {
+    for(let i = 0; i < t.questions.length; i++){ const q = t.questions[i];
+      if(!q.q.trim() || !q.a.trim() || !q.b.trim()){ toast('Question ' + (i + 1) + ' needs the question and at least options A and B.', 'error'); return; }
+      if(!q[q.correct.toLowerCase()].trim()){ toast('Question ' + (i + 1) + ': the correct answer option is empty.', 'error'); return; } }
+    showModal({ title:'Are you sure?', message: t.id ? 'Saving changes will clear pupils\' earlier submissions for this test. Continue?' : 'Save this test and show it to ' + t.cls + '?', confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
+      try{ const r = await Cloud.rpc('portal_cbt_save', { p_token: Cloud.token, p_test: t }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+        Sound.playSuccess(); toast('Test saved', 'success'); cbtEdit = null; renderTeacherCbt(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+  };
+}
+document.addEventListener('input', e => { const t = e.target; if(!cbtEdit || !t.dataset || !t.dataset.q) return; const box = t.closest('[data-qi]'); if(box) cbtEdit.questions[+box.dataset.qi][t.dataset.q] = t.value; });
+document.addEventListener('change', e => { const t = e.target; if(!cbtEdit || !t.dataset || !t.dataset.q) return; const box = t.closest('[data-qi]'); if(box) cbtEdit.questions[+box.dataset.qi][t.dataset.q] = t.value; });
+document.addEventListener('click', async e => {
+  const t = e.target.closest && e.target.closest('[data-cbtedit],[data-cbtdel],[data-qdel]'); if(!t) return;
+  if(t.dataset.qdel !== undefined && cbtEdit){ if(cbtEdit.questions.length > 1){ cbtEdit.questions.splice(+t.dataset.qdel, 1); renderCbtEditor(_el('tCbtPanel')); } return; }
+  if(t.dataset.cbtedit){ try{ const r = await Cloud.rpc('portal_cbt_get', { p_token: Cloud.token, p_id: t.dataset.cbtedit }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+    const x = r.test; cbtEdit = { id:x.id, cls:x.cls, subject:x.subject, kind:x.kind, title:x.title, questions:(x.questions || []).map(q => Object.assign(blankQ(), q)) }; renderTeacherCbt(); }catch(err){ toast('❌ ' + err.message, 'error'); } return; }
+  if(t.dataset.cbtdel){ showModal({ title:'Are you sure?', message:'Delete this test and all pupils\' results for it?', confirmText:'Yes, delete', cancelText:'Cancel', onConfirm: async () => { try{ await Cloud.rpc('portal_cbt_delete', { p_token: Cloud.token, p_id: t.dataset.cbtdel }); toast('Deleted', 'success'); renderTeacherCbt(); renderTeacherCbtDone(); }catch(err){ toast('❌ ' + err.message, 'error'); } } }); }
+});
+
+let cbtDoneSubject = 'All';
+async function renderTeacherCbtDone(quiet){
+  const el = _el('tCbtDonePanel'); if(!el && !quiet) return;
+  if(!cloudOn()){ if(el) el.innerHTML = `<h2>✅ Finished CBT</h2><div class="empty">${cbtNeed()}</div>`; return; }
+  let list = []; try{ list = await Cloud.rpc('portal_cbt_list', { p_token: Cloud.token }) || []; }catch(e){ return; }
+  const fresh = list.reduce((a, t) => a + (+t.fresh || 0), 0);
+  document.querySelectorAll('[data-tab-td="cbtdone"]').forEach(b => { b.innerHTML = '✅ Finished CBT' + (fresh ? `<span class="new-dot">${fresh}</span>` : ''); });
+  if(quiet && fresh > (window._cbtFresh || 0)) toast(`🔔 ${fresh} new CBT submission(s). Open "Finished CBT".`);
+  window._cbtFresh = fresh; if(quiet || !el) return;
+  const subs = ['All'].concat(Array.from(new Set(list.map(t => t.subject))));
+  const shown = list.filter(t => cbtDoneSubject === 'All' || t.subject === cbtDoneSubject);
+  el.innerHTML = `<h2 style="margin-bottom:4px">✅ Finished CBT</h2><p class="small-muted" style="margin-bottom:10px">Pick a subject to see the pupils who have finished. Tap a pupil to see the paper and result.</p>
+  <div class="field" style="max-width:280px"><label>Subject</label><select id="cbtDoneSub">${subs.map(s => `<option ${s === cbtDoneSubject ? 'selected' : ''}>${_enc(s)}</option>`).join('')}</select></div>
+  ${shown.length ? shown.map(t => `<div class="card" style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${_enc(t.subject)} — ${_enc(t.title || t.kind)} <span class="small-muted">(${_enc(t.cls)})</span></b><span>${t.done} finished${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</span></div><div class="cbtres" data-tid="${_enc(t.id)}"><button class="btn btn-sm btn-navy" style="margin-top:8px" data-cbtshow="${_enc(t.id)}">👁 Show pupils</button></div></div>`).join('') : '<div class="empty">No tests for this subject.</div>'}`;
+  _el('cbtDoneSub').onchange = e => { cbtDoneSubject = e.target.value; renderTeacherCbtDone(); };
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('[data-cbtshow],[data-cbtpaper]'); if(!b) return;
+  try{
+    if(b.dataset.cbtshow){ const id = b.dataset.cbtshow; const rs = await Cloud.rpc('portal_cbt_results', { p_token: Cloud.token, p_id: id }) || [];
+      b.closest('.cbtres').innerHTML = rs.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Pupil</th><th>ID</th><th>Score</th><th>Finished</th></tr></thead><tbody>${rs.map(r => `<tr style="cursor:pointer" data-cbtpaper="${_enc(id)}|${_enc(r.pupil)}"><td><b>${_enc(r.name)}</b>${r.fresh ? '<span class="new-dot">new</span>' : ''}</td><td>${_enc(r.pupil)}</td><td>${r.score}/${r.total}</td><td>${_enc(r.at)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small-muted" style="margin-top:8px">Nobody has finished this test yet.</p>';
+      renderTeacherCbtDone(true); return; }
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+});
+document.addEventListener('click', async e => {
+  const r = e.target.closest && e.target.closest('tr[data-cbtpaper]'); if(!r) return; const [tid, pid] = r.dataset.cbtpaper.split('|');
+  try{ const p = await Cloud.rpc('portal_cbt_paper', { p_token: Cloud.token, p_id: tid, p_pupil: pid }); if(!p.ok){ toast('❌ ' + p.reason, 'error'); return; } showPaperModal(paperHTML(p.test, p.answers, p.score, p.total, p.name)); }catch(err){ toast('❌ ' + err.message, 'error'); }
+});
+
+/* pupil side */
+let cbtTaking = null;
+async function renderPupilCbt(){
+  const el = _el('sCbtPanel'); if(!el) return;
+  const err = cbtNeed(); if(err){ el.innerHTML = `<h2>📝 CBT Test / Exam</h2><div class="empty">${err}</div>`; return; }
+  if(cbtTaking){ return renderCbtTake(el); }
+  let list = []; try{ list = await Cloud.rpc('portal_cbt_list', { p_token: Cloud.token }) || []; }catch(e){ el.innerHTML = '<div class="empty">❌ ' + _enc(e.message) + '</div>'; return; }
+  el.innerHTML = `<h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted" style="margin-bottom:10px">Answer the questions on the screen. You can submit each test only once, and you will see your score and the corrections straight away.</p>
+  ${list.length ? list.map(t => `<div class="card" style="margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>${_enc(t.subject)}</b> — ${_enc(t.title || t.kind)}<div class="small-muted">${_enc(t.kind)} · ${t.count} questions · ${_enc(t.at)}</div></div>
+    ${t.score != null ? `<div><span class="pill accepted">Score ${t.score}/${t.total}</span> <button class="btn btn-sm btn-navy" data-cbtmine="${_enc(t.id)}">View paper</button></div>` : `<button class="btn btn-sm btn-gold" data-cbtstart="${_enc(t.id)}">▶ Start</button>`}</div>`).join('') : '<div class="empty">No CBT test is available for your class yet.</div>'}`;
+}
+function renderCbtTake(el){
+  const t = cbtTaking;
+  el.innerHTML = `<h3>${_enc(t.subject)} — ${_enc(t.title || t.kind)}</h3><p class="small-muted">Choose one answer for each question, then press Submit.</p>
+  ${t.questions.map((q, i) => `<div class="cbt-q"><b>${i + 1}. ${_enc(q.q)}</b>${LET.filter(l => q[l.toLowerCase()]).map(l => `<label class="cbt-opt"><input type="radio" name="cq${i}" value="${l}" ${t._a[i] === l ? 'checked' : ''}> <b>${l}.</b> ${_enc(q[l.toLowerCase()])}</label>`).join('')}</div>`).join('')}
+  <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-gold" id="cbtSubmit">✅ Submit answers</button><button class="btn btn-ghost" id="cbtLeave">Leave</button></div>`;
+  el.onchange = e => { const m = /^cq(\d+)$/.exec(e.target.name || ''); if(m) t._a[+m[1]] = e.target.value; };
+  _el('cbtLeave').onclick = () => { cbtTaking = null; renderPupilCbt(); };
+  _el('cbtSubmit').onclick = () => { const n = t.questions.filter((q, i) => !t._a[i]).length;
+    showModal({ title:'Are you sure?', message: n ? `${n} question(s) are not answered. Submit anyway? You cannot retake it.` : 'Submit your answers now? You cannot retake it.', confirmText:'Yes, submit', cancelText:'Not yet', onConfirm: async () => {
+      try{ const r = await Cloud.rpc('portal_cbt_submit', { p_token: Cloud.token, p_id: t.id, p_answers: t._a }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+        cbtTaking = null; Sound.playSuccess(); el.onchange = null; el.innerHTML = paperHTML(r.test, r.answers, r.score, r.total, '') + '<button class="btn btn-navy btn-sm" id="cbtBack">← Back to tests</button>'; _el('cbtBack').onclick = renderPupilCbt; }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest && e.target.closest('[data-cbtstart],[data-cbtmine]'); if(!b) return;
+  try{
+    if(b.dataset.cbtstart){ const r = await Cloud.rpc('portal_cbt_get', { p_token: Cloud.token, p_id: b.dataset.cbtstart }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } cbtTaking = Object.assign({ _a: {} }, r.test); renderPupilCbt(); }
+    else { const p = await Cloud.rpc('portal_cbt_paper', { p_token: Cloud.token, p_id: b.dataset.cbtmine, p_pupil: myPid() }); if(!p.ok){ toast('❌ ' + p.reason, 'error'); return; } showPaperModal(paperHTML(p.test, p.answers, p.score, p.total, '')); }
+  }catch(err){ toast('❌ ' + err.message, 'error'); }
+});
+
+/* ---------- PRINT: one page + QR ---------- */
+function fitPrint(){
+  const box = _el('printReportCard'); if(!box) return; const pg = box.querySelector('.rc-page'); if(!pg) return;
+  const old = box.getAttribute('style') || '';
+  pg.style.zoom = ''; pg.style.width = '';
+  box.style.cssText = 'display:block;position:absolute;left:-99999px;top:0;width:194mm;visibility:hidden;';
+  const mm = 3.7795, maxH = 279 * mm; let h = pg.scrollHeight;
+  if(h > maxH){ const z = Math.max(.35, maxH / h); pg.style.zoom = z; pg.style.width = (194 / z) + 'mm'; pg.style.boxSizing = 'border-box';
+    h = pg.scrollHeight * z; if(h > maxH){ const z2 = z * maxH / h; pg.style.zoom = z2; pg.style.width = (194 / z2) + 'mm'; } }
+  box.setAttribute('style', old);
+}
+{ const _wp = window.print.bind(window); window.print = function(){ try{ fitPrint(); }catch(e){} return _wp(); }; }
+{
+  const _brc = buildReportCardHTML;
+  buildReportCardHTML = function(student, kind, pid){
+    let h = _brc.apply(this, arguments);
+    try{
+      const m = /Percentage:<\/b>\s*(\d+)%/.exec(h); const pct = m ? m[1] + '%' : '';
+      const txt = `${settings.schoolName || 'Mojuli Christ Glorious School'} | ${student.name} | ID ${student.id} | ${student.cls} | ${student.session} ${student.term}${pct ? ' | ' + pct : ''}`;
+      const qr = `<div class="rc-qr"><div style="text-align:right">Scan to read this result summary.<br>${_enc(student.name)} · ${_enc(student.id)}</div>${mjlQRsvg(txt, 84)}</div>`;
+      const i = h.lastIndexOf('</div>'); if(i > 0) h = h.slice(0, i) + qr + h.slice(i);
+    }catch(e){ console.warn(e); }
+    return h;
+  };
+}
+
+/* ---------- EXTRA REGISTRATION FIELDS ---------- */
+const XF_KEYS = ['stateOfOrigin','religion','fName','fAddress','fPhone','fJob','mName','mAddress','mPhone','mJob','mOther'];
+function xfFrom(o){ const r = {}; XF_KEYS.forEach(k => { if(o && o[k]) r[k] = o[k]; }); return r; }
+function xfInput(k, label, v, type){ return `<div class="field"><label>${label}</label><input data-xf="${k}" value="${_enc(v || '')}" ${type ? 'type="' + type + '"' : ''}></div>`; }
+function extraFieldsHTML(v){
+  v = v || {};
+  return `<div class="xf-wrap"><div class="xf-box"><h4>Student's details (more)</h4><div class="xf-grid">${xfInput('stateOfOrigin', 'State of origin', v.stateOfOrigin)}
+    <div class="field"><label>Religion</label><select data-xf="religion"><option value="">Select</option>${['Christianity','Islam','Other'].map(r => `<option ${v.religion === r ? 'selected' : ''}>${r}</option>`).join('')}</select></div></div></div>
+  <div class="xf-box"><h4>Father's details</h4><div class="xf-grid">${xfInput('fName', 'Full names', v.fName)}${xfInput('fAddress', 'Contact address', v.fAddress)}${xfInput('fPhone', 'Phone number', v.fPhone, 'tel')}${xfInput('fJob', 'Occupation', v.fJob)}</div></div>
+  <div class="xf-box"><h4>Mother's details</h4><div class="xf-grid">${xfInput('mName', 'Full names', v.mName)}${xfInput('mOther', 'Other names', v.mOther)}${xfInput('mAddress', 'Contact address', v.mAddress)}${xfInput('mPhone', 'Phone number', v.mPhone, 'tel')}${xfInput('mJob', 'Occupation', v.mJob)}</div></div></div>`;
+}
+function readXF(){ const r = {}; document.querySelectorAll('[data-xf]').forEach(i => { r[i.dataset.xf] = (i.value || '').trim(); }); return r; }
+{
+  const inject = () => {
+    ['pupilEnrollModalForm','inlineEnrollmentForm','addStudentDirectForm','editPupilForm'].forEach(fid => {
+      const f = _el(fid); if(!f || f.querySelector('.xf-wrap')) return;
+      const pid = fid === 'editPupilForm' ? window._epId : null; const p = pid ? classRoster.find(x => x.id === pid) : null;
+      const anchor = f.querySelector('.modal-actions') || (f.querySelector('button[type=submit]') || {}).parentElement;
+      const h = extraFieldsHTML(p || {});
+      if(anchor && anchor.parentElement === f) anchor.insertAdjacentHTML('beforebegin', h); else f.insertAdjacentHTML('beforeend', h);
+    });
+  };
+  new MutationObserver(inject).observe(document.body, { childList: true, subtree: true });
+  const _sep = showEditPupil; showEditPupil = function(id){ window._epId = id; return _sep(id); };
+  const _pp = patchPupil; patchPupil = function(id, patch){ if(_el('editPupilForm')) Object.assign(patch, readXF()); return _pp(id, patch); };
+  const _epe = enrollPupilEverywhere; enrollPupilEverywhere = function(p){ return _epe(Object.assign(p, readXF())); };
+  const _rpc = Cloud.rpc.bind(Cloud);
+  Cloud.rpc = function(name, params){ if(name === 'portal_enroll_student' && params && params.p_pupil && _el('addStudentDirectForm')) Object.assign(params.p_pupil, readXF()); return _rpc(name, params); };
+}
+
+/* ---------- wiring ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-tab-sd="cbt"],[data-tab-sd="books"],[data-tab-td="cbt"],[data-tab-td="cbtdone"]'); if(!t) return;
+  setTimeout(() => { try{
+    if(t.dataset.tabSd === 'cbt'){ cbtTaking = cbtTaking; if(!cbtTaking) renderPupilCbt(); }
+    if(t.dataset.tabSd === 'books'){ Books.load().then(() => renderPupilBooks()); }
+    if(t.dataset.tabTd === 'cbt' && !cbtEdit) renderTeacherCbt();
+    if(t.dataset.tabTd === 'cbtdone') renderTeacherCbtDone();
+  }catch(_){} }, 50);
+});
+const _ar7 = afterRender;
+afterRender = function(id){
+  _ar7(id);
+  try{
+    if(id === 'primary-dashboard' || id === 'secondary-dashboard'){
+      gateStudent(); renderPupilBooks(); renderPupilCbt();
+      Promise.all([Fees.load(), Books.load()]).then(r => { if(r[0]) go(id, true); else if(r[1]) renderPupilBooks(); });
+    }
+    if(id === 'parent-portal'){ gateParent(); Fees.load().then(ch => { if(ch) go(id, true); }); }
+    if(id === 'teacher-dashboard'){
+      renderTeacherBooks(); renderTeacherCbt(); renderTeacherCbtDone();
+      Books.load().then(ch => { if(ch) renderTeacherBooks(); });
+      clearInterval(window._cbtT); window._cbtT = setInterval(() => { if(_el('tCbtDonePanel')) renderTeacherCbtDone(true); else clearInterval(window._cbtT); }, 60000);
+    }
+    if(id === 'admin-dashboard'){ renderAdminFees(); Fees.load().then(() => renderAdminFees()); }
+  }catch(e){ console.warn(e); }
+};
+
 /* The Parents Forum is only for logged-in parents (and staff) */
 const _goForum = go;
 go = function(id, fromHistory){
