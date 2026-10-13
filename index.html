@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>window._resetTok=((/^#reset=([0-9a-f]+)/.exec(location.hash)||[])[1])||"";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mojuli Christ Glorious School | Portal &amp; Official Website</title>
@@ -9206,6 +9207,7 @@ function renderTeacherProfile(){
           if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } Object.assign(session.user, r.account); }
         else { Object.assign(session.user, { name: _el('tpName').value, email: _el('tpEmail').value, identifier: _el('tpEmail').value, phone: _el('tpPhone').value }); saveUserAccounts(); }
         session.name = session.user.name; Sound.playSuccess(); toast('Profile saved', 'success');
+        try{ const nm=session.user.name; const sb=document.querySelector('.dash-side .who b'); if(sb) sb.textContent=nm; const tp=document.querySelector('.dash-topbar p.small-muted'); if(tp) tp.textContent='Welcome, '+nm; const sb2=document.querySelector('.dash-side .who div b'); if(sb2) sb2.textContent=nm; }catch(_){}
       }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
   _el('tpPass').onsubmit = e => { e.preventDefault();
     if(_el('tpNew').value !== _el('tpNew2').value){ toast('New passwords do not match', 'error'); return; }
@@ -9873,6 +9875,125 @@ afterRender = function(id){
     if(id === 'admin-dashboard'){ renderAdminFees(); Fees.load().then(() => renderAdminFees()); }
   }catch(e){ console.warn(e); }
 };
+
+/* ===== Round 7: staff passwords + delete, admin recovery email, forgot-password link ===== */
+{ const _prev = renderAdminStaffs;
+  renderAdminStaffs = function(){
+    const el = _el('adminStaffsPanel'); if(!el) return;
+    const on = Cloud.active() && Cloud.token;
+    const list = on ? (cloudStaff||[]) : userAccounts.filter(u=>u.role==='teacher'||u.role==='admin');
+    el.innerHTML = `<h3 style="margin-bottom:4px">🧑‍🏫 Staffs</h3><p class="small-muted" style="margin-bottom:12px">Approved staff. The password column shows the password you issued; once a teacher changes their own password it shows “set by the user” (press 🔑 to issue a new one). Scroll sideways for every column.</p>
+    ${list.length ? `<div style="overflow-x:auto;white-space:nowrap"><table style="min-width:1100px"><thead><tr><th>SN</th><th>Photo</th><th>Name</th><th>Role</th><th>Gender</th><th>Phone</th><th>Email (login)</th><th>Password</th><th>Class</th><th>Registered</th><th>Action</th></tr></thead><tbody>${list.map((u,i)=>{
+      const pw = on ? (u.pw ? `<code>${_enc(u.pw)}</code>` : '<span class="small-muted">set by the user</span>') : (u.password ? `<code>${_enc(u.password)}</code>` : '-');
+      return `<tr><td>${i+1}.</td><td><div style="width:40px;height:40px;border-radius:50%;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center">${u.photoUrl?`<img src="${u.photoUrl}" alt="" style="width:100%;height:100%;object-fit:cover">`:initialsFor(u.name)}</div></td>
+      <td style="font-weight:700">${_enc(u.name)}</td><td><span class="badge ${u.role==='admin'?'gold':'live'}">${_enc(u.role)}</span></td><td>${_enc(u.gender||'-')}</td><td>${_enc(u.phone||'-')}</td><td>${_enc(u.email||u.identifier||'')}</td><td>${pw}</td><td>${_enc(u.cls||'-')}</td><td>${_enc(u.registeredAt||'')}</td>
+      <td>${on?`<button class="btn btn-sm btn-ghost" onclick="resetAccountPassword('${u.id}')">🔑 New password</button> `:''}<button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" onclick="deleteStaffAccount('${u.id}')">🗑 Delete</button></td></tr>`; }).join('')}</tbody></table></div>` : '<div class="empty">No approved staff yet.</div>'}`;
+  };
+}
+/* the new-password card can now refresh the table behind it */
+{ const _cnp = cloudNewPassword; cloudNewPassword = async function(a,b,c){ await _cnp(a,b,c); try{ await Cloud.refreshAdmin(); }catch(_){} }; }
+
+/* Admin recovery email card (Security tab) */
+async function renderAdminMail(){
+  const panel = document.querySelector('[data-panel-ad="security"]'); if(!panel) return;
+  let box = _el('adminMailCard');
+  if(!box){ box = document.createElement('div'); box.id='adminMailCard'; box.className='card'; box.style.marginTop='16px'; panel.appendChild(box); }
+  if(!(Cloud.active() && Cloud.token)){ box.innerHTML = '<h3>📧 Admin recovery email</h3><p class="small-muted">Connect the cloud (Supabase) and log in as admin to use this.</p>'; return; }
+  let st = {email:'',hasKey:false}; try{ const r = await Cloud.rpc('portal_admin_mail_get',{p_token:Cloud.token}); if(r.ok) st = r; }catch(_){}
+  box.innerHTML = `<h3>📧 Admin recovery email</h3>
+    <p class="small-muted" style="margin:4px 0 12px">Register your email here. On the Staff login page, “Forgot password?” will email a link (valid 30 minutes) to choose a new password. You can change this email any time.</p>
+    <form id="adminMailForm"><div class="field"><label>Your email *</label><input id="amEmail" type="email" required value="${_enc(st.email||'')}" placeholder="you@example.com"></div>
+    <div class="field"><label>Email sending key (Resend API key) ${st.hasKey?'<span class="badge live">saved</span>':'<span class="badge gold">not set</span>'}</label><input id="amKey" type="password" autocomplete="off" placeholder="${st.hasKey?'Leave empty to keep the saved key':'re_xxxxxxxx'}"></div>
+    <details class="small-muted" style="margin:6px 0 12px"><summary style="cursor:pointer">How to get the key (free, 2 minutes)</summary><ol style="margin:8px 0 0 18px;line-height:1.7"><li>Go to resend.com and sign up with <b>this same email</b>.</li><li>Open API Keys → Create API Key → copy it (starts with <code>re_</code>).</li><li>Paste it above and press Save. Free accounts can send to the email they signed up with, which is exactly what is needed here.</li></ol></details>
+    <button class="btn btn-navy" type="submit">💾 Save email</button></form>`;
+  _el('adminMailForm').onsubmit = e => { e.preventDefault();
+    showModal({title:'Are you sure?',message:'Save this recovery email? It is also the email you can log in with.',confirmText:'Yes, save',cancelText:'Cancel',onConfirm:async()=>{
+      try{ const r = await Cloud.rpc('portal_admin_mail_set',{p_token:Cloud.token,p_email:_el('amEmail').value,p_key:_el('amKey').value||null,p_site:location.href.split('#')[0]});
+        if(!r.ok){ toast('❌ '+r.reason,'error'); return; } if(session&&session.user) session.user.email=r.email; Sound.playSuccess(); toast('Saved','success'); renderAdminMail();
+      }catch(err){ toast('❌ '+err.message,'error'); } }}); };
+}
+document.addEventListener('click', e => { if(e.target.closest && e.target.closest('[data-tab-ad="security"]')) setTimeout(renderAdminMail, 50); });
+
+/* Forgot password (staff login page) */
+function forgotAdminCard(){
+  const o=_el('genericModalOverlay'), c=_el('genericModalCard');
+  c.innerHTML = `<h3>Forgot password?</h3><p class="small-muted">Administrators: enter the recovery email saved in your Security tab and we will email you a link. Teachers: please ask the administrator for a new password.</p>
+    <div class="field" style="margin-top:12px"><label>Admin email</label><input id="fpEmail" type="email" placeholder="you@example.com"></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="fpCancel">Cancel</button><button class="btn btn-navy btn-sm" id="fpSend">Send link</button></div>`;
+  o.classList.add('open'); _el('fpCancel').onclick=()=>o.classList.remove('open');
+  _el('fpSend').onclick=async()=>{ const em=_el('fpEmail').value.trim(); if(!em){ toast('Enter your email','error'); return; }
+    try{ const r=await Cloud.rpc('portal_admin_forgot',{p_email:em});
+      if(r.sent===false) toast('Email sending is not set up yet. Log in once and add it under Security.','error');
+      else { o.classList.remove('open'); toast('If that email belongs to the admin, a reset link has been sent. Check your inbox and spam.','success'); }
+    }catch(err){ toast('❌ '+err.message,'error'); } };
+}
+function resetPasswordCard(tok){
+  const o=_el('genericModalOverlay'), c=_el('genericModalCard');
+  c.innerHTML = `<h3>🔐 Choose a new admin password</h3><div class="field" style="margin-top:12px"><label>New password (8+ characters)</label><input id="rpNew" type="password" minlength="8"></div><div class="field"><label>Repeat new password</label><input id="rpNew2" type="password" minlength="8"></div>
+    <div class="modal-actions"><button class="btn btn-ghost btn-sm" id="rpCancel">Cancel</button><button class="btn btn-navy btn-sm" id="rpSave">Save password</button></div>`;
+  o.classList.add('open'); _el('rpCancel').onclick=()=>{ o.classList.remove('open'); try{history.replaceState({v:'home'},'','#home');}catch(_){} };
+  _el('rpSave').onclick=async()=>{ if(_el('rpNew').value!==_el('rpNew2').value){ toast('Passwords do not match','error'); return; }
+    try{ const r=await Cloud.rpc('portal_admin_reset',{p_reset:tok,p_new:_el('rpNew').value}); if(!r.ok){ toast('❌ '+r.reason,'error'); return; }
+      o.classList.remove('open'); Sound.playSuccess(); toast('Password changed. Please log in.','success'); window._resetTok=''; try{history.replaceState({v:'staff-login'},'','#staff-login');}catch(_){} go('staff-login'); }
+    catch(err){ toast('❌ '+err.message,'error'); } };
+}
+{ const _arF = afterRender; afterRender = function(id){ _arF(id);
+    if(id==='staff-login'){ const f=_el('loginForm-staff'); if(f && !_el('forgotPwLink')){ const a=document.createElement('p'); a.style.cssText='text-align:center;margin-top:12px'; a.innerHTML='<a href="#" id="forgotPwLink" style="color:var(--navy-700);font-weight:600">Forgot password?</a>'; f.appendChild(a); _el('forgotPwLink').onclick=ev=>{ ev.preventDefault(); forgotAdminCard(); }; } } }; }
+if(window._resetTok) setTimeout(()=>resetPasswordCard(window._resetTok), 1500);
+
+/* ===== Round 8: add past attendance days + edit anything before printing ===== */
+function _attLocalKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _attPastDates(n){ const out=[]; const d=new Date(); let guard=0;
+  while(out.length<n && guard++<800){ const wd=d.getDay(); const k=_attLocalKey(d);
+    if(wd!==0 && wd!==6 && !(attendanceStore[k] && Object.keys(attendanceStore[k]).length)) out.push(k);
+    d.setDate(d.getDate()-1); }
+  return out; }
+function _attRoster(){ const c=teacherClass(); return c ? classRoster.filter(p=>p.cls===c) : classRoster; }
+function _attNice(k){ const d=new Date(k+'T12:00:00'); return d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'}); }
+function startAttBack(){ const n=parseInt((_el('attBackN')||{}).value,10);
+  if(!n||n<1||n>60){ toast('Enter a number of days from 1 to 60','error'); return; }
+  window._attBack={dates:_attPastDates(n),ticks:{}}; renderTeacherAttendancePanel(); }
+function cancelAttBack(){ window._attBack=null; renderTeacherAttendancePanel(); }
+function attBackTick(pid,i,on){ const t=window._attBack.ticks; (t[pid]=t[pid]||{})[i]=!!on; const c=document.getElementById('abc-'+pid); if(c) c.textContent=Object.values(t[pid]).filter(Boolean).length+' / '+window._attBack.dates.length; }
+function attBackAll(pid,on){ const B=window._attBack; B.ticks[pid]={}; B.dates.forEach((d,i)=>B.ticks[pid][i]=!!on);
+  document.querySelectorAll(`[data-abp="${pid}"]`).forEach(x=>x.checked=!!on); attBackTick(pid,0,B.ticks[pid][0]); }
+function attBackDay(i,on){ _attRoster().forEach(p=>{ const t=window._attBack.ticks; (t[p.id]=t[p.id]||{})[i]=!!on; });
+  document.querySelectorAll(`[data-abd="${i}"]`).forEach(x=>x.checked=!!on); _attRoster().forEach(p=>attBackTick(p.id,i,window._attBack.ticks[p.id][i])); }
+function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return; const ro=_attRoster();
+  showModal({title:'Are you sure?',message:`Add ${B.dates.length} past day(s) for ${ro.length} pupil(s)? Ticked = present, not ticked = absent. This adds to each pupil's attendance total.`,confirmText:'Yes, save',cancelText:'Cancel',onConfirm:()=>{
+    B.dates.forEach((k,i)=>{ const day=attendanceStore[k]=attendanceStore[k]||{}; ro.forEach(p=>{ day[p.id]=((B.ticks[p.id]||{})[i])?'present':'absent'; }); });
+    DB.set('attendanceStore',attendanceStore); window._attBack=null; Sound.playSuccess(); toast('Past days added to attendance','success'); renderTeacherAttendancePanel(); }}); }
+{ const _rtap = renderTeacherAttendancePanel;
+  renderTeacherAttendancePanel = function(){ _rtap.apply(this,arguments);
+    const el=_el('teacherAttendancePanelBody'); if(!el) return;
+    const B=window._attBack;
+    if(!B){
+      el.insertAdjacentHTML('afterbegin',`<div class="card" style="margin-bottom:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>📅 Add past days</b><span class="small-muted">How many school days back?</span><input id="attBackN" type="number" min="1" max="60" value="5" style="width:80px"><button class="btn btn-gold btn-sm" onclick="startAttBack()">Add days</button></div>`);
+      return; }
+    const ro=_attRoster();
+    if(!B.dates.length){ el.innerHTML=`<div class="empty">No free weekdays found to add. <button class="btn btn-ghost btn-sm" onclick="cancelAttBack()">Back</button></div>`; return; }
+    el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">Add past days — ${B.dates.length} school day(s)</h2><p class="small-muted">From today backwards, weekends skipped and days already recorded left out. Tick the days each pupil was <b>present</b>; unticked counts as absent.</p></div><div><button class="btn btn-ghost btn-sm" onclick="cancelAttBack()">Cancel</button> <button class="btn btn-navy btn-sm" onclick="saveAttBack()">💾 Save past days</button></div></div>
+    <div style="overflow-x:auto"><table style="min-width:${300+B.dates.length*64}px"><thead><tr><th>SN</th><th style="min-width:170px">Pupil</th><th>Ticks</th><th>All</th>${B.dates.map((d,i)=>`<th style="text-align:center;font-size:.72rem;white-space:nowrap">${_enc(_attNice(d))}<br><input type="checkbox" title="Tick this day for everyone" onchange="attBackDay(${i},this.checked)" style="width:auto"></th>`).join('')}</tr></thead><tbody>
+    ${ro.map((p,idx)=>`<tr><td>${idx+1}.</td><td style="font-weight:700">${_enc(p.name)}</td><td><b id="abc-${p.id}">0 / ${B.dates.length}</b></td><td><input type="checkbox" onchange="attBackAll('${p.id}',this.checked)" style="width:auto"></td>${B.dates.map((d,i)=>`<td style="text-align:center"><input type="checkbox" data-abp="${p.id}" data-abd="${i}" onchange="attBackTick('${p.id}',${i},this.checked)" style="width:auto"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <button class="btn btn-navy mt24" onclick="saveAttBack()">💾 Save past days</button>`; };
+}
+
+/* Edit anything on a result/report card before it is printed (staff only) */
+{ let pend=false, skip=false; const pr=_el('printReportCard');
+  const obs = pr ? new MutationObserver(()=>{ if(skip){ skip=false; return; } pend = pr.innerHTML.trim()!==''; }) : null; if(obs) obs.observe(pr,{childList:true,subtree:true,characterData:true});
+  const _wp2 = window.print.bind(window);
+  window.print = function(){
+    if(obs){ const rec=obs.takeRecords(); if(rec.length && !skip) pend = pr.innerHTML.trim()!==''; }
+    const staff = session && /^staff/.test(session.role||'');
+    if(pend && staff && pr && pr.innerHTML.trim()){ pend=false;
+      const o=_el('genericModalOverlay'), c=_el('genericModalCard'); c.style.maxWidth='960px';
+      c.innerHTML=`<h3 style="margin-bottom:4px">✏️ Edit before printing</h3><p class="small-muted" style="margin-bottom:10px">Tap any text, number or remark below to change it. Nothing here is saved; it only changes this printout.</p><div id="rcEditBox" contenteditable="true" spellcheck="false" style="overflow:auto;max-width:100%;max-height:62vh;border:1px dashed var(--border);padding:6px;background:#fff">${pr.innerHTML}</div><div class="modal-actions"><button class="btn btn-ghost btn-sm" id="rcEdCancel">Cancel</button><button class="btn btn-navy btn-sm" id="rcEdPrint">🖨 Print</button></div>`;
+      o.classList.add('open');
+      _el('rcEdCancel').onclick=()=>{ o.classList.remove('open'); c.style.maxWidth=''; };
+      _el('rcEdPrint').onclick=()=>{ const h=_el('rcEditBox').innerHTML; o.classList.remove('open'); c.style.maxWidth=''; skip=true; pr.innerHTML=h; setTimeout(()=>{ skip=false; _wp2(); },150); };
+      return; }
+    return _wp2(); };
+}
 
 /* The Parents Forum is only for logged-in parents (and staff) */
 const _goForum = go;
