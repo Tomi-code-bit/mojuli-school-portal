@@ -5194,7 +5194,6 @@ function studentDashboard(kind){
         <span>${s.cls} &bull; ${s.id}</span></div>
       </div>
       <button class="tab active" data-tab-sd="overview">📊 Performance Overview</button>
-      <button class="tab" data-tab-sd="results">📑 Academic Results</button>
       <button class="tab" data-tab-sd="attendance">📅 Attendance Log</button>
       <button class="tab" data-tab-sd="homework">📝 Homework</button>
       ${extraTab}
@@ -5297,7 +5296,7 @@ function studentDashboard(kind){
         </div>
       </div>
 
-      <div data-panel-sd="results" class="panel">
+      <div data-panel-sd="results" class="panel" style="display:none !important" hidden>
         <div class="dash-topbar" style="margin-bottom:0">
           <div>
             <h2 style="margin-bottom:4px">Academic Score Sheet — ${s.term}</h2>
@@ -9120,10 +9119,10 @@ function pastRowAvg(pid, session, term){ const h = (termResultsHistory[pid] || {
 function renderStaffPast(elId, defaultCls){
   const el = _el(elId); if(!el) return;
   const sessions = pastSessionsFor();
-  el.innerHTML = `<h3 style="margin-bottom:4px">🗂 Past Students &amp; Results</h3><p class="small-muted" style="margin-bottom:12px">Pick the year, class and term to see everyone who was in that class then.</p>
+  el.innerHTML = `<h3 style="margin-bottom:4px">🗂 Past Students &amp; Results</h3><p class="small-muted" style="margin-bottom:12px">Pick the year and term to see the pupils you taught then (your class is fixed to the one you are assigned to; admins can also pick a class).</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
       <select id="${elId}_y">${sessions.map(s => `<option>${s}</option>`).join('')}</select>
-      <select id="${elId}_c">${ALL_CLASS_NAMES.concat(['Left']).map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>
+      ${(elId === 'teacherPastPanel' && teacherClass()) ? `<input type="hidden" id="${elId}_c" value="${_enc(teacherClass())}"><span class="badge gold" style="align-self:center">${_enc(teacherClass())}</span>` : `<select id="${elId}_c">${ALL_CLASS_NAMES.concat(['Left']).map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>`}
       <select id="${elId}_t"><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
       <button class="btn btn-navy" onclick="showStaffPast('${elId}')">Show students</button></div><div id="${elId}_out"></div>`;
 }
