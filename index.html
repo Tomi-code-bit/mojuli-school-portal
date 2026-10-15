@@ -3693,7 +3693,7 @@ function showPupilEnrollmentModal(kind) {
         <div class="field">
           <label>Class Enrolled</label>
           <select id="modal_pupilCls" required>
-            ${[...PRIMARY_CLASSES, ...SECONDARY_CLASSES].map(c=>`<option value="${c}" ${c==='Primary 4'?'selected':''}>${c}</option>`).join('')}
+            ${[...PRIMARY_CLASSES, ...SECONDARY_CLASSES].map(c=>`<option value="${c}" ${c==='Primary 4'?'selected':''}>${c}</option>`).join('')}<option value="Left">Left (left the school)</option>
           </select>
         </div>
         <div class="field">
@@ -5201,7 +5201,7 @@ function studentDashboard(kind){
       <button class="tab" data-tab-sd="timetable">⏰ Timetable</button>
       <button class="tab" data-tab-sd="books">📚 Book List</button>
       <button class="tab" data-tab-sd="cbt">📝 CBT Test / Exam</button>
-      <button class="tab" data-tab-sd="past">📚 Past Results</button>
+      <button class="tab" data-tab-sd="past">📚 Results</button>
       <button class="tab" data-tab-sd="announcements">📢 Bulletins</button>
       <button class="tab" data-tab-sd="calendar">📆 School Calendar</button>
       <button class="tab" data-tab-sd="profile">👤 Pupil Profile</button>
@@ -5664,7 +5664,7 @@ registerView('admin-dashboard', ()=>`
             <label style="font-weight:700;font-size:0.86rem;white-space:nowrap">Select Class:</label>
             <select id="adminResultsClassFilter" onchange="renderAdminResultsTable(this.value)" style="padding:7px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);font-weight:600;min-width:180px">
               <option value="All Classes">All Classes</option>
-              ${[...PRIMARY_CLASSES, ...SECONDARY_CLASSES].map(c=>`<option value="${c}" ${c==='Primary 4'?'selected':''}>${c}</option>`).join('')}
+              ${[...PRIMARY_CLASSES, ...SECONDARY_CLASSES].map(c=>`<option value="${c}" ${c==='Primary 4'?'selected':''}>${c}</option>`).join('')}<option value="Left">Left</option>
             </select>
           </div>
         </div>
@@ -8184,7 +8184,7 @@ function showAddStudentDirect(){
   <form id="addStudentDirectForm" style="display:grid;gap:10px;margin-top:8px">
     <div class="field"><label>Full name *</label><input id="asdName" required placeholder="Pupil's full name"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="field"><label>Class *</label><select id="asdClass" required>${ALL_CLASS_NAMES.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Class *</label><select id="asdClass" required>${ALL_CLASS_NAMES.concat(['Left']).map(c=>`<option>${c}</option>`).join('')}</select></div>
       <div class="field"><label>Gender</label><select id="asdGender"><option>Male</option><option>Female</option></select></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="field"><label>Parent / guardian</label><input id="asdParent" placeholder="Parent's name"></div>
@@ -9065,10 +9065,10 @@ async function patchPupil(id, patch){
     if(!r.ok) throw new Error(r.reason || 'Could not save');
   }
   if(p){ Object.assign(p, patch); saveClassRoster(); }
-  const u = userAccounts.find(x => x.id === id); if(u){ if(patch.name) u.name = patch.name; if(patch.cls){ u.cls = patch.cls; u.role = kindForClass(patch.cls) === 'secondary' ? 'student-secondary' : 'student-primary'; } saveUserAccounts(); }
+  const u = userAccounts.find(x => x.id === id); if(u){ if(patch.name) u.name = patch.name; if(patch.cls){ u.cls = patch.cls; if(patch.cls !== 'Left') u.role = kindForClass(patch.cls) === 'secondary' ? 'student-secondary' : 'student-primary'; } saveUserAccounts(); }
 }
 function promoteAllPupils(){
-  const list = classRoster.filter(p => p.cls !== 'Graduated');
+  const list = classRoster.filter(p => p.cls !== 'Graduated' && p.cls !== 'Left');
   if(!list.length){ toast('There are no pupils to promote.', 'error'); return; }
   showModal({ title:'Are you sure?', confirmText:'Yes, promote everyone', cancelText:'Cancel',
     message:`Promote ${list.length} pupil(s)/student(s) to the next class and start session ${nextSession(settings.session)}? Current results are first saved under Past Results. SS 3 leavers become "Graduated". Do this only at the END of the third term.`,
@@ -9123,7 +9123,7 @@ function renderStaffPast(elId, defaultCls){
   el.innerHTML = `<h3 style="margin-bottom:4px">🗂 Past Students &amp; Results</h3><p class="small-muted" style="margin-bottom:12px">Pick the year, class and term to see everyone who was in that class then.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
       <select id="${elId}_y">${sessions.map(s => `<option>${s}</option>`).join('')}</select>
-      <select id="${elId}_c">${ALL_CLASS_NAMES.map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>
+      <select id="${elId}_c">${ALL_CLASS_NAMES.concat(['Left']).map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>
       <select id="${elId}_t"><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
       <button class="btn btn-navy" onclick="showStaffPast('${elId}')">Show students</button></div><div id="${elId}_out"></div>`;
 }
@@ -9151,7 +9151,7 @@ function showPupilPast(){
 function showEditPupil(id){
   const p = classRoster.find(x => x.id === id); if(!p) return;
   const overlay = _el('genericModalOverlay'), card = _el('genericModalCard'); window._editPhoto = null;
-  const classes = ALL_CLASS_NAMES.concat(p.cls && !ALL_CLASS_NAMES.includes(p.cls) ? [p.cls] : []);
+  const classes = ALL_CLASS_NAMES.concat(['Left']).concat(p.cls && p.cls !== 'Left' && !ALL_CLASS_NAMES.includes(p.cls) ? [p.cls] : []);
   card.innerHTML = `<h3>✏️ Edit ${_enc(p.name)}</h3><p class="small-muted">Registration ID <b>${_enc(p.id)}</b> cannot be changed.</p>
     <form id="editPupilForm" style="display:grid;gap:10px">
       <div style="display:flex;gap:12px;align-items:center"><div class="zoomwrap" style="width:62px;height:72px;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#F1F5FB;display:flex;align-items:center;justify-content:center" id="epPrev">${p.photoUrl ? `<img src="${p.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : '🧒'}</div>
@@ -9995,6 +9995,52 @@ function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return;
     return _wp2(); };
 }
 
+/* ===== Round 9: extra pupil fields really save; student "Results" with year + class + term ===== */
+document.addEventListener('submit', e => { const f = e.target; if(f && ['editPupilForm','pupilEnrollModalForm','inlineEnrollmentForm','addStudentDirectForm'].includes(f.id)){ window._xfSnap = { at: Date.now(), form: f.id, v: readXF() }; } }, true);
+{ const _rxf = readXF;
+  readXF = function(){ const live = _rxf(); if(Object.keys(live).length) return live;
+    const s = window._xfSnap; return (s && Date.now() - s.at < 120000) ? s.v : {}; };
+  const _pp2 = patchPupil;
+  patchPupil = function(id, patch){ const s = window._xfSnap;
+    if(!_el('editPupilForm') && s && s.form === 'editPupilForm' && Date.now() - s.at < 120000){ Object.assign(patch, s.v); window._xfSnap = null; }
+    return _pp2(id, patch); };
+}
+function _sgCls(){ return ((session && session.student) || {}).cls || ''; }
+renderPupilPast = function(){
+  const el = _el('pupilPastPanel'); if(!el) return; const pid = ((session && session.student) || {}).id;
+  const sessions = pastSessionsFor(pid); if(!sessions.includes(settings.session)) sessions.unshift(settings.session);
+  const mine = _sgCls(), classes = ALL_CLASS_NAMES.includes(mine) || !mine ? ALL_CLASS_NAMES : ALL_CLASS_NAMES.concat([mine]);
+  el.innerHTML = `<h2 style="margin-bottom:4px">📚 Results</h2><p class="small-muted" style="margin-bottom:12px">Pick the year, the class and the term to see that result (this term or any old term).</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"><select id="ppY">${sessions.map(s => `<option ${s === settings.session ? 'selected' : ''}>${_enc(s)}</option>`).join('')}</select>
+    <select id="ppC">${classes.map(c => `<option ${c === mine ? 'selected' : ''}>${_enc(c)}</option>`).join('')}</select>
+    <select id="ppT">${['First Term','Second Term','Third Term'].map(t => `<option ${t === settings.term ? 'selected' : ''}>${t}</option>`).join('')}</select><button class="btn btn-navy" onclick="showPupilPast()">Show</button></div><div id="ppOut"></div>`;
+};
+function viewCurrentResult(){
+  const st = session && session.student; if(!st) return;
+  const html = buildReportCardHTML({ name: st.name, id: st.id, cls: st.cls, session: settings.session, term: settings.term, gender: st.gender, photoUrl: st.photoUrl }, kindForClass(st.cls), st.id);
+  const overlay = _el('genericModalOverlay'), card = _el('genericModalCard'); card.style.maxWidth = '940px';
+  card.innerHTML = `<div style="overflow:auto;max-width:100%">${html}</div><div class="modal-actions"><button class="btn btn-ghost btn-sm" id="prClose">Close</button><button class="btn btn-navy btn-sm" id="prPrint">🖨 Print</button></div>`;
+  overlay.classList.add('open'); _el('prClose').onclick = () => { overlay.classList.remove('open'); card.style.maxWidth = ''; };
+  _el('prPrint').onclick = () => { overlay.classList.remove('open'); card.style.maxWidth = ''; printReportCardForPupil(st.id, kindForClass(st.cls)); };
+}
+showPupilPast = function(){
+  const st = (session && session.student) || {}, pid = st.id, y = _el('ppY').value, c = _el('ppC').value, t = _el('ppT').value, out = _el('ppOut');
+  const none = `<div class="empty">No saved result for ${_enc(c)}, ${_enc(t)}, ${_enc(y)}. Please check the year, class and term you picked.</div>`;
+  if(y === settings.session && t === settings.term){
+    if(c !== st.cls){ out.innerHTML = none; return; }
+    const fs = feeState(pid, st.cls);
+    if(!fs.cleared){ out.innerHTML = lockHTML(fs, true); return; }
+    if(!Rel.is(st.cls)){ out.innerHTML = finalHTML(); return; }
+    out.innerHTML = `<div class="card"><b>${_enc(c)}</b> · ${_enc(t)} · ${_enc(y)}<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="viewCurrentResult()">👁 View result</button></div></div>`; return; }
+  const a = pastRowAvg(pid, y, t);
+  out.innerHTML = (a === null || pastClassOf(pid, y) !== c) ? none
+    : `<div class="card"><b>${_enc(c)}</b> · ${_enc(t)} · ${_enc(y)} — Average <b>${a}%</b> (${passRemark(a)})<div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="viewPastResult('${pid}','${y}','${t}')">👁 View result</button> <button class="btn btn-navy btn-sm" onclick="printPastResult('${pid}','${y}','${t}')">🖨 Print</button></div></div>`;
+};
+
+/* pupils marked "Left" see a notice on their profile */
+{ const _arL = afterRender; afterRender = function(id){ _arL(id);
+    if((id==='primary-dashboard'||id==='secondary-dashboard') && session && session.student && session.student.cls==='Left'){
+      const p=document.querySelector('[data-panel-sd="profile"]'); if(p && !p.querySelector('.left-note')) p.insertAdjacentHTML('afterbegin','<div class="note-box left-note" style="margin-bottom:12px;border-left:4px solid #B8860B"><b>Status: Left</b><br>This pupil has left Mojuli Christ Glorious School.</div>'); } }; }
 /* The Parents Forum is only for logged-in parents (and staff) */
 const _goForum = go;
 go = function(id, fromHistory){
