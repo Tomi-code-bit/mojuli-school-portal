@@ -8692,7 +8692,8 @@ function renderAdminGallery(){
   const el = _el('adminGalleryPanel'); if(!el) return;
   const hid = Site.hidden();
   const mine = (Site.cloudGallery || []).map(p => Object.assign({ src: Site.srcCache[p.id] || '' }, p));
-  const builtIn = DEFAULT_PHOTOS.map(p => Object.assign({ hidden: hid.includes(p.id) }, p));
+  let gone = []; try{ gone = JSON.parse(Site.content.gallery_removed || '[]'); }catch(_){}
+  const builtIn = DEFAULT_PHOTOS.filter(p => !gone.includes(p.id)).map(p => Object.assign({ hidden: hid.includes(p.id) }, p));
   el.innerHTML = `
     <h3 style="margin-bottom:4px">🖼 School Gallery</h3>
     <p class="small-muted" style="margin-bottom:14px">Only you (the administrator) can add or delete pictures. Visitors can only look at them.</p>
@@ -8712,7 +8713,8 @@ function renderAdminGallery(){
     <h4 style="margin-bottom:8px">Original school photos</h4>
     <div class="gallery-grid">${builtIn.map(p => `
       <div class="gallery-item" style="${p.hidden ? 'opacity:.45' : ''}"><img src="${p.src}" alt=""><div class="cap">${_enc(p.caption)}</div>
-        <button class="btn btn-sm ${p.hidden ? 'btn-gold' : 'btn-ghost'}" style="position:absolute;top:8px;right:8px" onclick="adminGalleryToggleBuiltIn('${p.id}')">${p.hidden ? 'Show again' : 'Hide'}</button></div>`).join('')}</div>`;
+        <button class="btn btn-sm ${p.hidden ? 'btn-gold' : 'btn-ghost'}" style="position:absolute;top:8px;right:8px" onclick="adminGalleryToggleBuiltIn('${p.id}')">${p.hidden ? 'Show again' : 'Hide'}</button>
+        <button class="btn btn-sm btn-ghost" style="position:absolute;top:8px;left:8px;color:var(--crimson-600);background:#fff" onclick="adminGalleryDeleteBuiltIn('${p.id}')">🗑 Delete</button></div>`).join('') || '<div class="empty" style="grid-column:1/-1">All original photos have been deleted.</div>'}</div>`;
   Site.hydrate();
 }
 async function adminGalleryAdd(){
@@ -8731,6 +8733,12 @@ function adminGalleryDelete(id){
   showModal({ title:'Are you sure?', message:`Delete "${(p && p.caption) || 'this photo'}" from the gallery? This cannot be undone.`, confirmText:'Yes, Delete', cancelText:'Cancel',
     onConfirm: async () => { try{ const r = await Cloud.rpc('portal_gallery_delete', { p_token: Cloud.token, p_id: id }); if(!r.ok) throw new Error(r.reason);
       await Site.load(); toast('Photo deleted successfully', 'success'); renderAdminGallery(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
+}
+function adminGalleryDeleteBuiltIn(id){
+  showModal({ title:'Are you sure?', message:'Delete this original school photo from the gallery for good?', confirmText:'Yes, Delete', cancelText:'Cancel', onConfirm: async () => {
+    try{ let gone = []; try{ gone = JSON.parse(Site.content.gallery_removed || '[]'); }catch(_){} if(!gone.includes(id)) gone.push(id);
+      const h = Site.hidden(); if(!h.includes(id)) h.push(id);
+      await Site.setContent({ gallery_removed: JSON.stringify(gone), gallery_hidden: JSON.stringify(h) }); Sound.playSuccess(); toast('Photo deleted', 'success'); renderAdminGallery(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
 }
 async function adminGalleryToggleBuiltIn(id){
   const h = Site.hidden(); const i = h.indexOf(id); if(i > -1) h.splice(i, 1); else h.push(id);
@@ -9194,6 +9202,9 @@ function renderTeacherProfile(){
       <div class="field"><label>Email (your login)</label><input id="tpEmail" type="email" required value="${_enc(u.email || u.identifier || '')}"></div>
       <div class="field"><label>Phone number</label><input id="tpPhone" value="${_enc(u.phone || '')}"></div>
       <button class="btn btn-gold" type="submit">💾 Save my details</button></form>
+    <div class="card" id="tpPhotoCard"><h4 style="margin-bottom:10px">My photo</h4>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div id="tpPhotoBox" style="width:96px;height:96px;border-radius:50%;overflow:hidden;background:#E8EEF8;display:flex;align-items:center;justify-content:center;font-size:2.4rem;border:2px solid var(--border)">${u.photoUrl ? `<img src="${u.photoUrl}" style="width:100%;height:100%;object-fit:cover">` : '👩‍🏫'}</div>
+      <div><input type="file" accept="image/*" id="tpPhotoFile"><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-gold btn-sm" type="button" id="tpPhotoSave">📷 Save photo</button>${u.photoUrl ? '<button class="btn btn-ghost btn-sm" type="button" id="tpPhotoDel">Remove</button>' : ''}</div></div></div></div>
     <form class="card" id="tpPass"><h4 style="margin-bottom:10px">Change my password</h4>
       <div class="field"><label>Current password</label><input id="tpCur" type="password" required></div>
       <div class="field"><label>New password (8+ characters)</label><input id="tpNew" type="password" minlength="8" required></div>
@@ -9208,6 +9219,15 @@ function renderTeacherProfile(){
         session.name = session.user.name; Sound.playSuccess(); toast('Profile saved', 'success');
         try{ const nm=session.user.name; const sb=document.querySelector('.dash-side .who b'); if(sb) sb.textContent=nm; const tp=document.querySelector('.dash-topbar p.small-muted'); if(tp) tp.textContent='Welcome, '+nm; const sb2=document.querySelector('.dash-side .who div b'); if(sb2) sb2.textContent=nm; }catch(_){}
       }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+  const setPhoto = async src => {
+    try{ if(Cloud.active() && Cloud.token){ const r = await Cloud.rpc('portal_update_my_photo', { p_token: Cloud.token, p_photo: src }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } }
+      else { session.user.photoUrl = src; saveUserAccounts(); }
+      session.user.photoUrl = src; Sound.playSuccess(); toast(src ? 'Photo saved' : 'Photo removed', 'success');
+      const html = src ? `<img src="${src}" style="width:100%;height:100%;object-fit:cover">` : '👩‍🏫';
+      const sb = document.querySelector('.dash-side .who > div'); if(sb) sb.innerHTML = html; renderTeacherProfile();
+    }catch(err){ toast('❌ ' + err.message, 'error'); } };
+  _el('tpPhotoSave').onclick = async () => { const f = _el('tpPhotoFile').files[0]; if(!f){ toast('Choose a picture first', 'error'); return; } try{ await setPhoto(await compressImage(f, 400, 0.8)); }catch(err){ toast('❌ ' + err.message, 'error'); } };
+  if(_el('tpPhotoDel')) _el('tpPhotoDel').onclick = () => setPhoto('');
   _el('tpPass').onsubmit = e => { e.preventDefault();
     if(_el('tpNew').value !== _el('tpNew2').value){ toast('New passwords do not match', 'error'); return; }
     showModal({ title:'Are you sure?', message:'Change your password?', confirmText:'Yes, change', cancelText:'Cancel', onConfirm: async () => {
@@ -9518,7 +9538,7 @@ function printBooks(cls, d){
 }
 
 /* ---------- CBT ---------- */
-const CBT_SUBJECTS = ['English Language','Mathematics','Basic Science','Basic Technology','Social Studies','Civic Education','Computer Studies / ICT','Agricultural Science','Verbal Reasoning','Quantitative Reasoning','Phonics','Literacy','Numeracy','Christian Religious Studies','Islamic Studies','Creative Arts','Physical & Health Education','Home Economics','Yoruba','Physics','Chemistry','Biology','Further Mathematics','Economics','Government','Literature in English','Geography','Commerce','Financial Accounting','Business Studies','Other'];
+const CBT_SUBJECTS = ['All','English Language','Mathematics','Basic Science','Basic Technology','Social Studies','Civic Education','Computer Studies / ICT','Agricultural Science','Verbal Reasoning','Quantitative Reasoning','Phonics','Literacy','Numeracy','Christian Religious Studies','Islamic Studies','Creative Arts','Physical & Health Education','Home Economics','Yoruba','Physics','Chemistry','Biology','Further Mathematics','Economics','Government','Literature in English','Geography','Commerce','Financial Accounting','Business Studies','Other'];
 const LET = ['A','B','C','D','E'];
 const cbtNeed = () => { if(!cloudOn()){ return 'CBT needs the school database. Please log in again (and make sure supabase_accounts.sql has been run).'; } return ''; };
 function paperHTML(test, answers, score, total, who){
@@ -9546,7 +9566,7 @@ async function renderTeacherCbt(){
   const mine = teacherClass(), isAdm = session && session.role === 'staff-admin';
   list = list.filter(t => isAdm || !mine || t.cls === mine || true);
   el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted">Set multiple-choice questions. Pupils answer on their portal and are marked automatically.</p></div><button class="btn btn-gold btn-sm" id="cbtNew">➕ Create new test</button></div>
-  ${list.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Title</th><th>Class</th><th>Type</th><th>Questions</th><th>Finished</th><th></th></tr></thead><tbody>${list.map(t => `<tr><td><b>${_enc(t.subject)}</b></td><td>${_enc(t.title)}</td><td>${_enc(t.cls)}</td><td>${_enc(t.kind)}</td><td>${t.count}</td><td>${t.done}${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</td><td style="white-space:nowrap">${t.done ? '' : `<button class="btn btn-sm btn-ghost" data-cbtedit="${_enc(t.id)}">✏️ Edit</button> `}<button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-cbtdel="${_enc(t.id)}">🗑</button> <button class="btn btn-sm ${t.published ? 'btn-gold' : 'btn-ghost'}" data-cbtpub="${_enc(t.id)}|${t.published ? 0 : 1}">${t.published ? '👁 Visible to pupils — hide' : '🙈 Hidden — allow view'}</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No test has been created yet.</div>'}`;
+  ${list.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Subject</th><th>Title</th><th>Class</th><th>Type</th><th>Questions</th><th>Finished</th><th></th></tr></thead><tbody>${list.map(t => `<tr><td><b>${_enc(t.subject)}</b></td><td>${_enc(t.title)}</td><td>${_enc(t.cls)}</td><td>${_enc(t.kind)}${t.duration ? `<div class="small-muted">⏱ ${t.duration} min</div>` : ''}</td><td>${t.count}</td><td>${t.done}${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</td><td style="white-space:nowrap">${t.done ? '' : `<button class="btn btn-sm btn-ghost" data-cbtedit="${_enc(t.id)}">✏️ Edit</button> `}<button class="btn btn-sm btn-ghost" style="color:var(--crimson-600)" data-cbtdel="${_enc(t.id)}">🗑</button> <button class="btn btn-sm ${t.open ? 'btn-gold' : 'btn-ghost'}" data-cbtpub="${_enc(t.id)}|${t.open ? 0 : 1}">${t.open ? '👁 Visible to pupils — hide' : (t.publishAt ? '⏰ Opens ' + _enc(new Date(t.publishAt).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })) + ' — show now' : '🙈 Hidden — allow view')}</button></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No test has been created yet.</div>'}`;
   _el('cbtNew').onclick = () => { cbtEdit = { cls: mine || 'Primary 4', subject: 'Mathematics', kind: 'Test', title: '', questions: [blankQ()] }; renderTeacherCbt(); };
 }
 function renderCbtEditor(el){
@@ -9554,23 +9574,29 @@ function renderCbtEditor(el){
   el.innerHTML = `<h2 style="margin-bottom:8px">${t.id ? '✏️ Edit test' : '➕ New test'}</h2>
   <div class="grid-2"><div class="field"><label>Class</label><select id="cbtCls" ${mine && !isAdm ? 'disabled' : ''}>${ALL_CLASS_NAMES.map(c => `<option ${c === t.cls ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
   <div class="field"><label>Subject</label><select id="cbtSub">${CBT_SUBJECTS.map(c => `<option ${c === t.subject ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div>
-  <div class="grid-2"><div class="field"><label>Type</label><select id="cbtKind"><option ${t.kind !== 'Exam' ? 'selected' : ''}>Test</option><option ${t.kind === 'Exam' ? 'selected' : ''}>Exam</option></select></div>
+  <div class="grid-2"><div class="field"><label>Type</label><select id="cbtKind"><option value="Test" ${!t._ck && t.kind !== 'Exam' ? 'selected' : ''}>Test</option><option value="Exam" ${!t._ck && t.kind === 'Exam' ? 'selected' : ''}>Exam</option><option value="__other" ${t._ck ? 'selected' : ''}>Other (type your own)…</option></select>
+  <input id="cbtKindTxt" placeholder="e.g. Quiz, Assignment, Mid-term" maxlength="40" value="${_enc(t._ck ? t.kind : '')}" style="margin-top:6px;${t._ck ? '' : 'display:none'}"></div>
   <div class="field"><label>Title (optional)</label><input id="cbtTitle" value="${_enc(t.title)}" placeholder="e.g. First Term Exam"></div></div>
+  <div class="grid-2"><div class="field"><label>⏱ Time allowed (minutes)</label><input id="cbtDur" type="number" min="0" max="600" value="${+t.duration || 0}" placeholder="0 = no timer"><div class="small-muted">The clock starts when the pupil presses Start. When it ends, the answers are submitted automatically. 0 = no timer.</div></div>
+  <div class="field"><label>🗓 Show to pupils at (optional)</label><input id="cbtAt" type="datetime-local" value="${_enc(t.publishLocal || '')}"><div class="small-muted">Leave empty to use the Show / Hide button. If set, the test appears by itself at this time, even if your phone or computer is off.</div></div></div>
   <div id="cbtQs">${t.questions.map((q, i) => `<div class="cbt-q" data-qi="${i}"><div style="display:flex;justify-content:space-between"><b>Question ${i + 1}</b><button class="btn btn-sm btn-ghost" data-qdel="${i}">🗑</button></div>
     <div class="field"><textarea data-q="q" placeholder="Type the question">${_enc(q.q)}</textarea></div>
     <div class="xf-grid">${LET.map(l => `<div class="field"><label>Option ${l}${l === 'E' ? ' (optional)' : ''}</label><input data-q="${l.toLowerCase()}" value="${_enc(q[l.toLowerCase()])}"></div>`).join('')}
     <div class="field"><label>Correct answer</label><select data-q="correct">${LET.map(l => `<option ${l === q.correct ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div></div>`).join('')}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn btn-ghost btn-sm" id="cbtAddQ">➕ Add question</button><button class="btn btn-gold btn-sm" id="cbtSave">💾 Save test</button><button class="btn btn-ghost btn-sm" id="cbtCancel">Cancel</button></div>`;
   _el('cbtCls').onchange = e => { t.cls = e.target.value; }; _el('cbtSub').onchange = e => { t.subject = e.target.value; };
-  _el('cbtKind').onchange = e => { t.kind = e.target.value; }; _el('cbtTitle').oninput = e => { t.title = e.target.value; };
+  _el('cbtKind').onchange = e => { const o = e.target.value === '__other'; t._ck = o; _el('cbtKindTxt').style.display = o ? '' : 'none'; t.kind = o ? (_el('cbtKindTxt').value || '') : e.target.value; };
+  _el('cbtKindTxt').oninput = e => { t.kind = e.target.value; }; _el('cbtDur').oninput = e => { t.duration = +e.target.value || 0; }; _el('cbtAt').oninput = e => { t.publishLocal = e.target.value; }; _el('cbtTitle').oninput = e => { t.title = e.target.value; };
   _el('cbtAddQ').onclick = () => { t.questions.push(blankQ()); renderCbtEditor(el); };
   _el('cbtCancel').onclick = () => { cbtEdit = null; renderTeacherCbt(); };
   _el('cbtSave').onclick = () => {
     for(let i = 0; i < t.questions.length; i++){ const q = t.questions[i];
       if(!q.q.trim() || !q.a.trim() || !q.b.trim()){ toast('Question ' + (i + 1) + ' needs the question and at least options A and B.', 'error'); return; }
       if(!q[q.correct.toLowerCase()].trim()){ toast('Question ' + (i + 1) + ': the correct answer option is empty.', 'error'); return; } }
-    showModal({ title:'Are you sure?', message: t.id ? 'Save your changes to this test?' : 'Save this test and show it to ' + t.cls + '?', confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
-      try{ const r = await Cloud.rpc('portal_cbt_save', { p_token: Cloud.token, p_test: t }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+    if(t._ck && !String(t.kind || '').trim()){ toast('Type the name of the test type.', 'error'); return; }
+    if(t.publishLocal && isNaN(new Date(t.publishLocal).getTime())){ toast('The "show at" time is not valid.', 'error'); return; }
+    showModal({ title:'Are you sure?', message: t.id ? 'Save your changes to this test?' : 'Save this test?' + (t.publishLocal ? ' It will appear to ' + t.cls + ' on its own at the time you set.' : ' It stays hidden until you press "allow view".'), confirmText:'Yes, save', cancelText:'Cancel', onConfirm: async () => {
+      try{ const r = await Cloud.rpc('portal_cbt_save', { p_token: Cloud.token, p_test: Object.assign({}, t, { kind: String(t.kind || 'Test').trim() || 'Test', duration: +t.duration || 0, publishAt: t.publishLocal ? new Date(t.publishLocal).toISOString() : '' }) }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
         Sound.playSuccess(); toast('Test saved', 'success'); cbtEdit = null; renderTeacherCbt(); }catch(e){ toast('❌ ' + e.message, 'error'); } } });
   };
 }
@@ -9580,7 +9606,8 @@ document.addEventListener('click', async e => {
   const t = e.target.closest && e.target.closest('[data-cbtedit],[data-cbtdel],[data-qdel]'); if(!t) return;
   if(t.dataset.qdel !== undefined && cbtEdit){ if(cbtEdit.questions.length > 1){ cbtEdit.questions.splice(+t.dataset.qdel, 1); renderCbtEditor(_el('tCbtPanel')); } return; }
   if(t.dataset.cbtedit){ try{ const r = await Cloud.rpc('portal_cbt_get', { p_token: Cloud.token, p_id: t.dataset.cbtedit }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
-    const x = r.test; cbtEdit = { id:x.id, cls:x.cls, subject:x.subject, kind:x.kind, title:x.title, questions:(x.questions || []).map(q => Object.assign(blankQ(), q)) }; renderTeacherCbt(); }catch(err){ toast('❌ ' + err.message, 'error'); } return; }
+    const x = r.test; const _lp = x.publishAt ? (() => { const d = new Date(x.publishAt), z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); })() : '';
+    cbtEdit = { id:x.id, cls:x.cls, subject:x.subject, kind:x.kind, _ck: !['Test','Exam'].includes(x.kind), duration: x.duration || x.duration_min || 0, publishLocal: _lp, title:x.title, questions:(x.questions || []).map(q => Object.assign(blankQ(), q)) }; renderTeacherCbt(); }catch(err){ toast('❌ ' + err.message, 'error'); } return; }
   if(t.dataset.cbtdel){ showModal({ title:'Are you sure?', message:'Delete this test and all pupils\' results for it?', confirmText:'Yes, delete', cancelText:'Cancel', onConfirm: async () => { try{ await Cloud.rpc('portal_cbt_delete', { p_token: Cloud.token, p_id: t.dataset.cbtdel }); toast('Deleted', 'success'); renderTeacherCbt(); renderTeacherCbtDone(); }catch(err){ toast('❌ ' + err.message, 'error'); } } }); }
 });
 
@@ -9597,19 +9624,28 @@ async function renderTeacherCbtDone(quiet){
   const shown = list.filter(t => cbtDoneSubject === 'All' || t.subject === cbtDoneSubject);
   el.innerHTML = `${releaseCardHTML()}<h2 style="margin-bottom:4px">✅ Finished CBT</h2><p class="small-muted" style="margin-bottom:10px">Pick a subject to see the pupils who have finished. Tap a pupil to see the paper and result.</p>
   <div class="field" style="max-width:280px"><label>Subject</label><select id="cbtDoneSub">${subs.map(s => `<option ${s === cbtDoneSubject ? 'selected' : ''}>${_enc(s)}</option>`).join('')}</select></div>
-  ${shown.length ? shown.map(t => `<div class="card" style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${_enc(t.subject)} — ${_enc(t.title || t.kind)} <span class="small-muted">(${_enc(t.cls)})</span></b><span>${t.done} finished${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</span></div><div class="cbtres" data-tid="${_enc(t.id)}"><button class="btn btn-sm btn-navy" style="margin-top:8px" data-cbtshow="${_enc(t.id)}">👁 Show pupils</button></div></div>`).join('') : '<div class="empty">No tests for this subject.</div>'}`;
+  ${shown.length ? shown.map(t => `<div class="card" style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${_enc(t.subject)} — ${_enc(t.title || t.kind)} <span class="small-muted">(${_enc(t.cls)})</span></b><span>${t.done} finished${t.fresh ? `<span class="new-dot">${t.fresh} new</span>` : ''}</span></div><div class="cbtres" data-tid="${_enc(t.id)}" data-cls="${_enc(t.cls)}"><button class="btn btn-sm btn-navy" style="margin-top:8px" data-cbtshow="${_enc(t.id)}">👁 Show pupils</button></div></div>`).join('') : '<div class="empty">No tests for this subject.</div>'}`;
   _el('cbtDoneSub').onchange = e => { cbtDoneSubject = e.target.value; renderTeacherCbtDone(); };
 }
+async function cbtLoadRows(box){
+  if(!box) return; const id = box.dataset.tid, sec = /^(JSS|SS)/.test(box.dataset.cls || ''), who = sec ? 'student' : 'pupil';
+  const rs = await Cloud.rpc('portal_cbt_results', { p_token: Cloud.token, p_id: id }) || [];
+  box.innerHTML = rs.length ? `<div style="margin:8px 0"><button class="btn btn-sm btn-gold" data-cbtrel="${_enc(id)}||1">✅ Allow all ${who}s to see their paper</button> <button class="btn btn-sm btn-ghost" data-cbtrel="${_enc(id)}||0">🙈 Hide all</button></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Allow ${who} to view</th><th>${sec ? 'Student' : 'Pupil'}</th><th>ID</th><th>Score</th><th>Finished</th></tr></thead><tbody>${rs.map(r => `<tr style="cursor:pointer" data-cbtpaper="${_enc(id)}|${_enc(r.pupil)}"><td><button class="btn btn-sm ${r.released ? 'btn-gold' : 'btn-ghost'}" data-cbtrel="${_enc(id)}|${_enc(r.pupil)}|${r.released ? 0 : 1}">${r.released ? '👁 Allowed — hide' : '🙈 Not allowed — allow'}</button></td><td><b>${_enc(r.name)}</b>${r.fresh ? '<span class="new-dot">new</span>' : ''}${r.late ? ' <span class="pill review">late</span>' : ''}</td><td>${_enc(r.pupil)}</td><td>${r.score}/${r.total}</td><td>${_enc(r.at)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small-muted" style="margin-top:8px">Nobody has finished this test yet.</p>';
+}
+document.addEventListener('click', async e => {
+  const rb = e.target.closest && e.target.closest('[data-cbtrel]'); if(!rb) return; e.stopPropagation();
+  const [tid, pid, on] = rb.dataset.cbtrel.split('|');
+  try{ await Cloud.rpc('portal_cbt_result_release', { p_token: Cloud.token, p_id: tid, p_pupil: pid, p_on: on === '1' }); toast(on === '1' ? 'Allowed to see the paper and result' : 'Hidden again', 'success'); await cbtLoadRows(rb.closest('.cbtres')); }catch(err){ toast('❌ ' + err.message, 'error'); }
+}, true);
 document.addEventListener('click', async e => {
   const b = e.target.closest && e.target.closest('[data-cbtshow],[data-cbtpaper]'); if(!b) return;
   try{
-    if(b.dataset.cbtshow){ const id = b.dataset.cbtshow; const rs = await Cloud.rpc('portal_cbt_results', { p_token: Cloud.token, p_id: id }) || [];
-      b.closest('.cbtres').innerHTML = rs.length ? `<div style="overflow-x:auto"><table><thead><tr><th>Pupil</th><th>ID</th><th>Score</th><th>Finished</th></tr></thead><tbody>${rs.map(r => `<tr style="cursor:pointer" data-cbtpaper="${_enc(id)}|${_enc(r.pupil)}"><td><b>${_enc(r.name)}</b>${r.fresh ? '<span class="new-dot">new</span>' : ''}</td><td>${_enc(r.pupil)}</td><td>${r.score}/${r.total}</td><td>${_enc(r.at)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="small-muted" style="margin-top:8px">Nobody has finished this test yet.</p>';
-      renderTeacherCbtDone(true); return; }
+    if(b.dataset.cbtshow){ await cbtLoadRows(b.closest('.cbtres')); renderTeacherCbtDone(true); return; }
   }catch(err){ toast('❌ ' + err.message, 'error'); }
 });
 document.addEventListener('click', async e => {
-  const r = e.target.closest && e.target.closest('tr[data-cbtpaper]'); if(!r) return; const [tid, pid] = r.dataset.cbtpaper.split('|');
+  if(e.target.closest && e.target.closest('[data-cbtrel]')) return; const r = e.target.closest && e.target.closest('tr[data-cbtpaper]'); if(!r) return; const [tid, pid] = r.dataset.cbtpaper.split('|');
   try{ const p = await Cloud.rpc('portal_cbt_paper', { p_token: Cloud.token, p_id: tid, p_pupil: pid }); if(!p.ok){ toast('❌ ' + p.reason, 'error'); return; } showPaperModal(paperHTML(p.test, p.answers, p.score, p.total, p.name)); }catch(err){ toast('❌ ' + err.message, 'error'); }
 });
 
@@ -9621,26 +9657,40 @@ async function renderPupilCbt(){
   if(cbtTaking){ return renderCbtTake(el); }
   let list = []; try{ list = await Cloud.rpc('portal_cbt_list', { p_token: Cloud.token }) || []; }catch(e){ el.innerHTML = '<div class="empty">❌ ' + _enc(e.message) + '</div>'; return; }
   const st = session && session.student, rel = st && Rel.is(st.cls);
+  window._cbtMins = {}; list.forEach(t => { if(t.duration) window._cbtMins[t.id] = t.duration; });
   el.innerHTML = `<h2 style="margin-bottom:4px">📝 CBT Test / Exam</h2><p class="small-muted" style="margin-bottom:10px">You can submit each test only once. Your score and corrections appear here when your teacher releases the results.</p>
-  ${list.length ? list.map(t => `<div class="card" style="margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>${_enc(t.subject)}</b> — ${_enc(t.title || t.kind)}<div class="small-muted">${_enc(t.kind)} · ${t.count} questions · ${_enc(t.at)}</div></div>
-    ${t.done ? `<div><span class="pill accepted">✔ Done · ${_enc(t.doneAt)}</span> ${rel && t.score != null ? `<span class="pill review">Score ${t.score}/${t.total}</span> <button class="btn btn-sm btn-navy" data-cbtmine="${_enc(t.id)}">View paper</button>` : '<span class="small-muted">Result has not been finalized yet.</span>'}</div>` : `<button class="btn btn-sm btn-gold" data-cbtstart="${_enc(t.id)}">▶ Start</button>`}</div>`).join('') : '<div class="empty">No CBT test is open for your class yet.</div>'}`;
+  ${list.length ? list.map(t => `<div class="card" style="margin:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>${_enc(t.subject)}</b> — ${_enc(t.title || t.kind)}<div class="small-muted">${_enc(t.kind)} · ${t.count} questions${t.duration ? ' · ⏱ ' + t.duration + ' min' : ''} · ${_enc(t.at)}</div></div>
+    ${t.done ? `<div><span class="pill accepted">✔ Done · ${_enc(t.doneAt)}</span> ${(rel || t.released) && t.score != null ? `<span class="pill review">Score ${t.score}/${t.total}</span> <button class="btn btn-sm btn-navy" data-cbtmine="${_enc(t.id)}">View paper</button>` : '<span class="small-muted">Result has not been finalized yet.</span>'}</div>` : `<button class="btn btn-sm btn-gold" data-cbtstart="${_enc(t.id)}">▶ Start</button>`}</div>`).join('') : '<div class="empty">No CBT test is open for your class yet.</div>'}`;
 }
 function renderCbtTake(el){
   const t = cbtTaking;
-  el.innerHTML = `<h3>${_enc(t.subject)} — ${_enc(t.title || t.kind)}</h3><p class="small-muted">Choose one answer for each question, then press Submit.</p>
+  el.innerHTML = `<h3>${_enc(t.subject)} — ${_enc(t.title || t.kind)}</h3><div id="cbtClock" style="${t._end ? '' : 'display:none;'}position:sticky;top:0;z-index:5;background:#0B1F3A;color:#fff;padding:8px 14px;border-radius:10px;margin:6px 0;font-weight:700;text-align:center">⏱ <span id="cbtLeft">--:--</span> left</div><p class="small-muted">Choose one answer for each question, then press Submit.</p>
   ${t.questions.map((q, i) => `<div class="cbt-q"><b>${i + 1}. ${_enc(q.q)}</b>${LET.filter(l => q[l.toLowerCase()]).map(l => `<label class="cbt-opt"><span class="cbt-t"><b>${l}.</b> ${_enc(q[l.toLowerCase()])}</span><input type="radio" name="cq${i}" value="${l}" ${t._a[i] === l ? 'checked' : ''}></label>`).join('')}</div>`).join('')}
   <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-gold" id="cbtSubmit">✅ Submit answers</button><button class="btn btn-ghost" id="cbtLeave">Leave</button></div>`;
-  el.onchange = e => { const m = /^cq(\d+)$/.exec(e.target.name || ''); if(m) t._a[+m[1]] = e.target.value; };
-  _el('cbtLeave').onclick = () => { cbtTaking = null; renderPupilCbt(); };
+  el.onchange = e => { const m = /^cq(\d+)$/.exec(e.target.name || ''); if(m){ t._a[+m[1]] = e.target.value; try{ localStorage.setItem('mjl_cbtdraft_' + t.id + '_' + myPid(), JSON.stringify(t._a)); }catch(_){} } };
+  const finish = r => { clearInterval(window._cbtTick); cbtTaking = null; try{ localStorage.removeItem('mjl_cbtdraft_' + t.id + '_' + myPid()); }catch(_){}
+    Sound.playSuccess(); el.onchange = null; el.innerHTML = `<div class="pay-lock" style="border-color:#10B981;background:rgba(16,185,129,.07)"><div style="font-size:2.4rem">✅</div><h3 style="color:#047857">Submitted — ${_enc(r.at)}</h3><p>Your answers have been received. Your result will show here when your teacher releases the results.</p></div><div style="text-align:center"><button class="btn btn-navy btn-sm" id="cbtBack">← Back to tests</button></div>`; _el('cbtBack').onclick = renderPupilCbt; };
+  const doSubmit = async () => { try{ const r = await Cloud.rpc('portal_cbt_submit', { p_token: Cloud.token, p_id: t.id, p_answers: t._a }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } finish(r); }catch(err){ toast('❌ ' + err.message, 'error'); } };
+  clearInterval(window._cbtTick);
+  if(t._end){ const tick = async () => { const left = Math.max(0, Math.round((t._end - Date.now()) / 1000)), m = Math.floor(left / 60), sc = left % 60, lb = _el('cbtLeft');
+      if(!lb){ clearInterval(window._cbtTick); return; } lb.textContent = m + ':' + String(sc).padStart(2, '0'); _el('cbtClock').style.background = left <= 60 ? '#B91C1C' : '#0B1F3A';
+      if(left <= 0){ clearInterval(window._cbtTick); document.querySelectorAll('.modal-overlay.open').forEach(o => o.classList.remove('open')); toast("⏱ Time is up. Your answers are being submitted.", 'info'); await doSubmit(); } };
+    tick(); window._cbtTick = setInterval(tick, 1000); }
+  _el('cbtLeave').onclick = () => { if(t._end){ toast('This test is timed. The clock keeps running until you submit.', 'error'); return; } cbtTaking = null; renderPupilCbt(); };
   _el('cbtSubmit').onclick = () => { const n = t.questions.filter((q, i) => !t._a[i]).length;
-    showModal({ title:'Are you sure?', message: n ? `${n} question(s) are not answered. Submit anyway? You cannot retake it.` : 'Submit your answers now? You cannot retake it.', confirmText:'Yes, submit', cancelText:'Not yet', onConfirm: async () => {
-      try{ const r = await Cloud.rpc('portal_cbt_submit', { p_token: Cloud.token, p_id: t.id, p_answers: t._a }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
-        cbtTaking = null; Sound.playSuccess(); el.onchange = null; el.innerHTML = `<div class="pay-lock" style="border-color:#10B981;background:rgba(16,185,129,.07)"><div style="font-size:2.4rem">✅</div><h3 style="color:#047857">Submitted — ${_enc(r.at)}</h3><p>Your answers have been received. Your result will show here when your teacher releases the results.</p></div><div style="text-align:center"><button class="btn btn-navy btn-sm" id="cbtBack">← Back to tests</button></div>`; _el('cbtBack').onclick = renderPupilCbt; }catch(err){ toast('❌ ' + err.message, 'error'); } } }); };
+    showModal({ title:'Are you sure?', message: n ? `${n} question(s) are not answered. Submit anyway? You cannot retake it.` : 'Submit your answers now? You cannot retake it.', confirmText:'Yes, submit', cancelText:'Not yet', onConfirm: doSubmit }); };
 }
 document.addEventListener('click', async e => {
   const b = e.target.closest && e.target.closest('[data-cbtstart],[data-cbtmine]'); if(!b) return;
   try{
-    if(b.dataset.cbtstart){ const r = await Cloud.rpc('portal_cbt_get', { p_token: Cloud.token, p_id: b.dataset.cbtstart }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; } cbtTaking = Object.assign({ _a: {} }, r.test); renderPupilCbt(); }
+    if(b.dataset.cbtstart){ const id = b.dataset.cbtstart;
+      const go2 = async () => { const r = await Cloud.rpc('portal_cbt_get', { p_token: Cloud.token, p_id: id }); if(!r.ok){ toast('❌ ' + r.reason, 'error'); return; }
+        const st = await Cloud.rpc('portal_cbt_start', { p_token: Cloud.token, p_id: id }); if(!st.ok){ toast('❌ ' + st.reason, 'error'); return; }
+        let draft = {}; try{ draft = JSON.parse(localStorage.getItem('mjl_cbtdraft_' + id + '_' + myPid()) || '{}'); }catch(_){}
+        cbtTaking = Object.assign({ _a: draft }, r.test); if(st.remaining != null) cbtTaking._end = Date.now() + st.remaining * 1000; renderPupilCbt(); };
+      const dm = (window._cbtMins || {})[id];
+      if(dm){ showModal({ title:'This test is timed', message:`You have ${dm} minutes. The clock starts as soon as you press Start and cannot be paused. When it reaches zero your answers are submitted automatically.`, confirmText:'Start now', cancelText:'Not yet', onConfirm: () => { go2().catch(err => toast('❌ ' + err.message, 'error')); } }); }
+      else await go2(); }
     else { const p = await Cloud.rpc('portal_cbt_paper', { p_token: Cloud.token, p_id: b.dataset.cbtmine, p_pupil: myPid() }); if(!p.ok){ toast('❌ ' + p.reason, 'error'); return; } showPaperModal(paperHTML(p.test, p.answers, p.score, p.total, '')); }
   }catch(err){ toast('❌ ' + err.message, 'error'); }
 });
