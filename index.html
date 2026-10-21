@@ -7827,7 +7827,7 @@ const _ral=renderAdminAnnouncementList;renderAdminAnnouncementList=function(){_r
 function saveAttendanceRegister(){try{const d=attendanceStore[todayKey()]=attendanceStore[todayKey()]||{};
  classRoster.forEach(p=>{const c=document.querySelector(`input[name="att-${p.id}"]:checked`);if(c)d[p.id]=c.value;});
  DB.set('attendanceStore',attendanceStore);Sound.playSuccess();toast('Attendance saved for '+fmtDate());}catch(e){console.error(e);toast('Could not save attendance');}}
-function refreshAttendance(id){const A=SAMPLE_ATTENDANCE;A.present=A.absent=A.late=A.total=0;Object.values(attendanceStore).forEach(d=>{const v=d[id];if(v){A.total++;A[v]++;}});}
+function refreshAttendance(id){const A=SAMPLE_ATTENDANCE;A.present=A.absent=A.late=A.total=0;Object.values(attendanceStore).forEach(d=>{const v=d[id];if(v){A.total+=2;A[v]+=2;}});}
 function attPct(){const A=SAMPLE_ATTENDANCE;return A.total?Math.round((A.present+A.late)/A.total*100):0;}
 function classRankFor(id){const me=classRoster.find(p=>p.id===id);if(!me)return '-';const avg=p=>{const r=getPupilResults(p.id);return r.reduce((t,x)=>t+x.total,0)/(r.length||1);};
  const i=classRoster.filter(p=>p.cls===me.cls).sort((a,b)=>avg(b)-avg(a)).findIndex(p=>p.id===id)+1;
@@ -8232,7 +8232,7 @@ function waNumber(p){ const d = String(p||'').replace(/\D/g,''); return d.starts
 function attendanceSummary(id){
   const o = { present:0, late:0, absent:0, total:0 };
   if(window._pastNoAtt){ o.days = 0; return o; }
-  try { Object.values(attendanceStore || {}).forEach(d => { const v = d && d[id]; if(v){ o.total++; if(o[v] !== undefined) o[v]++; } }); } catch(e){}
+  try { Object.values(attendanceStore || {}).forEach(d => { const v = d && d[id]; if(v){ o.total += 2; if(o[v] !== undefined) o[v] += 2; } }); } catch(e){}
   o.days = o.present + o.late;
   return o;
 }
@@ -10003,13 +10003,13 @@ function startAttBack(){ const n=parseInt((_el('attBackN')||{}).value,10);
   if(!n||n<1||n>60){ toast('Enter a number of days from 1 to 60','error'); return; }
   window._attBack={dates:_attPastDates(n),ticks:{}}; renderTeacherAttendancePanel(); }
 function cancelAttBack(){ window._attBack=null; renderTeacherAttendancePanel(); }
-function attBackTick(pid,i,on){ const t=window._attBack.ticks; (t[pid]=t[pid]||{})[i]=!!on; const c=document.getElementById('abc-'+pid); if(c) c.textContent=Object.values(t[pid]).filter(Boolean).length+' / '+window._attBack.dates.length; }
+function attBackTick(pid,i,on){ const t=window._attBack.ticks; (t[pid]=t[pid]||{})[i]=!!on; const c=document.getElementById('abc-'+pid); if(c) { const N=window._attBack.dates.length, n=Object.values(t[pid]).filter(Boolean).length; c.innerHTML=n+' / '+N+'<br><span style="font-weight:400;font-size:.78rem">present '+(n*2)+' · <span style="color:#B91C1C">absent '+((N-n)*2)+'</span> days</span>'; } }
 function attBackAll(pid,on){ const B=window._attBack; B.ticks[pid]={}; B.dates.forEach((d,i)=>B.ticks[pid][i]=!!on);
   document.querySelectorAll(`[data-abp="${pid}"]`).forEach(x=>x.checked=!!on); attBackTick(pid,0,B.ticks[pid][0]); }
 function attBackDay(i,on){ _attRoster().forEach(p=>{ const t=window._attBack.ticks; (t[p.id]=t[p.id]||{})[i]=!!on; });
   document.querySelectorAll(`[data-abd="${i}"]`).forEach(x=>x.checked=!!on); _attRoster().forEach(p=>attBackTick(p.id,i,window._attBack.ticks[p.id][i])); }
 function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return; const ro=_attRoster();
-  showModal({title:'Are you sure?',message:`Add ${B.dates.length} past day(s) for ${ro.length} pupil(s)? Ticked = present, not ticked = absent. This adds to each pupil's attendance total.`,confirmText:'Yes, save',cancelText:'Cancel',onConfirm:()=>{
+  showModal({title:'Are you sure?',message:`Add ${B.dates.length} past day(s) for ${ro.length} pupil(s)? Ticked = present, not ticked = absent. Each day counts as 2 days (a ticked day = 2 present, an unticked day = 2 absent). This adds to each pupil's attendance total.`,confirmText:'Yes, save',cancelText:'Cancel',onConfirm:()=>{
     B.dates.forEach((k,i)=>{ const day=attendanceStore[k]=attendanceStore[k]||{}; ro.forEach(p=>{ day[p.id]=((B.ticks[p.id]||{})[i])?'present':'absent'; }); });
     DB.set('attendanceStore',attendanceStore); window._attBack=null; Sound.playSuccess(); toast('Past days added to attendance','success'); renderTeacherAttendancePanel(); }}); }
 { const _rtap = renderTeacherAttendancePanel;
@@ -10023,7 +10023,7 @@ function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return;
     if(!B.dates.length){ el.innerHTML=`<div class="empty">No free weekdays found to add. <button class="btn btn-ghost btn-sm" onclick="cancelAttBack()">Back</button></div>`; return; }
     el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px"><div><h2 style="margin-bottom:4px">Add past days — ${B.dates.length} school day(s)</h2><p class="small-muted">From today backwards, weekends skipped and days already recorded left out. Tick the days each pupil was <b>present</b>; unticked counts as absent.</p></div><div><button class="btn btn-ghost btn-sm" onclick="cancelAttBack()">Cancel</button> <button class="btn btn-navy btn-sm" onclick="saveAttBack()">💾 Save past days</button></div></div>
     <div style="overflow-x:auto"><table style="min-width:${300+B.dates.length*64}px"><thead><tr><th>SN</th><th style="min-width:170px">Pupil</th><th>Ticks</th><th>All</th>${B.dates.map((d,i)=>`<th style="text-align:center;font-size:.72rem;white-space:nowrap">${_enc(_attNice(d))}<br><input type="checkbox" title="Tick this day for everyone" onchange="attBackDay(${i},this.checked)" style="width:auto"></th>`).join('')}</tr></thead><tbody>
-    ${ro.map((p,idx)=>`<tr><td>${idx+1}.</td><td style="font-weight:700">${_enc(p.name)}</td><td><b id="abc-${p.id}">0 / ${B.dates.length}</b></td><td><input type="checkbox" onchange="attBackAll('${p.id}',this.checked)" style="width:auto"></td>${B.dates.map((d,i)=>`<td style="text-align:center"><input type="checkbox" data-abp="${p.id}" data-abd="${i}" onchange="attBackTick('${p.id}',${i},this.checked)" style="width:auto"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    ${ro.map((p,idx)=>`<tr><td>${idx+1}.</td><td style="font-weight:700">${_enc(p.name)}</td><td><b id="abc-${p.id}">0 / ${B.dates.length}<br><span style="font-weight:400;font-size:.78rem">present 0 · <span style="color:#B91C1C">absent ${B.dates.length*2}</span> days</span></b></td><td><input type="checkbox" onchange="attBackAll('${p.id}',this.checked)" style="width:auto"></td>${B.dates.map((d,i)=>`<td style="text-align:center"><input type="checkbox" data-abp="${p.id}" data-abd="${i}" onchange="attBackTick('${p.id}',${i},this.checked)" style="width:auto"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
     <button class="btn btn-navy mt24" onclick="saveAttBack()">💾 Save past days</button>`; };
 }
 
