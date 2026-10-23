@@ -3442,6 +3442,7 @@ function teacherResultsPanelHTML(kind){
             <span><b>Gender:</b> <span class="badge ${pupil.gender==='Female'?'demo':'live'}" style="font-size:0.75rem">${pupil.gender==='Female'?'👧 Female':'👦 Male'}</span></span>
             ${pupil.parent ? `<span><b>Parent:</b> ${escapeHtml(pupil.parent)} (${escapeHtml(pupil.phone||'')})</span>` : ''}
           </div>
+          ${(() => { const A = attendanceSummary(pupil.id); if(!A.total) return '<div class="small-muted" style="margin-top:6px">📅 Attendance: nothing recorded yet.</div>'; const pc = Math.round(A.days / A.total * 100); return `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>📅 Attendance:</b> <span class="badge live">Present ${A.present}</span> <span class="badge gold">Late ${A.late}</span> <span class="badge" style="background:#FEE2E2;color:#B91C1C">Absent ${A.absent}</span> <span class="small-muted">out of ${A.total} days · ${pc}%</span></div>`; })()}
         </div>
         <div style="display:flex;gap:16px;align-items:center">
           <div style="text-align:right">
@@ -5495,7 +5496,6 @@ registerView('teacher-dashboard', ()=>`
           <h2>Teacher Console</h2>
           <p class="small-muted">Welcome, ${(session && session.name) || SAMPLE_TEACHER.name}</p>
         </div>
-        <button class="btn btn-navy btn-sm" onclick="printReportCard('primary')">🖨 Master Score Report</button>
       </div>
 
       <div data-panel-td="classes" class="panel active">
@@ -7780,7 +7780,7 @@ if (window.SupabaseService) {
 
 
 /* ===== Admin deletes, messages, attendance, gallery slider, reveal animations ===== */
-const todayKey=()=>new Date().toISOString().slice(0,10);
+const todayKey=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 let attendanceStore=DB.get('attendanceStore',{});
 let contactMessages=DB.get('contactMessages',[]);
 const fmtDate=()=>new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
@@ -7826,7 +7826,7 @@ function deleteContactMessage(id){confirmDelete('Delete message?','Delete this m
 const _ral=renderAdminAnnouncementList;renderAdminAnnouncementList=function(){_ral();renderAdminMessages();};
 function saveAttendanceRegister(){try{const d=attendanceStore[todayKey()]=attendanceStore[todayKey()]||{};
  classRoster.forEach(p=>{const c=document.querySelector(`input[name="att-${p.id}"]:checked`);if(c)d[p.id]=c.value;});
- DB.set('attendanceStore',attendanceStore);Sound.playSuccess();toast('Attendance saved for '+fmtDate());}catch(e){console.error(e);toast('Could not save attendance');}}
+ DB.set('attendanceStore',attendanceStore);window._attEditToday=false;Sound.playSuccess();toast('Attendance saved for '+fmtDate());try{ renderTeacherAttendancePanel(); }catch(_){}}catch(e){console.error(e);toast('Could not save attendance');}}
 function refreshAttendance(id){const A=SAMPLE_ATTENDANCE;A.present=A.absent=A.late=A.total=0;Object.values(attendanceStore).forEach(d=>{const v=d[id];if(v){A.total+=2;A[v]+=2;}});}
 function attPct(){const A=SAMPLE_ATTENDANCE;return A.total?Math.round((A.present+A.late)/A.total*100):0;}
 function classRankFor(id){const me=classRoster.find(p=>p.id===id);if(!me)return '-';const avg=p=>{const r=getPupilResults(p.id);return r.reduce((t,x)=>t+x.total,0)/(r.length||1);};
@@ -9132,7 +9132,15 @@ function renderStaffPast(elId, defaultCls){
       <select id="${elId}_y">${sessions.map(s => `<option>${s}</option>`).join('')}</select>
       ${(elId === 'teacherPastPanel' && teacherClass()) ? `<input type="hidden" id="${elId}_c" value="${_enc(teacherClass())}"><span class="badge gold" style="align-self:center">${_enc(teacherClass())}</span>` : `<select id="${elId}_c">${ALL_CLASS_NAMES.concat(['Left']).map(c => `<option ${c === defaultCls ? 'selected' : ''}>${c}</option>`).join('')}</select>`}
       <select id="${elId}_t"><option>First Term</option><option>Second Term</option><option>Third Term</option></select>
-      <button class="btn btn-navy" onclick="showStaffPast('${elId}')">Show students</button></div><div id="${elId}_out"></div>`;
+      <button class="btn btn-navy" onclick="showStaffPast('${elId}')">Show students</button>
+      <button class="btn btn-gold" onclick="printMasterPast('${elId}')">🖨 Master result</button></div><div id="${elId}_out"></div>`;
+}
+function printMasterPast(elId){
+  const y = _el(elId + '_y').value, c = _el(elId + '_c').value, t = _el(elId + '_t').value;
+  const rows = classRoster.filter(p => pastClassOf(p.id, y) === c && pastRowAvg(p.id, y, t) !== null);
+  if(!rows.length){ toast('No saved results for ' + c + ', ' + t + ', ' + y + '.', 'error'); return; }
+  _el('printReportCard').innerHTML = rows.map(p => `<div style="break-after:page;page-break-after:always">${pastResultHTML(p.id, y, t)}</div>`).join('');
+  Sound.playSuccess(); toast('Printing ' + rows.length + ' result(s) for ' + c + ' · ' + t + ' · ' + y, 'success'); setTimeout(() => window.print(), 200);
 }
 function showStaffPast(elId){
   const y = _el(elId + '_y').value, c = _el(elId + '_c').value, t = _el(elId + '_t').value;
@@ -9697,13 +9705,16 @@ document.addEventListener('click', async e => {
 
 /* ---------- PRINT: one page + QR ---------- */
 function fitPrint(){
-  const box = _el('printReportCard'); if(!box) return; const pg = box.querySelector('.rc-page'); if(!pg) return;
+  const box = _el('printReportCard'); if(!box) return; const pages = box.querySelectorAll('.rc-page'); if(!pages.length) return;
   const old = box.getAttribute('style') || '';
-  pg.style.zoom = ''; pg.style.width = '';
   box.style.cssText = 'display:block;position:absolute;left:-99999px;top:0;width:194mm;visibility:hidden;';
-  const mm = 3.7795, maxH = 279 * mm; let h = pg.scrollHeight;
-  if(h > maxH){ const z = Math.max(.35, maxH / h); pg.style.zoom = z; pg.style.width = (194 / z) + 'mm'; pg.style.boxSizing = 'border-box';
-    h = pg.scrollHeight * z; if(h > maxH){ const z2 = z * maxH / h; pg.style.zoom = z2; pg.style.width = (194 / z2) + 'mm'; } }
+  const mm = 3.7795, maxH = 279 * mm;
+  pages.forEach(pg => {
+    pg.style.zoom = ''; pg.style.width = '';
+    let h = pg.scrollHeight;
+    if(h > maxH){ const z = Math.max(.35, maxH / h); pg.style.zoom = z; pg.style.width = (194 / z) + 'mm'; pg.style.boxSizing = 'border-box';
+      h = pg.scrollHeight * z; if(h > maxH){ const z2 = z * maxH / h; pg.style.zoom = z2; pg.style.width = (194 / z2) + 'mm'; } }
+  });
   box.setAttribute('style', old);
 }
 { const _wp = window.print.bind(window); window.print = function(){ try{ fitPrint(); }catch(e){} return _wp(); }; }
@@ -10000,7 +10011,7 @@ function _attPastDates(n){ const out=[]; const d=new Date(); let guard=0;
 function _attRoster(){ const c=teacherClass(); return c ? classRoster.filter(p=>p.cls===c) : classRoster; }
 function _attNice(k){ const d=new Date(k+'T12:00:00'); return d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'}); }
 function startAttBack(){ const n=parseInt((_el('attBackN')||{}).value,10);
-  if(!n||n<1||n>60){ toast('Enter a number of days from 1 to 60','error'); return; }
+  if(!n||n<1||n>365){ toast('Enter a number of days from 1 to 365','error'); return; }
   window._attBack={dates:_attPastDates(n),ticks:{}}; renderTeacherAttendancePanel(); }
 function cancelAttBack(){ window._attBack=null; renderTeacherAttendancePanel(); }
 function attBackTick(pid,i,on){ const t=window._attBack.ticks; (t[pid]=t[pid]||{})[i]=!!on; const c=document.getElementById('abc-'+pid); if(c) { const N=window._attBack.dates.length, n=Object.values(t[pid]).filter(Boolean).length; c.innerHTML=n+' / '+N+'<br><span style="font-weight:400;font-size:.78rem">present '+(n*2)+' · <span style="color:#B91C1C">absent '+((N-n)*2)+'</span> days</span>'; } }
@@ -10017,7 +10028,7 @@ function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return;
     const el=_el('teacherAttendancePanelBody'); if(!el) return;
     const B=window._attBack;
     if(!B){
-      el.insertAdjacentHTML('afterbegin',`<div class="card" style="margin-bottom:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>📅 Add past days</b><span class="small-muted">How many school days back?</span><input id="attBackN" type="number" min="1" max="60" value="5" style="width:80px"><button class="btn btn-gold btn-sm" onclick="startAttBack()">Add days</button></div>`);
+      el.insertAdjacentHTML('afterbegin',`<div class="card" style="margin-bottom:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>📅 Add past days</b><span class="small-muted">How many school days back?</span><input id="attBackN" type="number" min="1" max="365" value="5" style="width:80px"><button class="btn btn-gold btn-sm" onclick="startAttBack()">Add days</button></div>`);
       return; }
     const ro=_attRoster();
     if(!B.dates.length){ el.innerHTML=`<div class="empty">No free weekdays found to add. <button class="btn btn-ghost btn-sm" onclick="cancelAttBack()">Back</button></div>`; return; }
@@ -10026,6 +10037,23 @@ function saveAttBack(){ const B=window._attBack; if(!B||!B.dates.length) return;
     ${ro.map((p,idx)=>`<tr><td>${idx+1}.</td><td style="font-weight:700">${_enc(p.name)}</td><td><b id="abc-${p.id}">0 / ${B.dates.length}<br><span style="font-weight:400;font-size:.78rem">present 0 · <span style="color:#B91C1C">absent ${B.dates.length*2}</span> days</span></b></td><td><input type="checkbox" onchange="attBackAll('${p.id}',this.checked)" style="width:auto"></td>${B.dates.map((d,i)=>`<td style="text-align:center"><input type="checkbox" data-abp="${p.id}" data-abd="${i}" onchange="attBackTick('${p.id}',${i},this.checked)" style="width:auto"></td>`).join('')}</tr>`).join('')}</tbody></table></div>
     <button class="btn btn-navy mt24" onclick="saveAttBack()">💾 Save past days</button>`; };
 }
+
+/* ===== Round 15: roll call shows today's date; once saved it hides until tomorrow ===== */
+{ const _rtap3 = renderTeacherAttendancePanel;
+  renderTeacherAttendancePanel = function(){ _rtap3.apply(this, arguments);
+    const el = _el('teacherAttendancePanelBody'); if(!el || window._attBack) return;
+    const k = todayKey(), ro = _attRoster(), day = attendanceStore[k] || {};
+    const nice = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const cls = teacherClass();
+    const saved = ro.length && ro.some(p => day[p.id]) && !window._attEditToday;
+    if(saved){
+      const cnt = { present:0, absent:0, late:0 }; ro.forEach(p => { if(cnt[day[p.id]] !== undefined) cnt[day[p.id]]++; });
+      const first = el.querySelector(':scope > .card'); while(el.lastElementChild && el.lastElementChild !== first) el.lastElementChild.remove();
+      el.insertAdjacentHTML('beforeend', `<div class="card" style="text-align:center;padding:26px 18px"><div style="font-size:2.2rem">✅</div><h3 style="margin:6px 0">Attendance for today has been saved</h3><p style="font-weight:700;color:var(--navy-700)">📅 ${nice}</p><p class="small-muted" style="margin:8px 0 14px">${cnt.present} present · ${cnt.late} late · ${cnt.absent} absent${cls ? ' — ' + _enc(cls) : ''}. The register will appear again tomorrow.</p><button class="btn btn-ghost btn-sm" onclick="window._attEditToday=true;renderTeacherAttendancePanel()">✏️ Correct today's attendance</button></div>`);
+      return; }
+    const h = el.querySelector('h2');
+    if(h && !el.querySelector('#attDateLine')){ if(cls) h.textContent = 'Mark Attendance — ' + cls; h.insertAdjacentHTML('afterend', `<p id="attDateLine" style="font-weight:700;color:var(--navy-700);margin:2px 0 4px">📅 ${nice}</p>`); }
+  }; }
 
 /* Edit anything on a result/report card before it is printed (staff only) */
 { let pend=false, skip=false; const pr=_el('printReportCard');
