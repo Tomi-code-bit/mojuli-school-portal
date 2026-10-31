@@ -626,9 +626,9 @@ section.pad.tight { padding: 48px 0; }
 .section-head h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); letter-spacing: -0.02em; }
 
 /* Blue fade: headings and intro text start blue and faded, then settle as you scroll to them */
-@keyframes blueFade { from { opacity: 0; color: #1F5BFF; transform: translateY(18px); } 60% { color: #1F5BFF; } }
+@keyframes blueFade { from { opacity: 0; color: #1F5BFF; transform: translateX(-48px); -webkit-mask-image: linear-gradient(90deg,#000 0 40%,transparent 60%); mask-image: linear-gradient(90deg,#000 0 40%,transparent 60%); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-position: 100% 0; mask-position: 100% 0; } 55% { color: #1F5BFF; opacity: 1; } to { transform: translateX(0); -webkit-mask-position: 0 0; mask-position: 0 0; } }
 html.fx .fx-t:not(.fx-in) { opacity: 0; }
-html.fx .fx-t.fx-in { animation: blueFade 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+html.fx .fx-t.fx-in { animation: blueFade 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 @media (prefers-reduced-motion: reduce) { html.fx .fx-t:not(.fx-in) { opacity: 1; } html.fx .fx-t.fx-in { animation: none; } }
 @media print { html.fx .fx-t { opacity: 1 !important; animation: none !important; } }
 /* Click boxes: glide up softly, one after another, as you scroll to them */
