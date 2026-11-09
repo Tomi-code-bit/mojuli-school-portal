@@ -275,6 +275,7 @@ header.site {
   margin: 0 auto;
   gap: 16px;
 }
+header.site .nav-row { max-width: none; padding-left: clamp(8px, 1.4vw, 20px); padding-right: clamp(8px, 1.4vw, 20px); }
 .brand {
   display: flex;
   align-items: center;
@@ -10220,7 +10221,8 @@ showPupilPast = function(){
 /* ---------- HOME HERO: motion-design background (drifting light, shapes and school symbols) ---------- */
 (function(){
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let cv, g, W = 0, H = 0, DPR = 1, raf = 0, vis = true, t0 = 0, shapes = [], blobs = [], sparks = [];
+  let cv, g, W = 0, H = 0, DPR = 1, raf = 0, vis = true, t0 = 0, shapes = [], blobs = [], sparks = [], ripples = [], bits = [];
+  const P = { on: false, x: -999, y: -999, sx: -999, sy: -999, a: 0, nx: 0, ny: 0, last: 0 };
   const rnd = (a, b) => a + Math.random() * (b - a);
   const GOLD = '255,194,14', SKY = '140,190,255', WHITE = '255,255,255';
   function size(){
@@ -10230,7 +10232,7 @@ showPupilPast = function(){
     const n = Math.max(10, Math.round(W * H / 26000));
     blobs = [ [.15,.25,.55,SKY,.34], [.85,.2,.45,GOLD,.20], [.6,.95,.6,SKY,.26], [.3,.9,.4,WHITE,.10] ].map((b,i) => ({ x:b[0], y:b[1], r:b[2], c:b[3], a:b[4], p:i * 1.7, s:.00018 + i * .00005 }));
     const kinds = ['circle','ring','square','tri','plus','book','pencil','cap','star','book','cap'];
-    shapes = Array.from({ length: n }, (_, i) => ({ k: kinds[i % kinds.length], x: rnd(0, W), y: rnd(0, H), s: rnd(14, 42), rot: rnd(0, 6.28), vr: rnd(-.0006, .0006), vy: -rnd(.012, .045), sw: rnd(10, 36), sf: rnd(.0004, .0011), p: rnd(0, 6.28), c: [WHITE, GOLD, SKY][i % 3], a: rnd(.16, .38) }));
+    shapes = Array.from({ length: n }, (_, i) => ({ ox: 0, oy: 0, k: kinds[i % kinds.length], x: rnd(0, W), y: rnd(0, H), s: rnd(14, 42), rot: rnd(0, 6.28), vr: rnd(-.0006, .0006), vy: -rnd(.012, .045), sw: rnd(10, 36), sf: rnd(.0004, .0011), p: rnd(0, 6.28), c: [WHITE, GOLD, SKY][i % 3], a: rnd(.16, .38) }));
     sparks = Array.from({ length: Math.round(n * 1.6) }, () => ({ x: rnd(0, W), y: rnd(0, H), r: rnd(1, 2.6), vy: -rnd(.02, .08), p: rnd(0, 6.28) }));
   }
   function draw(k, s){
@@ -10249,7 +10251,7 @@ showPupilPast = function(){
     if(!t0) t0 = now; const t = now - t0;
     g.clearRect(0, 0, W, H);
     g.globalCompositeOperation = 'lighter';
-    for(const b of blobs){ const x = (b.x + Math.sin(t * b.s + b.p) * .12) * W, y = (b.y + Math.cos(t * b.s * 1.3 + b.p) * .1) * H, r = b.r * Math.max(W, H) * (1 + Math.sin(t * .0006 + b.p) * .08);
+    for(const b of blobs){ const dirn = b.p > 2 ? -1 : 1, x = (b.x + Math.sin(t * b.s + b.p) * .12 + P.nx * .07 * dirn) * W, y = (b.y + Math.cos(t * b.s * 1.3 + b.p) * .1 + P.ny * .07 * dirn) * H, r = b.r * Math.max(W, H) * (1 + Math.sin(t * .0006 + b.p) * .08);
       const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, `rgba(${b.c},${b.a})`); gr.addColorStop(1, `rgba(${b.c},0)`); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
     g.globalCompositeOperation = 'source-over';
     // light beam sweeping across every ~8 seconds
@@ -10257,14 +10259,46 @@ showPupilPast = function(){
     const bg = g.createLinearGradient(bx - 160, 0, bx + 160, H); bg.addColorStop(0, 'rgba(255,255,255,0)'); bg.addColorStop(.5, 'rgba(255,255,255,.10)'); bg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
     for(const s of shapes){
       if(!RM){ s.y += s.vy * 16; s.rot += s.vr * 16; if(s.y < -60){ s.y = H + 60; s.x = rnd(0, W); } }
-      const x = s.x + Math.sin(t * s.sf + s.p) * s.sw, tw = .75 + .25 * Math.sin(t * .0012 + s.p);
-      g.save(); g.translate(x, s.y); g.rotate(s.rot); g.fillStyle = `rgba(${s.c},${s.a * tw})`; g.strokeStyle = `rgba(${s.c},${s.a * tw + .08})`; g.lineJoin = 'round'; g.lineCap = 'round'; draw(s.k, s.s); g.restore();
+      let near = 0;
+      if(!RM && P.a > .02){
+        const px = s.x + Math.sin(t * s.sf + s.p) * s.sw + s.ox - P.sx, py = s.y + s.oy - P.sy, d = Math.hypot(px, py), R = 190;
+        if(d < R && d > .1){ const f = Math.pow(1 - d / R, 2) * 3.2 * P.a; s.ox += px / d * f; s.oy += py / d * f; s.rot += f * .03; near = 1 - d / R; }
+      }
+      s.ox *= .93; s.oy *= .93;
+      const x = s.x + Math.sin(t * s.sf + s.p) * s.sw + s.ox, y = s.y + s.oy, tw = (.75 + .25 * Math.sin(t * .0012 + s.p)) + near * .9;
+      s._x = x; s._y = y; s._n = near;
+      g.save(); g.translate(x, y); g.rotate(s.rot); if(near) g.scale(1 + near * .45, 1 + near * .45); g.fillStyle = `rgba(${s.c},${s.a * tw})`; g.strokeStyle = `rgba(${s.c},${s.a * tw + .08})`; g.lineJoin = 'round'; g.lineCap = 'round'; draw(s.k, s.s); g.restore();
     }
     for(const p of sparks){ if(!RM){ p.y += p.vy * 16; if(p.y < -4){ p.y = H + 4; p.x = rnd(0, W); } } const a = .25 + .55 * Math.abs(Math.sin(t * .002 + p.p)); g.fillStyle = `rgba(255,255,255,${a})`; g.beginPath(); g.arc(p.x, p.y, p.r, 0, 7); g.fill(); }
+    if(!RM){
+      P.a += ((P.on ? 1 : 0) - P.a) * .08; P.sx += (P.x - P.sx) * .22; P.sy += (P.y - P.sy) * .22;
+      if(P.a > .02){
+        // soft light that follows the finger or cursor
+        g.globalCompositeOperation = 'lighter';
+        const lg = g.createRadialGradient(P.sx, P.sy, 0, P.sx, P.sy, 190); lg.addColorStop(0, `rgba(255,236,170,${.34 * P.a})`); lg.addColorStop(.4, `rgba(255,194,14,${.12 * P.a})`); lg.addColorStop(1, 'rgba(255,194,14,0)');
+        g.fillStyle = lg; g.fillRect(P.sx - 200, P.sy - 200, 400, 400); g.globalCompositeOperation = 'source-over';
+        // thin lines join the pointer to nearby shapes
+        g.lineWidth = 1;
+        for(const s of shapes){ if(s._n > 0){ g.strokeStyle = `rgba(255,255,255,${s._n * .55 * P.a})`; g.beginPath(); g.moveTo(P.sx, P.sy); g.lineTo(s._x, s._y); g.stroke(); } }
+      }
+      for(let i = ripples.length - 1; i >= 0; i--){ const r = ripples[i]; r.r += 4.2; r.a -= .018; if(r.a <= 0){ ripples.splice(i, 1); continue; } g.strokeStyle = `rgba(255,236,170,${r.a})`; g.lineWidth = 2.5; g.beginPath(); g.arc(r.x, r.y, r.r, 0, 7); g.stroke(); }
+      for(let i = bits.length - 1; i >= 0; i--){ const b = bits[i]; b.x += b.vx; b.y += b.vy; b.vx *= .97; b.vy = b.vy * .97 + .02; b.a -= .014; if(b.a <= 0){ bits.splice(i, 1); continue; } g.fillStyle = `rgba(${b.c},${b.a})`; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.fill(); }
+    }
     if(!RM && vis) raf = requestAnimationFrame(frame);
   }
+  function burst(x, y, n){ ripples.push({ x, y, r: 6, a: .8 }); for(let i = 0; i < n; i++){ const a = rnd(0, 6.283), v = rnd(1, 4.2); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: rnd(1.5, 3.4), a: 1, c: i % 3 ? '255,236,170' : '255,255,255' }); } if(bits.length > 160) bits.splice(0, bits.length - 160); }
+  function wire(hero){
+    const pos = e => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    hero.addEventListener('pointermove', e => { const [x, y] = pos(e); P.x = x; P.y = y; P.on = true; P.nx = x / W - .5; P.ny = y / H - .5; const n = performance.now(); if(n - P.last > 60){ P.last = n; burst0(x, y); } }, { passive: true });
+    hero.addEventListener('pointerleave', () => { P.on = false; P.nx = P.ny = 0; });
+    hero.addEventListener('pointerdown', e => { const [x, y] = pos(e); P.x = x; P.y = y; P.sx = x; P.sy = y; P.on = true; burst(x, y, 22); }, { passive: true });
+    hero.addEventListener('pointerup', e => { if(e.pointerType === 'touch'){ P.on = false; P.nx = P.ny = 0; } });
+    hero.addEventListener('pointercancel', () => { P.on = false; });
+  }
+  function burst0(x, y){ bits.push({ x, y, vx: rnd(-.6, .6), vy: rnd(-.6, .2), r: rnd(1, 2.2), a: .8, c: '255,236,170' }); }
   function start(){
     cv = document.getElementById('heroBg'); if(!cv || cv.__on) return; cv.__on = 1; g = cv.getContext('2d'); size(); if(!W) return;
+    if(!RM && cv.parentElement) wire(cv.parentElement);
     raf = requestAnimationFrame(frame);
     addEventListener('resize', () => { size(); if(RM) frame(performance.now()); });
     if('IntersectionObserver' in window) new IntersectionObserver(es => { vis = es[0].isIntersecting; if(vis && !RM){ cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); } }).observe(cv);
