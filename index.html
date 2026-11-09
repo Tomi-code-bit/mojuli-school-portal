@@ -4338,6 +4338,8 @@ registerView('home', ()=>{
     </div>
   </section>
 
+  ${newsTickerHTML()}
+
   <!-- Educational Levels -->
   <section class="pad alt">
     <div class="wrap">
@@ -4449,7 +4451,7 @@ registerView('home', ()=>{
   </section>
 
   <!-- Announcements & Events -->
-  <section class="pad alt">
+  <section class="pad alt" id="newsSection">
     <div class="wrap">
       <div class="grid-2" style="align-items:flex-start">
         <div>
@@ -8818,6 +8820,7 @@ function renderWebsiteBody(){
   if(p === 'gallery') extra = `<div class="card" style="margin-bottom:16px"><b>Photos:</b> add or delete pictures in the <a href="#" onclick="event.preventDefault();document.querySelector('[data-tab-ad=gallery]').click()" style="color:var(--navy-700);font-weight:700">🖼 Gallery</a> tab.</div>`;
   if(p === 'forum') extra = `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:6px">Parents Forum switch</h4><p class="small-muted" style="margin-bottom:10px">Only parents with a login can enter the forum. Close it to stop parents from posting questions or replies until you open it again.</p>
       <div id="wsForumState" class="small-muted">Checking…</div></div>`;
+  if(p === 'home') extra += tickerAdminCard();
   const items = edItems(p);
   el.innerHTML = extra + `<div class="card"><h4 style="margin-bottom:4px">Page wording</h4><p class="small-muted" style="margin-bottom:12px">Edit the text in any box. Leave a box unchanged to keep the original wording.</p>
     ${items.length ? items.map((it, i) => `<div class="field"><label style="text-transform:none;font-size:.78rem">${it.tag.match(/^h/) ? 'Heading' : it.tag === 'li' ? 'List item' : it.tag === 'summary' ? 'Question' : 'Text'} ${i + 1}</label>
@@ -8839,6 +8842,12 @@ async function saveWebsitePage(){
     if(p === 'home'){ sp.heroHeadline = g('wsHeroH'); sp.heroSubtitle = g('wsHeroS'); sp.nextTerm = g('wsNext'); }
     if(p === 'admission'){ sp.admissionFee = g('wsFee'); }
     if(p === 'contact'){ sp.phone1 = g('wsPh1'); sp.phone2 = g('wsPh2'); sp.email = g('wsEm'); sp.address = g('wsAd'); }
+    if(p === 'home' && _el('tkLines')){
+      const lines = g('tkLines').split(/\r?\n/).map(x => x.trim()).filter(Boolean).join('\n'), def = tickerDefaults().join('\n');
+      const on = _el('tkOn').checked;
+      const want = { ticker_lines: (!lines || lines === def) ? null : lines, ticker_on: on ? null : '0' };
+      Object.keys(want).forEach(k => { if((Site.content[k] == null ? null : Site.content[k]) !== want[k]) pairs[k] = want[k]; });
+    }
     const hasSettings = Object.keys(sp).some(k => sp[k] !== undefined && sp[k] !== settings[k]);
     if(hasSettings){ Object.keys(sp).forEach(k => { if(sp[k] !== undefined) settings[k] = sp[k]; }); const s = Object.assign({}, settings); delete s.adminPasscode; if(s.logoDataUrl && s.logoDataUrl.length > 700000) s.logoDataUrl = null; pairs.settings = JSON.stringify(s); DB.set('settings', settings); }
     if(!Object.keys(pairs).length){ toast('Nothing was changed.'); btn.disabled = false; btn.textContent = '💾 Save this page'; return; }
@@ -10308,6 +10317,62 @@ showPupilPast = function(){
   // the home page is drawn by the router, so keep looking until the hero exists
   new MutationObserver(() => { const c = document.getElementById('heroBg'); if(c && !c.__on) start(); }).observe(document.documentElement, { childList: true, subtree: true });
   start();
+})();
+
+/* ---------- MOVING NEWS ROW (under the home hero) ---------- */
+function tickerDefaults(){
+  const sec = settings.secondaryActive;
+  const short = String(settings.address || '').split(',').slice(0, 2).join(',').trim();
+  return [
+    'Admission in progress for ' + (sec ? 'Nursery, Primary and Secondary classes' : 'Nursery and Primary classes'),
+    'Classes open: Creche · Nursery · Primary 1–5' + (sec ? ' · JSS 1–3 · SS 1–3' : ''),
+    'Collect and submit your admission form online today',
+    'Pupil and parent portals are open: check results, attendance and fees',
+    'Call or WhatsApp ' + (settings.phone1 || '') + ' for enquiries' + (short ? ' · Visit us at ' + short : '')
+  ];
+}
+function tickerLines(){
+  const raw = Site && Site.content && Site.content.ticker_lines;
+  const l = raw ? String(raw).split(/\r?\n/).map(x => x.trim()).filter(Boolean) : [];
+  return l.length ? l : tickerDefaults();
+}
+function newsTickerHTML(){
+  try{
+    if(Site.content && Site.content.ticker_on === '0') return '';
+    const lines = tickerLines(); if(!lines.length) return '';
+    const row = lines.map(t => `<span class="tk-i"><b>${escapeHtml(t)}</b></span>`).join('');
+    const chars = lines.reduce((n, t) => n + t.length + 12, 0), dur = Math.max(26, Math.round(chars * 0.24));
+    return `<div class="ticker" role="region" aria-label="School announcements" onclick="go('admission')">
+      <div class="tk-view"><div class="tk-track" style="--tkdur:${dur}s">${row}${row}${row}${row}</div></div>
+    </div>`;
+  }catch(e){ return ''; }
+}
+function tickerAdminCard(){
+  const on = !(Site.content && Site.content.ticker_on === '0');
+  return `<div class="card" style="margin-bottom:16px"><h4 style="margin-bottom:4px">Moving message row</h4>
+    <p class="small-muted" style="margin-bottom:10px">The strip that scrolls under the blue banner on the home page. Write one message per line, for example “Admission in progress for Nursery and Primary classes”.</p>
+    <label class="chk" style="display:flex;gap:8px;align-items:center;font-weight:700;margin-bottom:10px"><input type="checkbox" id="tkOn" ${on ? 'checked' : ''}> Show the moving row on the home page</label>
+    ${wsField('tkLines', 'Messages (one per line)', tickerLines().join('\n'), true).replace('rows="3"', 'rows="6"')}</div>`;
+}
+(function(){
+  if(document.getElementById('tickerCss')) return;
+  const st = document.createElement('style'); st.id = 'tickerCss';
+  st.textContent = `
+  .ticker { display: flex; align-items: stretch; background: var(--navy-950); color: #fff; border-bottom: 3px solid var(--gold-500); cursor: pointer; overflow: hidden; position: relative; z-index: 2; }
+  .tk-label { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 18px; background: var(--gold-500); color: #1b1400; font-weight: 900; letter-spacing: .14em; font-size: .78rem; position: relative; z-index: 2; clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%); padding-right: 28px; }
+  .tk-label i { width: 9px; height: 9px; border-radius: 50%; background: var(--crimson-600); animation: tkPulse 1.4s ease-in-out infinite; }
+  @keyframes tkPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(208,2,27,.7); } 50% { box-shadow: 0 0 0 7px rgba(208,2,27,0); } }
+  .tk-view { flex: 1; overflow: hidden; min-width: 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 60px, #000 calc(100% - 60px), transparent); mask-image: linear-gradient(90deg, transparent, #000 60px, #000 calc(100% - 60px), transparent); }
+  .tk-track { display: inline-flex; white-space: nowrap; padding: 13px 0; animation: tkMove var(--tkdur, 40s) linear infinite; will-change: transform; }
+  .ticker:hover .tk-track, .ticker:active .tk-track { animation-play-state: paused; }
+  @keyframes tkMove { to { transform: translateX(-50%); } }
+  .tk-i { display: inline-flex; align-items: center; gap: 9px; padding-right: 46px; font-size: .94rem; }
+  .tk-i::after { content: '◆'; margin-left: 46px; color: var(--gold-400); font-size: .6rem; }
+  .tk-i b { font-weight: 700; }
+  .tk-i em { font-style: normal; color: var(--gold-300); font-size: .8rem; opacity: .9; }
+  @media (prefers-reduced-motion: reduce) { .tk-track { animation: none; } .tk-view { overflow-x: auto; } .tk-label i { animation: none; } }
+  @media (max-width: 560px) { .tk-label { padding: 0 12px 0 12px; padding-right: 22px; font-size: .7rem; } .tk-i { font-size: .86rem; } }`;
+  document.head.appendChild(st);
 })();
 
 /* The Parents Forum is only for logged-in parents (and staff) */
