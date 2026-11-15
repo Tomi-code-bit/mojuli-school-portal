@@ -2412,8 +2412,23 @@ function classmatesOf(pupilId){
 }
 const subjKey = n => String(n || '').trim().toLowerCase();
 function classSubjectTemplate(pupilId){
-  const mate = classmatesOf(pupilId).find(x => x.id !== pupilId && Array.isArray(pupilScoresStore[x.id]) && pupilScoresStore[x.id].length);
+  const mate = classmatesOf(pupilId).filter(x => x.id !== pupilId && Array.isArray(pupilScoresStore[x.id]) && pupilScoresStore[x.id].length).sort((a, b) => pupilScoresStore[b.id].length - pupilScoresStore[a.id].length)[0];
   return mate ? pupilScoresStore[mate.id].map(r => ({ subject: r.subject, ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:'-', remark:'Pending assessment' })) : null;
+}
+/* Give every pupil in the class the same subjects, in the same order, as the pupil who has the most (scores already entered are kept) */
+function syncClassSubjects(pupilId){
+  const mates = classmatesOf(pupilId); if (mates.length < 2) return 0;
+  mates.forEach(m => { if (!Array.isArray(pupilScoresStore[m.id]) || !pupilScoresStore[m.id].length) getPupilResults(m.id); });
+  const pref = pupilScoresStore[pupilId], master = (Array.isArray(pref) && pref.length >= Math.max(...mates.map(m => (pupilScoresStore[m.id] || []).length))) ? pupilId : mates.slice().sort((a, b) => (pupilScoresStore[b.id] || []).length - (pupilScoresStore[a.id] || []).length)[0].id;
+  const order = (pupilScoresStore[master] || []).map(r => r.subject); let changed = 0;
+  mates.forEach(m => {
+    const rows = pupilScoresStore[m.id] || [], by = new Map(rows.map(r => [subjKey(r.subject), r])), out = [];
+    order.forEach(n => { const k = subjKey(n); out.push(by.get(k) || { subject: n, ca1:0, ca2:0, ca3:0, exam:0, lastTermBF:0, position:'-', remark:'' }); by.delete(k); });
+    by.forEach(r => out.push(r));
+    if (out.length !== rows.length || out.some((r, i) => r !== rows[i])) { pupilScoresStore[m.id] = out; changed++; }
+  });
+  if (changed) savePupilScoresStore();
+  return changed;
 }
 function getPupilResults(pupilId, customTerm, customSession) {
   const currentTerm = customTerm || (window.settings && window.settings.term) || "First Term";
@@ -3566,6 +3581,7 @@ function teacherResultsPanelHTML(kind){
             <tr>
               <td colspan="15" style="padding:14px">
                 <button class="btn btn-gold btn-sm" onclick="promptAddPupilSubject('${pupil.id}','${kind}')">＋ Add Another Subject (for the whole class)</button>
+                <button class="btn btn-ghost btn-sm" title="Give every pupil in the class the same subjects as the pupil with the most" onclick="const n = syncClassSubjects('${pupil.id}'); renderTeacherResultsPanel('${kind}'); toast(n ? 'Subjects updated for ' + n + ' pupil(s)' : 'All pupils already have the same subjects')">🔄 Match subjects for all pupils</button>
               </td>
             </tr>
           </tbody>
@@ -3612,6 +3628,7 @@ function teacherResultsPanelHTML(kind){
 }
 
 function renderTeacherResultsPanel(kind){
+  try { if (activePupilId) syncClassSubjects(activePupilId); } catch(e) {}
   const el = document.getElementById('teacherResultsPanelBody');
   if(el) el.innerHTML = teacherResultsPanelHTML(kind);
 }
